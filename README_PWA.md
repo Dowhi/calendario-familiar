@@ -134,3 +134,6 @@ Si tienes problemas:
 - 📱 Instalable como app nativa
 - 🔌 Funciona offline
 - 🌐 Accesible desde cualquier dispositivo
+
+---
+**Última actualización**: 30 de agosto de 2025 - PWA configurada y lista para despliegue
