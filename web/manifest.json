@@ -1,13 +1,16 @@
 {
-    "name": "calendario_familiar",
-    "short_name": "calendario_familiar",
+    "name": "Calendario Familiar",
+    "short_name": "Calendario",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#hexcode",
-    "theme_color": "#hexcode",
-    "description": "A new Flutter project.",
+    "background_color": "#ffffff",
+    "theme_color": "#2196F3",
+    "description": "Calendario familiar compartido con sincronización en tiempo real",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "scope": "/",
+    "lang": "es",
+    "categories": ["productivity", "family"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
