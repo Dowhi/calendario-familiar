@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Función para verificar si el usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Función para verificar si el usuario es miembro de la familia
+    function isFamilyMember(familyId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/families/$(familyId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/families/$(familyId)).data.members;
+    }
+    
+    // Función para verificar si el usuario es propietario del evento
+    function isEventOwner(eventData) {
+      return isAuthenticated() && eventData.ownerId == request.auth.uid;
+    }
+    
+    // Función para verificar si el usuario es administrador de la familia
+    function isFamilyAdmin(familyId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/families/$(familyId)) &&
+        get(/databases/$(database)/documents/families/$(familyId)).data.roles[request.auth.uid] == 'admin';
+    }
+    
+    // ===== REGLAS PARA EVENTOS (Colección unificada) =====
+    match /events/{eventId} {
+      // Permitir lectura si el usuario es miembro de la familia
+      allow read: if isFamilyMember(resource.data.familyId);
+      
+      // Permitir creación si el usuario está autenticado y es miembro de la familia
+      allow create: if isAuthenticated() && 
+        isFamilyMember(request.resource.data.familyId) &&
+        request.resource.data.ownerId == request.auth.uid;
+      
+      // Permitir actualización si el usuario es miembro de la familia y es propietario o participante
+      allow update: if isFamilyMember(resource.data.familyId) &&
+        (isEventOwner(resource.data) || 
+         request.auth.uid in resource.data.participants);
+      
+      // Permitir eliminación si el usuario es miembro de la familia y es propietario
+      allow delete: if isFamilyMember(resource.data.familyId) &&
+        isEventOwner(resource.data);
+    }
+    
+    // ===== REGLAS PARA CATEGORÍAS DEL DÍA =====
+    match /day_categories/{dateKey} {
+      // Permitir lectura y escritura si el usuario es miembro de la familia
+      allow read, write: if isFamilyMember(resource.data.familyId);
+    }
+    
+    // ===== REGLAS PARA PLANTILLAS DE TURNOS =====
+    match /shift_templates/{templateId} {
+      // Permitir lectura si el usuario es miembro de la familia
+      allow read: if isFamilyMember(resource.data.familyId);
+      
+      // Permitir creación si el usuario es miembro de la familia
+      allow create: if isAuthenticated() && 
+        isFamilyMember(request.resource.data.familyId);
+      
+      // Permitir actualización si el usuario es miembro de la familia
+      allow update: if isFamilyMember(resource.data.familyId);
+      
+      // Permitir eliminación si el usuario es administrador de la familia
+      allow delete: if isFamilyAdmin(resource.data.familyId);
+    }
+    
+    // ===== REGLAS PARA FAMILIAS =====
+    match /families/{familyId} {
+      // Permitir lectura si el usuario es miembro de la familia
+      // Los administradores pueden leer todos los campos, incluyendo la contraseña
+      allow read: if isAuthenticated() && 
+        request.auth.uid in resource.data.members;
+      
+      // Permitir creación si el usuario está autenticado y es el creador
+      allow create: if isAuthenticated() && 
+        request.resource.data.createdBy == request.auth.uid;
+      
+      // Permitir actualización si el usuario es miembro de la familia
+      allow update: if isAuthenticated() && 
+        request.auth.uid in resource.data.members;
+      
+      // Permitir eliminación si el usuario es administrador de la familia
+      allow delete: if isFamilyAdmin(familyId);
+    }
+    
+    // ===== REGLAS PARA USUARIOS =====
+    match /users/{userId} {
+      // Permitir lectura y escritura solo al propio usuario
+      allow read, write: if isAuthenticated() && 
+        request.auth.uid == userId;
+    }
+    
+    // ===== REGLAS PARA COLECCIONES LEGACY (Compatibilidad temporal) =====
+    
+    // Notas (legacy - mantener durante migración)
+    match /notes/{noteId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Turnos (legacy - mantener durante migración)
+    match /shifts/{shiftId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Categorías del día (legacy - mantener durante migración)
+    match /dayCategories/{dateKey} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Eventos legacy
+    match /events_legacy/{eventId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
+
+
+
+

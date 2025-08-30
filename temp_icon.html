@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+    <style>
+        body { margin: 0; padding: 0; background: transparent; }
+        svg { width: 1024px; height: 1024px; }
+    </style>
+</head>
+<body>
+    <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo circular con gradiente moderno -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="calendarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:0.9" />
+    </linearGradient>
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ee5a52;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Círculo de fondo con gradiente -->
+  <circle cx="512" cy="512" r="512" fill="url(#bgGradient)"/>
+  
+  <!-- Calendario principal (forma base) -->
+  <rect x="200" y="280" width="624" height="464" rx="24" fill="url(#calendarGradient)" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- Encabezado del calendario -->
+  <rect x="200" y="280" width="624" height="80" rx="24" fill="#ffffff" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- Anillo del calendario -->
+  <rect x="240" y="320" width="544" height="8" rx="4" fill="#667eea"/>
+  
+  <!-- Días del calendario (puntos representando días) -->
+  <!-- Primera fila -->
+  <circle cx="280" cy="420" r="16" fill="#667eea" opacity="0.8"/>
+  <circle cx="360" cy="420" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="440" cy="420" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="520" cy="420" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="600" cy="420" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="680" cy="420" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="760" cy="420" r="16" fill="#667eea" opacity="0.6"/>
+  
+  <!-- Segunda fila -->
+  <circle cx="280" cy="480" r="16" fill="#764ba2" opacity="0.6"/>
+  <circle cx="360" cy="480" r="16" fill="#667eea" opacity="0.8"/>
+  <circle cx="440" cy="480" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="520" cy="480" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="600" cy="480" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="680" cy="480" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="760" cy="480" r="16" fill="#764ba2" opacity="0.8"/>
+  
+  <!-- Tercera fila -->
+  <circle cx="280" cy="540" r="16" fill="#667eea" opacity="0.8"/>
+  <circle cx="360" cy="540" r="16" fill="#764ba2" opacity="0.6"/>
+  <circle cx="440" cy="540" r="16" fill="#667eea" opacity="0.8"/>
+  <circle cx="520" cy="540" r="16" fill="#764ba2" opacity="0.6"/>
+  <circle cx="600" cy="540" r="16" fill="#667eea" opacity="0.8"/>
+  <circle cx="680" cy="540" r="16" fill="#764ba2" opacity="0.6"/>
+  <circle cx="760" cy="540" r="16" fill="#667eea" opacity="0.8"/>
+  
+  <!-- Cuarta fila -->
+  <circle cx="280" cy="600" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="360" cy="600" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="440" cy="600" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="520" cy="600" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="600" cy="600" r="16" fill="#764ba2" opacity="0.8"/>
+  <circle cx="680" cy="600" r="16" fill="#667eea" opacity="0.6"/>
+  <circle cx="760" cy="600" r="16" fill="#764ba2" opacity="0.8"/>
+  
+  <!-- Corazón familiar en el centro -->
+  <g transform="translate(512, 480)">
+    <!-- Corazón principal -->
+    <path d="M-40 -20 C-40 -40, -20 -50, 0 -30 C20 -50, 40 -40, 40 -20 C40 0, 0 30, 0 30 C0 30, -40 0, -40 -20 Z" fill="url(#heartGradient)"/>
+    
+    <!-- Corazón pequeño superior izquierdo -->
+    <path d="M-25 -35 C-25 -45, -15 -50, -5 -40 C5 -50, 15 -45, 15 -35 C15 -25, -5 -5, -5 -5 C-5 -5, -25 -25, -25 -35 Z" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Corazón pequeño superior derecho -->
+    <path d="M25 -35 C25 -45, 15 -50, 5 -40 C-5 -50, -15 -45, -15 -35 C-15 -25, 5 -5, 5 -5 C5 -5, 25 -25, 25 -35 Z" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Corazón pequeño inferior -->
+    <path d="M0 -15 C0 -25, 10 -30, 20 -20 C30 -30, 40 -25, 40 -15 C40 -5, 20 15, 20 15 C20 15, 0 -5, 0 -15 Z" fill="#ffffff" opacity="0.9"/>
+  </g>
+  
+  <!-- Elementos decorativos modernos -->
+  <!-- Círculos flotantes pequeños -->
+  <circle cx="150" cy="200" r="8" fill="#ffffff" opacity="0.3"/>
+  <circle cx="874" cy="180" r="12" fill="#ffffff" opacity="0.2"/>
+  <circle cx="180" cy="800" r="10" fill="#ffffff" opacity="0.25"/>
+  <circle cx="844" cy="820" r="6" fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Líneas decorativas sutiles -->
+  <line x1="100" y1="150" x2="200" y2="150" stroke="#ffffff" stroke-width="2" opacity="0.2"/>
+  <line x1="824" y1="200" x2="924" y2="200" stroke="#ffffff" stroke-width="2" opacity="0.2"/>
+  <line x1="100" y1="874" x2="200" y2="874" stroke="#ffffff" stroke-width="2" opacity="0.2"/>
+  <line x1="824" y1="824" x2="924" y2="824" stroke="#ffffff" stroke-width="2" opacity="0.2"/>
+</svg>
+
+</body>
+</html>

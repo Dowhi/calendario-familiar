@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>804273724178-fjvnh7m1lib8tu5n3urja55o2m8sl0re.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.804273724178-fjvnh7m1lib8tu5n3urja55o2m8sl0re</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>804273724178-2jj98tmfftffs728j89tj8g30ksp0gmj.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDnLSt92vUS87sBGulNft9BoBwu48xZoPs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>804273724178</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.juancarlos.calendariofamiliar</string>
+	<key>PROJECT_ID</key>
+	<string>apptaxi-f2190</string>
+	<key>STORAGE_BUCKET</key>
+	<string>apptaxi-f2190.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:804273724178:ios:1cb45dc889866ee2e7f1cb</string>
+</dict>
+</plist>
