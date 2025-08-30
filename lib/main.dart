@@ -14,6 +14,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -262,6 +263,12 @@ Future<void> _initializeNotifications() async {
 
 // Solicitar permisos de notificaciones
 Future<void> _requestNotificationPermissions() async {
+  // Solo solicitar permisos en Android, no en web
+  if (kIsWeb) {
+    print('🌐 Web: Saltando solicitud de permisos de notificaciones');
+    return;
+  }
+  
   if (Platform.isAndroid) {
     // Solicitar permiso de notificaciones (Android 13+)
     if (await Permission.notification.isDenied) {
