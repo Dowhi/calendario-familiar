@@ -296,37 +296,41 @@ void _showAlarmNotification(String eventText, DateTime eventDate) async {
   try {
     final FlutterLocalNotificationsPlugin notifications = FlutterLocalNotificationsPlugin();
     
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'event_reminders',
-      'Recordatorios de eventos',
-      channelDescription: 'Notificaciones para recordar eventos del calendario',
-      importance: Importance.high,
-      priority: Priority.high,
-      enableVibration: true,
-      playSound: true,
-      showWhen: true,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.alarm,
-      timeoutAfter: 60000,
-      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-      color: const Color(0xFF2196F3),
-      enableLights: true,
-      ledColor: const Color(0xFF2196F3),
-      ledOnMs: 1000,
-      ledOffMs: 500,
-    );
+    NotificationDetails? platformChannelSpecifics;
+    
+    if (!kIsWeb) {
+      const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'event_reminders',
+        'Recordatorios de eventos',
+        channelDescription: 'Notificaciones para recordar eventos del calendario',
+        importance: Importance.high,
+        priority: Priority.high,
+        enableVibration: true,
+        playSound: true,
+        showWhen: true,
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.alarm,
+        timeoutAfter: 60000,
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF2196F3),
+        enableLights: true,
+        ledColor: Color(0xFF2196F3),
+        ledOnMs: 1000,
+        ledOffMs: 500,
+      );
 
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+      platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    }
 
-    await notifications.show(
-      9999,
-      '🔔 ¡Es hora de tu evento!',
-      'Evento: $eventText',
-      platformChannelSpecifics,
-      payload: 'alarm|$eventText|${eventDate.toIso8601String()}',
-    );
+    if (!kIsWeb && platformChannelSpecifics != null) {
+      await notifications.show(
+        9999,
+        '🔔 ¡Es hora de tu evento!',
+        'Evento: $eventText',
+        platformChannelSpecifics,
+        payload: 'alarm|$eventText|${eventDate.toIso8601String()}',
+      );
+    }
     
     print('✅ Notificación de alarma mostrada');
     
@@ -473,42 +477,46 @@ Future<void> _scheduleAlarmFromFirebase(Map<String, dynamic> alarmData, String d
     final FlutterLocalNotificationsPlugin notifications = FlutterLocalNotificationsPlugin();
     final alarmId = docId.hashCode;
     
-    final AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'event_reminders',
-      'Recordatorios de eventos',
-      channelDescription: 'Notificaciones para recordar eventos del calendario',
-      importance: Importance.high,
-      priority: Priority.high,
-      enableVibration: true,
-      playSound: true,
-      sound: const RawResourceAndroidNotificationSound('alarm_sound'),
-      showWhen: true,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.alarm,
-      timeoutAfter: 30000,
-      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-      color: const Color(0xFF2196F3),
-      enableLights: true,
-      ledColor: const Color(0xFF2196F3),
-      ledOnMs: 1000,
-      ledOffMs: 500,
-    );
+    NotificationDetails? platformChannelSpecifics;
+    
+    if (!kIsWeb) {
+      final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'event_reminders',
+        'Recordatorios de eventos',
+        channelDescription: 'Notificaciones para recordar eventos del calendario',
+        importance: Importance.high,
+        priority: Priority.high,
+        enableVibration: true,
+        playSound: true,
+        sound: const RawResourceAndroidNotificationSound('alarm_sound'),
+        showWhen: true,
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.alarm,
+        timeoutAfter: 30000,
+        largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: const Color(0xFF2196F3),
+        enableLights: true,
+        ledColor: const Color(0xFF2196F3),
+        ledOnMs: 1000,
+        ledOffMs: 500,
+      );
 
-    final NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+      platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    }
 
-    await notifications.zonedSchedule(
-      alarmId,
-      '🔔 Recordatorio de evento',
-      'Evento: $eventText',
-      tz.TZDateTime.from(notificationDateTime, tz.local),
-      platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'alarm|$eventText|${eventDateTime.toIso8601String()}',
-    );
+    if (!kIsWeb && platformChannelSpecifics != null) {
+      await notifications.zonedSchedule(
+        alarmId,
+        '🔔 Recordatorio de evento',
+        'Evento: $eventText',
+        tz.TZDateTime.from(notificationDateTime, tz.local),
+        platformChannelSpecifics,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: 'alarm|$eventText|${eventDateTime.toIso8601String()}',
+      );
+    }
     
     print('✅ Alarma programada: $eventText para $notificationDateTime');
     
