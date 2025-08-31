@@ -37,6 +37,9 @@
   <link rel="manifest" href="./manifest.json">
 </head>
 <body>
+  <!-- ELEMENTO CONTENEDOR DE FLUTTER - FALTABA ESTO -->
+  <div id="flutter_target"></div>
+  
   <script>
     window.flutterWebRenderer = "html";
   </script>
@@ -49,6 +52,20 @@
         }
       });
     });
+  </script>
+  <script>
+    // Registro del Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((registration) => {
+            console.log('SW registrado: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registro falló: ', registrationError);
+          });
+      });
+    }
   </script>
 </body>
 </html>
