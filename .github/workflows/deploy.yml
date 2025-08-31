@@ -28,14 +28,16 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.35.1'
+        flutter-version: '3.13.0'
         channel: 'stable'
     
     - name: Install dependencies
       run: flutter pub get
     
     - name: Build PWA
-      run: flutter build web --release --pwa-strategy offline-first --base-href /calendario-familiar/
+      run: |
+        flutter build web --release --pwa-strategy offline-first --base-href /calendario-familiar/
+        cp build/web/index.html build/web/404.html
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
