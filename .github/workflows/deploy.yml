@@ -35,7 +35,7 @@ jobs:
       run: flutter pub get
     
     - name: Build PWA
-      run: flutter build web --release --pwa-strategy offline-first
+      run: flutter build web --release --pwa-strategy offline-first --base-href /calendario-familiar/
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
