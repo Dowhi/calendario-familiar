@@ -79,9 +79,15 @@
   </script>
   <script src="flutter.js" defer></script>
   <script>
+    // USAR CALLBACK APPROACH EN LUGAR DE PROMISES
     window.addEventListener('load', function(ev) {
       _flutter.loader.loadEntrypoint({
-        serviceWorker: null,  // DESHABILITAR SERVICE WORKER
+        serviceWorker: null,
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
       });
     });
   </script>
