@@ -267,7 +267,7 @@ class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
                 borderRadius: BorderRadius.circular(5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: Colors.grey.withOpacity(0.2),
                     spreadRadius: 1,
                     blurRadius: 3,
                     offset: const Offset(0, 1),
@@ -366,7 +366,7 @@ class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
                 borderRadius: BorderRadius.circular(5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: Colors.grey.withOpacity(0.2),
                     spreadRadius: 1,
                     blurRadius: 3,
                     offset: const Offset(0, 1),
@@ -421,7 +421,7 @@ class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
                         margin: const EdgeInsets.only(bottom: 4),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.15),
+                          color: color.withOpacity(0.15),
                           border: Border.all(color: color, width: 1),
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -464,7 +464,7 @@ class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
                 borderRadius: BorderRadius.circular(5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
+                    color: Colors.grey.withOpacity(0.2),
                     spreadRadius: 1,
                     blurRadius: 3,
                     offset: const Offset(0, 1),
