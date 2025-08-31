@@ -53,7 +53,7 @@ dependencies:
   cloud_firestore: ^4.14.0  # Versión compatible con firebase_core
   firebase_auth: ^4.16.0  # Versión compatible con firebase_core
   google_sign_in: ^6.1.5
-  firebase_messaging: ^14.7.10  # Versión compatible con firebase_core
+  firebase_messaging: ^14.6.7  # Versión compatible con firebase_core
 
   # Notificaciones
   flutter_local_notifications: ^15.1.1
@@ -88,11 +88,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
-  # Code generation - VERSIONES COMPATIBLES CON DART SDK 3.4.0
-  build_runner: ^2.4.7
-  freezed: ^2.5.2  # BAJADO según sugerencia del error
-  json_serializable: ^6.7.1
-  riverpod_generator: ^2.3.9
+  # Code generation
+  build_runner: ^2.4.7  # Versión exacta que funcionó
+  freezed: ^2.5.2  # Versión compatible con freezed_annotation
+  json_serializable: ^6.7.1  # Versión exacta que funcionó
+  riverpod_generator: ^2.3.9  # Versión exacta que funcionó
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
