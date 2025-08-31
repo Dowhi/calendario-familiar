@@ -228,9 +228,18 @@ Future<void> _initializeNotifications() async {
   
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-  
-  const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
+
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings();
+
+  const LinuxInitializationSettings initializationSettingsLinux =
+      LinuxInitializationSettings(defaultActionName: 'Open notification');
+
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
+    linux: initializationSettingsLinux,
+  );
   
   await notifications.initialize(
     initializationSettings,
@@ -268,7 +277,7 @@ Future<void> _requestNotificationPermissions() async {
     return;
   }
   
-  if (Platform.isAndroid) {
+  if (!kIsWeb) {
     // Solicitar permiso de notificaciones (Android 13+)
     if (await Permission.notification.isDenied) {
       await Permission.notification.request();
