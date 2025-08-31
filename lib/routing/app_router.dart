@@ -13,6 +13,7 @@ import 'package:calendario_familiar/features/auth/presentation/login_screen.dart
 import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart'; // Nueva pantalla de registro
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart'; // Pantalla de configuración
 import 'package:calendario_familiar/main.dart';
+import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart'; // Nueva pantalla de recuperación de contraseña
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -132,6 +133,11 @@ final appRouter = GoRouter(
           eventDate: eventDate,
         );
       },
+    ),
+    // Agregar esta ruta en las rutas existentes
+    GoRoute(
+      path: '/password-recovery',
+      builder: (context, state) => const PasswordRecoveryScreen(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

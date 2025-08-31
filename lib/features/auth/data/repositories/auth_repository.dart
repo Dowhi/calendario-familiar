@@ -64,7 +64,7 @@ class AuthRepository {
       // Actualizar displayName en Firebase Auth
       await firebaseUser.updateDisplayName(displayName);
 
-      // Crear objeto AppUser
+      // Crear objeto AppUser con contraseña
       final appUser = AppUser(
         uid: firebaseUser.uid,
         email: firebaseUser.email ?? '',
@@ -72,6 +72,7 @@ class AuthRepository {
         photoUrl: null,
         deviceTokens: [],
         familyId: null, // Sin familia inicialmente
+        password: password, // Guardar contraseña en users
       );
 
       // Guardar usuario en Firestore
@@ -330,6 +331,38 @@ class AuthRepository {
       return null;
     } catch (e) {
       print('❌ Error buscando usuario por email: $e');
+      return null;
+    }
+  }
+
+  /// Recuperar contraseña por email
+  Future<String?> recoverPasswordByEmail(String email) async {
+    try {
+      print('🔍 Buscando contraseña para email: $email');
+      
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+      
+      if (querySnapshot.docs.isNotEmpty) {
+        final userData = querySnapshot.docs.first.data();
+        final password = userData['password'] as String?;
+        
+        if (password != null) {
+          print('✅ Contraseña encontrada para: $email');
+          return password;
+        } else {
+          print('❌ No hay contraseña guardada para: $email');
+          return null;
+        }
+      }
+      
+      print('❌ No se encontró usuario con email: $email');
+      return null;
+    } catch (e) {
+      print('❌ Error recuperando contraseña: $e');
       return null;
     }
   }
