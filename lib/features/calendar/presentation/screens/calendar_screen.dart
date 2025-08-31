@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/day_detail_screen.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -88,35 +89,85 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       body: Column(
         children: [
-          // Aquí iría el contenido del calendario
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.calendar_today, size: 100, color: Colors.blue),
-                  const SizedBox(height: 20),
-                  const Text(
-                    '¡Calendario Familiar Funcionando!',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'La aplicación está lista para usar',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Aquí iría la lógica del calendario
-                    },
-                    child: const Text('Comenzar a usar'),
-                  ),
-                ],
-              ),
+          // Calendario
+          TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+              
+              // Navegar al detalle del día
+              context.push('/day-detail', extra: {
+                'date': selectedDay,
+                'existingText': null,
+                'existingEventId': null,
+              });
+            },
+            calendarFormat: CalendarFormat.month,
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+            ),
+            calendarStyle: const CalendarStyle(
+              outsideDaysVisible: false,
+              weekendTextStyle: TextStyle(color: Colors.red),
+            ),
+          ),
+          
+          // Botones de acción
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.push('/day-detail', extra: {
+                      'date': _selectedDay,
+                      'existingText': null,
+                      'existingEventId': null,
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Agregar Evento'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.push('/statistics');
+                  },
+                  icon: const Icon(Icons.analytics),
+                  label: const Text('Estadísticas'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.push('/year-summary');
+                  },
+                  icon: const Icon(Icons.summarize),
+                  label: const Text('Resumen'),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.push('/day-detail', extra: {
+            'date': DateTime.now(),
+            'existingText': null,
+            'existingEventId': null,
+          });
+        },
+        backgroundColor: const Color(0xFF1B5E20),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
