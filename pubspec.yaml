@@ -88,11 +88,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
-  # Code generation - VERSIONES COMPATIBLES CON DART SDK 3.4.0
-  build_runner: 2.4.7
-  freezed: 2.5.7
-  json_serializable: 6.7.1  # Versión compatible con Dart SDK 3.4.0
-  riverpod_generator: 2.5.0
+  # Code generation - VERSIONES QUE REALMENTE EXISTEN
+  build_runner: ^2.4.7
+  freezed: ^2.5.7
+  json_serializable: ^6.7.1
+  riverpod_generator: ^2.3.9  # Versión que realmente existe
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
