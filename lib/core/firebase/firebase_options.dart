@@ -43,6 +43,8 @@ class DefaultFirebaseOptions {
     projectId: 'apptaxi-f2190',
     authDomain: 'apptaxi-f2190.firebaseapp.com',
     storageBucket: 'apptaxi-f2190.appspot.com',
+    measurementId: 'G-MEASUREMENT-ID', // Opcional para web
+    databaseURL: 'https://apptaxi-f2190.firebaseio.com', // Opcional para web
   );
 
   static const FirebaseOptions android = FirebaseOptions(
