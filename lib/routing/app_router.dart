@@ -1,32 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/calendar_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/day_detail_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/year_summary_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/statistics_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/notification_screen.dart';
-import 'package:calendario_familiar/features/calendar/presentation/screens/shift_template_management_screen.dart'; // Nueva pantalla
-import 'package:calendario_familiar/features/calendar/presentation/screens/family_management_screen.dart'; // Nueva pantalla de gestión familiar
-import 'package:calendario_familiar/features/calendar/presentation/screens/family_settings_screen.dart'; // Nueva pantalla de configuración de familia
-import 'package:calendario_familiar/features/calendar/presentation/screens/advanced_reports_screen.dart'; // Nueva pantalla de reportes avanzados
-import 'package:calendario_familiar/features/auth/presentation/login_screen.dart'; // Añadir esta importación
-import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart'; // Nueva pantalla de registro
-import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart'; // Pantalla de configuración
+import 'package:calendario_familiar/features/calendar/presentation/screens/shift_template_management_screen.dart';
+import 'package:calendario_familiar/features/calendar/presentation/screens/family_management_screen.dart';
+import 'package:calendario_familiar/features/calendar/presentation/screens/family_settings_screen.dart';
+import 'package:calendario_familiar/features/calendar/presentation/screens/advanced_reports_screen.dart';
+import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
+import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart';
+import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
-import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart'; // Nueva pantalla de recuperación de contraseña
+import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
-  navigatorKey: navigatorKey, // Agregar el navigatorKey
+  navigatorKey: navigatorKey,
   initialLocation: openedFromNotification ? '/notification-screen' : '/',
   redirect: (context, state) {
+    // Verificar si hay usuario autenticado
+    final container = ProviderScope.containerOf(context);
+    final authController = container.read(authControllerProvider);
+    
     if (openedFromNotification && state.fullPath != '/notification-screen') {
       // Resetear la bandera después de redirigir
       openedFromNotification = false;
       return '/notification-screen';
     }
+    
+    // Si no hay usuario autenticado y no está en login, redirigir a login
+    if (authController == null && 
+        !state.fullPath!.startsWith('/login') && 
+        !state.fullPath!.startsWith('/email-signup') &&
+        !state.fullPath!.startsWith('/password-recovery')) {
+      return '/login';
+    }
+    
     return null;
   },
   routes: [
@@ -81,16 +96,19 @@ final appRouter = GoRouter(
       path: '/statistics',
       builder: (context, state) => const StatisticsScreen(),
     ),
+    
     // Nueva ruta para la gestión de plantillas de turnos
     GoRoute(
       path: '/shift-templates',
       builder: (context, state) => const ShiftTemplateManagementScreen(),
     ),
+    
     // Nueva ruta para la gestión familiar
     GoRoute(
       path: '/family-management',
       builder: (context, state) => const FamilyManagementScreen(),
     ),
+    
     // Nueva ruta para la configuración de familia
     GoRoute(
       path: '/family-settings',
@@ -102,42 +120,58 @@ final appRouter = GoRouter(
       path: '/advanced-reports',
       builder: (context, state) => const AdvancedReportsScreen(),
     ),
+    
     // Nueva ruta para el login
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
     ),
+    
     // Nueva ruta para el registro por email
     GoRoute(
       path: '/email-signup',
       builder: (context, state) => const EmailSignupScreen(),
     ),
+    
     // Nueva ruta para la pantalla de configuración
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
     ),
-    // Nueva ruta para la pantalla de notificación de alarma
+    
+    // Nueva ruta para recuperación de contraseña
+    GoRoute(
+      path: '/password-recovery',
+      builder: (context, state) => const PasswordRecoveryScreen(),
+    ),
+    
+    // Ruta para pantalla de notificaciones
     GoRoute(
       path: '/notification-screen',
       builder: (context, state) {
-        final Map<String, dynamic>? extraData = state.extra as Map<String, dynamic>?;
-        final String eventText = extraData != null 
-            ? extraData['eventText'] as String? ?? pendingEventText 
-            : pendingEventText; // Usar global si no viene en extra
-        final DateTime eventDate = extraData != null 
-            ? extraData['eventDate'] as DateTime? ?? pendingEventDate 
-            : pendingEventDate; // Usar global si no viene en extra
+        final extraData = state.extra as Map<String, dynamic>?;
+        if (extraData == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Error')),
+            body: const Center(child: Text('Datos no proporcionados para NotificationScreen')),
+          );
+        }
+        
+        final eventText = extraData['eventText'] as String?;
+        final eventDate = extraData['eventDate'] as DateTime?;
+        
+        if (eventText == null || eventDate == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Error')),
+            body: const Center(child: Text('Datos de evento no proporcionados')),
+          );
+        }
+        
         return NotificationScreen(
           eventText: eventText,
           eventDate: eventDate,
         );
       },
-    ),
-    // Agregar esta ruta en las rutas existentes
-    GoRoute(
-      path: '/password-recovery',
-      builder: (context, state) => const PasswordRecoveryScreen(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(
