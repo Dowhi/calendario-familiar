@@ -24,24 +24,13 @@ final appRouter = GoRouter(
   navigatorKey: navigatorKey,
   initialLocation: openedFromNotification ? '/notification-screen' : '/',
   redirect: (context, state) {
-    // Verificar si hay usuario autenticado
-    final container = ProviderScope.containerOf(context);
-    final authController = container.read(authControllerProvider);
-    
+    // TEMPORALMENTE DESHABILITAR REDIRECCIÓN PARA DEBUG
+    /*
     if (openedFromNotification && state.fullPath != '/notification-screen') {
-      // Resetear la bandera después de redirigir
       openedFromNotification = false;
       return '/notification-screen';
     }
-    
-    // Si no hay usuario autenticado y no está en login, redirigir a login
-    if (authController == null && 
-        !state.fullPath!.startsWith('/login') && 
-        !state.fullPath!.startsWith('/email-signup') &&
-        !state.fullPath!.startsWith('/password-recovery')) {
-      return '/login';
-    }
-    
+    */
     return null;
   },
   routes: [
