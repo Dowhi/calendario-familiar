@@ -64,7 +64,7 @@ class AuthRepository {
       // Actualizar displayName en Firebase Auth
       await firebaseUser.updateDisplayName(displayName);
 
-      // Crear objeto AppUser con contraseña
+      // Crear usuario de la aplicación
       final appUser = AppUser(
         uid: firebaseUser.uid,
         email: firebaseUser.email ?? '',
@@ -72,7 +72,6 @@ class AuthRepository {
         photoUrl: null,
         deviceTokens: [],
         familyId: null, // Sin familia inicialmente
-        password: password, // Guardar contraseña en users
       );
 
       // Guardar usuario en Firestore
