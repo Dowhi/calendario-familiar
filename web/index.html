@@ -81,8 +81,11 @@
   <script>
     window.addEventListener('load', function(ev) {
       _flutter.loader.loadEntrypoint({
-        // DESHABILITAR SERVICE WORKER TEMPORALMENTE
-        serviceWorker: null,
+        serviceWorker: {
+          serviceWorkerVersion: null,
+          // TIMEOUT MÁS LARGO PARA EVITAR PROBLEMAS
+          timeout: 10000,
+        }
       });
     });
   </script>
