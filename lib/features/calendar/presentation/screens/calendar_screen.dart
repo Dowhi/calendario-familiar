@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/day_detail_screen.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -16,14 +15,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   late DateTime _selectedDay;
   late DateTime _focusedDay;
   bool _isPaintMode = false;
-  String? _selectedPaintOption;
+  String? _selectedPaintOption; // Ahora almacena el ID o nombre de la plantilla
 
+  // Inicializar con el mes actual
   DateTime get _currentMonth => DateTime.now();
 
+  // Servicios
   late final CalendarDataService _dataService;
 
+  // Mapa para almacenar categorías por día
   final Map<String, Map<String, String?>> _dayCategories = {};
 
+  // Método para obtener el icono de la categoría
   IconData? _getCategoryIcon(String? category) {
     switch (category) {
       case 'Cambio de turno':
@@ -50,15 +53,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   void initState() {
     super.initState();
+    // Inicializar con el mes actual
     _selectedDay = DateTime.now();
     _focusedDay = DateTime.now();
+
+    // _dataService se inicializa en didChangeDependencies o build
+    // No es necesario un listener aquí directamente, ya que usaremos ref.watch
     print('📱 CalendarScreen inicializada');
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _dataService = ref.watch(calendarDataServiceProvider);
+    _dataService = ref.watch(calendarDataServiceProvider); // Inicializar _dataService aquí
+  }
+
+  @override
+  void dispose() {
+    // No es necesario remover listener si usamos ref.watch
+    super.dispose();
   }
 
   @override
@@ -70,8 +83,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1B5E20),
         foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Text('Calendario Familiar'),
+        elevation: 0, // Eliminar sombra del AppBar
+        title: const Text('My Calendar'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -79,6 +92,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               context.push('/settings');
             },
           ),
+          // Botón para gestionar plantillas de turnos
           IconButton(
             icon: const Icon(Icons.calendar_view_day),
             onPressed: () {
@@ -87,87 +101,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Calendario
-          TableCalendar(
-            firstDay: DateTime.utc(2020, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-              
-              // Navegar al detalle del día
-              context.push('/day-detail', extra: {
-                'date': selectedDay,
-                'existingText': null,
-                'existingEventId': null,
-              });
-            },
-            calendarFormat: CalendarFormat.month,
-            startingDayOfWeek: StartingDayOfWeek.monday,
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-            ),
-            calendarStyle: const CalendarStyle(
-              outsideDaysVisible: false,
-              weekendTextStyle: TextStyle(color: Colors.red),
-            ),
-          ),
-          
-          // Botones de acción
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    context.push('/day-detail', extra: {
-                      'date': _selectedDay,
-                      'existingText': null,
-                      'existingEventId': null,
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Agregar Evento'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    context.push('/statistics');
-                  },
-                  icon: const Icon(Icons.analytics),
-                  label: const Text('Estadísticas'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    context.push('/year-summary');
-                  },
-                  icon: const Icon(Icons.summarize),
-                  label: const Text('Resumen'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/day-detail', extra: {
-            'date': DateTime.now(),
-            'existingText': null,
-            'existingEventId': null,
-          });
-        },
-        backgroundColor: const Color(0xFF1B5E20),
-        child: const Icon(Icons.add, color: Colors.white),
+      body: const Center(
+        child: Text(
+          'Calendario Familiar - Pantalla Original',
+          style: TextStyle(fontSize: 20),
+        ),
       ),
     );
   }
