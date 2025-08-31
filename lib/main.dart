@@ -153,25 +153,27 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Obtener detalles de lanzamiento si la app se abrió desde una notificación
-  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
-  final NotificationAppLaunchDetails? notificationAppLaunchDetails =
-      await notificationsPlugin.getNotificationAppLaunchDetails();
-  
-  if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-    final String? payload = notificationAppLaunchDetails!.notificationResponse?.payload;
+  if (!kIsWeb) {
+    final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+    final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+        await notificationsPlugin.getNotificationAppLaunchDetails();
     
-    if (payload != null && payload.startsWith('alarm|')) {
-      final payloadParts = payload.split('|');
-      if (payloadParts.length >= 3) {
-        openedFromNotification = true;
-        pendingEventText = payloadParts[1];
-        pendingEventDate = DateTime.parse(payloadParts[2]);
-        print('🔔 App lanzada desde notificación al inicio. Evento pendiente: $pendingEventText');
+    if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+      final String? payload = notificationAppLaunchDetails!.notificationResponse?.payload;
+      
+      if (payload != null && payload.startsWith('alarm|')) {
+        final payloadParts = payload.split('|');
+        if (payloadParts.length >= 3) {
+          openedFromNotification = true;
+          pendingEventText = payloadParts[1];
+          pendingEventDate = DateTime.parse(payloadParts[2]);
+          print('🔔 App lanzada desde notificación al inicio. Evento pendiente: $pendingEventText');
+        } else {
+          print('❌ Payload de alarma malformado al inicio de la app: $payload');
+        }
       } else {
-        print('❌ Payload de alarma malformado al inicio de la app: $payload');
+        print('❓ Payload no reconocido al inicio de la app: $payload');
       }
-    } else {
-      print('❓ Payload no reconocido al inicio de la app: $payload');
     }
   }
 
