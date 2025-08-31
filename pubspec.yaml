@@ -91,7 +91,7 @@ dev_dependencies:
   # Code generation
   build_runner: ^2.4.7  # Versión exacta que funcionó
   freezed: ^2.5.7  # Versión compatible con freezed_annotation
-  json_serializable: ^6.9.5  # Versión exacta que funcionó
+  json_serializable: 6.9.5  # Versión exacta compatible con Dart SDK 3.4.0
   riverpod_generator: ^2.5.0  # Versión exacta que funcionó
 
 # For information on the generic Dart part of this file, see the
