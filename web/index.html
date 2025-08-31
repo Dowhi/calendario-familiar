@@ -40,9 +40,6 @@
   <script>
     window.flutterWebRenderer = "html";
   </script>
-  <script>
-    window.flutterWebRenderer = "html";
-  </script>
   <script src="flutter.js" defer></script>
   <script>
     window.addEventListener('load', function(ev) {
@@ -52,20 +49,6 @@
         }
       });
     });
-  </script>
-  <script>
-    // Registro del Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((registration) => {
-            console.log('SW registrado: ', registration);
-          })
-          .catch((registrationError) => {
-            console.log('SW registro falló: ', registrationError);
-          });
-      });
-    }
   </script>
 </body>
 </html>
