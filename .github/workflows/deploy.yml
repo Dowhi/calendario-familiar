@@ -36,11 +36,7 @@ jobs:
     
     - name: Build PWA
       run: |
-<<<<<<< HEAD
         flutter build web --release --pwa-strategy offline-first --base-href /calendario-familiar/
-=======
-        flutter build web --release --pwa-strategy offline-first --base-href /calendario-familiar/ 
->>>>>>> cc6be2db4c6f9ff9078503c2a4704cd49c67ce1d
         cp build/web/index.html build/web/404.html
     
     - name: Setup Pages
