@@ -10,8 +10,7 @@ _$FamilyCalendarImpl _$$FamilyCalendarImplFromJson(Map<String, dynamic> json) =>
     _$FamilyCalendarImpl(
       id: json['id'] as String,
       name: json['name'] as String,
-      members:
-          (json['members'] as List<dynamic>?)
+      members: (json['members'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
@@ -24,11 +23,11 @@ _$FamilyCalendarImpl _$$FamilyCalendarImplFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$$FamilyCalendarImplToJson(
-  _$FamilyCalendarImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'members': instance.members,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'updatedAt': instance.updatedAt?.toIso8601String(),
-};
+        _$FamilyCalendarImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'members': instance.members,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+    };

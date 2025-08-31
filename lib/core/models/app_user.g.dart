@@ -13,8 +13,7 @@ _$AppUserImpl _$$AppUserImplFromJson(Map<String, dynamic> json) =>
       displayName: json['displayName'] as String?,
       photoUrl: json['photoUrl'] as String?,
       familyId: json['familyId'] as String?,
-      deviceTokens:
-          (json['deviceTokens'] as List<dynamic>?)
+      deviceTokens: (json['deviceTokens'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],

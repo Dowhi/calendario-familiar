@@ -12,8 +12,7 @@ part of 'app_user.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 AppUser _$AppUserFromJson(Map<String, dynamic> json) {
   return _AppUser.fromJson(json);
@@ -42,14 +41,13 @@ abstract class $AppUserCopyWith<$Res> {
   factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) then) =
       _$AppUserCopyWithImpl<$Res, AppUser>;
   @useResult
-  $Res call({
-    String uid,
-    String email,
-    String? displayName,
-    String? photoUrl,
-    String? familyId,
-    List<String> deviceTokens,
-  });
+  $Res call(
+      {String uid,
+      String email,
+      String? displayName,
+      String? photoUrl,
+      String? familyId,
+      List<String> deviceTokens});
 }
 
 /// @nodoc
@@ -74,54 +72,49 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
     Object? familyId = freezed,
     Object? deviceTokens = null,
   }) {
-    return _then(
-      _value.copyWith(
-            uid: null == uid
-                ? _value.uid
-                : uid // ignore: cast_nullable_to_non_nullable
-                      as String,
-            email: null == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                      as String,
-            displayName: freezed == displayName
-                ? _value.displayName
-                : displayName // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            photoUrl: freezed == photoUrl
-                ? _value.photoUrl
-                : photoUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            familyId: freezed == familyId
-                ? _value.familyId
-                : familyId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            deviceTokens: null == deviceTokens
-                ? _value.deviceTokens
-                : deviceTokens // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      uid: null == uid
+          ? _value.uid
+          : uid // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      familyId: freezed == familyId
+          ? _value.familyId
+          : familyId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      deviceTokens: null == deviceTokens
+          ? _value.deviceTokens
+          : deviceTokens // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   factory _$$AppUserImplCopyWith(
-    _$AppUserImpl value,
-    $Res Function(_$AppUserImpl) then,
-  ) = __$$AppUserImplCopyWithImpl<$Res>;
+          _$AppUserImpl value, $Res Function(_$AppUserImpl) then) =
+      __$$AppUserImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String uid,
-    String email,
-    String? displayName,
-    String? photoUrl,
-    String? familyId,
-    List<String> deviceTokens,
-  });
+  $Res call(
+      {String uid,
+      String email,
+      String? displayName,
+      String? photoUrl,
+      String? familyId,
+      List<String> deviceTokens});
 }
 
 /// @nodoc
@@ -129,9 +122,8 @@ class __$$AppUserImplCopyWithImpl<$Res>
     extends _$AppUserCopyWithImpl<$Res, _$AppUserImpl>
     implements _$$AppUserImplCopyWith<$Res> {
   __$$AppUserImplCopyWithImpl(
-    _$AppUserImpl _value,
-    $Res Function(_$AppUserImpl) _then,
-  ) : super(_value, _then);
+      _$AppUserImpl _value, $Res Function(_$AppUserImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of AppUser
   /// with the given fields replaced by the non-null parameter values.
@@ -145,48 +137,46 @@ class __$$AppUserImplCopyWithImpl<$Res>
     Object? familyId = freezed,
     Object? deviceTokens = null,
   }) {
-    return _then(
-      _$AppUserImpl(
-        uid: null == uid
-            ? _value.uid
-            : uid // ignore: cast_nullable_to_non_nullable
-                  as String,
-        email: null == email
-            ? _value.email
-            : email // ignore: cast_nullable_to_non_nullable
-                  as String,
-        displayName: freezed == displayName
-            ? _value.displayName
-            : displayName // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        photoUrl: freezed == photoUrl
-            ? _value.photoUrl
-            : photoUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        familyId: freezed == familyId
-            ? _value.familyId
-            : familyId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        deviceTokens: null == deviceTokens
-            ? _value._deviceTokens
-            : deviceTokens // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-      ),
-    );
+    return _then(_$AppUserImpl(
+      uid: null == uid
+          ? _value.uid
+          : uid // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      familyId: freezed == familyId
+          ? _value.familyId
+          : familyId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      deviceTokens: null == deviceTokens
+          ? _value._deviceTokens
+          : deviceTokens // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AppUserImpl implements _AppUser {
-  const _$AppUserImpl({
-    required this.uid,
-    required this.email,
-    this.displayName,
-    this.photoUrl,
-    this.familyId,
-    final List<String> deviceTokens = const [],
-  }) : _deviceTokens = deviceTokens;
+  const _$AppUserImpl(
+      {required this.uid,
+      required this.email,
+      this.displayName,
+      this.photoUrl,
+      this.familyId,
+      final List<String> deviceTokens = const []})
+      : _deviceTokens = deviceTokens;
 
   factory _$AppUserImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppUserImplFromJson(json);
@@ -228,23 +218,14 @@ class _$AppUserImpl implements _AppUser {
                 other.photoUrl == photoUrl) &&
             (identical(other.familyId, familyId) ||
                 other.familyId == familyId) &&
-            const DeepCollectionEquality().equals(
-              other._deviceTokens,
-              _deviceTokens,
-            ));
+            const DeepCollectionEquality()
+                .equals(other._deviceTokens, _deviceTokens));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    uid,
-    email,
-    displayName,
-    photoUrl,
-    familyId,
-    const DeepCollectionEquality().hash(_deviceTokens),
-  );
+  int get hashCode => Object.hash(runtimeType, uid, email, displayName,
+      photoUrl, familyId, const DeepCollectionEquality().hash(_deviceTokens));
 
   /// Create a copy of AppUser
   /// with the given fields replaced by the non-null parameter values.
@@ -256,19 +237,20 @@ class _$AppUserImpl implements _AppUser {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AppUserImplToJson(this);
+    return _$$AppUserImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _AppUser implements AppUser {
-  const factory _AppUser({
-    required final String uid,
-    required final String email,
-    final String? displayName,
-    final String? photoUrl,
-    final String? familyId,
-    final List<String> deviceTokens,
-  }) = _$AppUserImpl;
+  const factory _AppUser(
+      {required final String uid,
+      required final String email,
+      final String? displayName,
+      final String? photoUrl,
+      final String? familyId,
+      final List<String> deviceTokens}) = _$AppUserImpl;
 
   factory _AppUser.fromJson(Map<String, dynamic> json) = _$AppUserImpl.fromJson;
 

@@ -12,8 +12,7 @@ part of 'family.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Family _$FamilyFromJson(Map<String, dynamic> json) {
   return _Family.fromJson(json);
@@ -51,19 +50,18 @@ abstract class $FamilyCopyWith<$Res> {
   factory $FamilyCopyWith(Family value, $Res Function(Family) then) =
       _$FamilyCopyWithImpl<$Res, Family>;
   @useResult
-  $Res call({
-    String id,
-    String name,
-    String code,
-    String password,
-    String createdBy,
-    List<String> members,
-    Map<String, String> roles,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    DateTime? createdAt,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    DateTime? updatedAt,
-  });
+  $Res call(
+      {String id,
+      String name,
+      String code,
+      String password,
+      String createdBy,
+      List<String> members,
+      Map<String, String> roles,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      DateTime? createdAt,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -91,71 +89,66 @@ class _$FamilyCopyWithImpl<$Res, $Val extends Family>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            code: null == code
-                ? _value.code
-                : code // ignore: cast_nullable_to_non_nullable
-                      as String,
-            password: null == password
-                ? _value.password
-                : password // ignore: cast_nullable_to_non_nullable
-                      as String,
-            createdBy: null == createdBy
-                ? _value.createdBy
-                : createdBy // ignore: cast_nullable_to_non_nullable
-                      as String,
-            members: null == members
-                ? _value.members
-                : members // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            roles: null == roles
-                ? _value.roles
-                : roles // ignore: cast_nullable_to_non_nullable
-                      as Map<String, String>,
-            createdAt: freezed == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            updatedAt: freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      code: null == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String,
+      password: null == password
+          ? _value.password
+          : password // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdBy: null == createdBy
+          ? _value.createdBy
+          : createdBy // ignore: cast_nullable_to_non_nullable
+              as String,
+      members: null == members
+          ? _value.members
+          : members // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      roles: null == roles
+          ? _value.roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as Map<String, String>,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$FamilyImplCopyWith<$Res> implements $FamilyCopyWith<$Res> {
   factory _$$FamilyImplCopyWith(
-    _$FamilyImpl value,
-    $Res Function(_$FamilyImpl) then,
-  ) = __$$FamilyImplCopyWithImpl<$Res>;
+          _$FamilyImpl value, $Res Function(_$FamilyImpl) then) =
+      __$$FamilyImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String name,
-    String code,
-    String password,
-    String createdBy,
-    List<String> members,
-    Map<String, String> roles,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    DateTime? createdAt,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    DateTime? updatedAt,
-  });
+  $Res call(
+      {String id,
+      String name,
+      String code,
+      String password,
+      String createdBy,
+      List<String> members,
+      Map<String, String> roles,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      DateTime? createdAt,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -163,9 +156,8 @@ class __$$FamilyImplCopyWithImpl<$Res>
     extends _$FamilyCopyWithImpl<$Res, _$FamilyImpl>
     implements _$$FamilyImplCopyWith<$Res> {
   __$$FamilyImplCopyWithImpl(
-    _$FamilyImpl _value,
-    $Res Function(_$FamilyImpl) _then,
-  ) : super(_value, _then);
+      _$FamilyImpl _value, $Res Function(_$FamilyImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Family
   /// with the given fields replaced by the non-null parameter values.
@@ -182,66 +174,64 @@ class __$$FamilyImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(
-      _$FamilyImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        code: null == code
-            ? _value.code
-            : code // ignore: cast_nullable_to_non_nullable
-                  as String,
-        password: null == password
-            ? _value.password
-            : password // ignore: cast_nullable_to_non_nullable
-                  as String,
-        createdBy: null == createdBy
-            ? _value.createdBy
-            : createdBy // ignore: cast_nullable_to_non_nullable
-                  as String,
-        members: null == members
-            ? _value._members
-            : members // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        roles: null == roles
-            ? _value._roles
-            : roles // ignore: cast_nullable_to_non_nullable
-                  as Map<String, String>,
-        createdAt: freezed == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        updatedAt: freezed == updatedAt
-            ? _value.updatedAt
-            : updatedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-      ),
-    );
+    return _then(_$FamilyImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      code: null == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String,
+      password: null == password
+          ? _value.password
+          : password // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdBy: null == createdBy
+          ? _value.createdBy
+          : createdBy // ignore: cast_nullable_to_non_nullable
+              as String,
+      members: null == members
+          ? _value._members
+          : members // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      roles: null == roles
+          ? _value._roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as Map<String, String>,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$FamilyImpl implements _Family {
-  const _$FamilyImpl({
-    required this.id,
-    required this.name,
-    required this.code,
-    required this.password,
-    required this.createdBy,
-    required final List<String> members,
-    final Map<String, String> roles = const {},
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    this.createdAt,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    this.updatedAt,
-  }) : _members = members,
-       _roles = roles;
+  const _$FamilyImpl(
+      {required this.id,
+      required this.name,
+      required this.code,
+      required this.password,
+      required this.createdBy,
+      required final List<String> members,
+      final Map<String, String> roles = const {},
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      this.createdAt,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      this.updatedAt})
+      : _members = members,
+        _roles = roles;
 
   factory _$FamilyImpl.fromJson(Map<String, dynamic> json) =>
       _$$FamilyImplFromJson(json);
@@ -252,10 +242,10 @@ class _$FamilyImpl implements _Family {
   final String name;
   @override
   final String code;
-  // Código de invitación de la familia
+// Código de invitación de la familia
   @override
   final String password;
-  // Contraseña de la familia (solo visible para admin)
+// Contraseña de la familia (solo visible para admin)
   @override
   final String createdBy;
   final List<String> _members;
@@ -266,9 +256,9 @@ class _$FamilyImpl implements _Family {
     return EqualUnmodifiableListView(_members);
   }
 
-  // UIDs de los miembros
+// UIDs de los miembros
   final Map<String, String> _roles;
-  // UIDs de los miembros
+// UIDs de los miembros
   @override
   @JsonKey()
   Map<String, String> get roles {
@@ -277,7 +267,7 @@ class _$FamilyImpl implements _Family {
     return EqualUnmodifiableMapView(_roles);
   }
 
-  // Map<UID, Role>
+// Map<UID, Role>
   @override
   @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
   final DateTime? createdAt;
@@ -313,17 +303,16 @@ class _$FamilyImpl implements _Family {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    code,
-    password,
-    createdBy,
-    const DeepCollectionEquality().hash(_members),
-    const DeepCollectionEquality().hash(_roles),
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      id,
+      name,
+      code,
+      password,
+      createdBy,
+      const DeepCollectionEquality().hash(_members),
+      const DeepCollectionEquality().hash(_roles),
+      createdAt,
+      updatedAt);
 
   /// Create a copy of Family
   /// with the given fields replaced by the non-null parameter values.
@@ -335,24 +324,25 @@ class _$FamilyImpl implements _Family {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FamilyImplToJson(this);
+    return _$$FamilyImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Family implements Family {
-  const factory _Family({
-    required final String id,
-    required final String name,
-    required final String code,
-    required final String password,
-    required final String createdBy,
-    required final List<String> members,
-    final Map<String, String> roles,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    final DateTime? createdAt,
-    @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
-    final DateTime? updatedAt,
-  }) = _$FamilyImpl;
+  const factory _Family(
+      {required final String id,
+      required final String name,
+      required final String code,
+      required final String password,
+      required final String createdBy,
+      required final List<String> members,
+      final Map<String, String> roles,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      final DateTime? createdAt,
+      @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
+      final DateTime? updatedAt}) = _$FamilyImpl;
 
   factory _Family.fromJson(Map<String, dynamic> json) = _$FamilyImpl.fromJson;
 

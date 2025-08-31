@@ -12,8 +12,7 @@ part of 'recurrence.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Recurrence _$RecurrenceFromJson(Map<String, dynamic> json) {
   return _Recurrence.fromJson(json);
@@ -40,17 +39,15 @@ mixin _$Recurrence {
 /// @nodoc
 abstract class $RecurrenceCopyWith<$Res> {
   factory $RecurrenceCopyWith(
-    Recurrence value,
-    $Res Function(Recurrence) then,
-  ) = _$RecurrenceCopyWithImpl<$Res, Recurrence>;
+          Recurrence value, $Res Function(Recurrence) then) =
+      _$RecurrenceCopyWithImpl<$Res, Recurrence>;
   @useResult
-  $Res call({
-    String rule,
-    int? interval,
-    List<int>? byWeekdays,
-    int? byMonthDay,
-    DateTime? until,
-  });
+  $Res call(
+      {String rule,
+      int? interval,
+      List<int>? byWeekdays,
+      int? byMonthDay,
+      DateTime? until});
 }
 
 /// @nodoc
@@ -74,31 +71,28 @@ class _$RecurrenceCopyWithImpl<$Res, $Val extends Recurrence>
     Object? byMonthDay = freezed,
     Object? until = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            rule: null == rule
-                ? _value.rule
-                : rule // ignore: cast_nullable_to_non_nullable
-                      as String,
-            interval: freezed == interval
-                ? _value.interval
-                : interval // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            byWeekdays: freezed == byWeekdays
-                ? _value.byWeekdays
-                : byWeekdays // ignore: cast_nullable_to_non_nullable
-                      as List<int>?,
-            byMonthDay: freezed == byMonthDay
-                ? _value.byMonthDay
-                : byMonthDay // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            until: freezed == until
-                ? _value.until
-                : until // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      rule: null == rule
+          ? _value.rule
+          : rule // ignore: cast_nullable_to_non_nullable
+              as String,
+      interval: freezed == interval
+          ? _value.interval
+          : interval // ignore: cast_nullable_to_non_nullable
+              as int?,
+      byWeekdays: freezed == byWeekdays
+          ? _value.byWeekdays
+          : byWeekdays // ignore: cast_nullable_to_non_nullable
+              as List<int>?,
+      byMonthDay: freezed == byMonthDay
+          ? _value.byMonthDay
+          : byMonthDay // ignore: cast_nullable_to_non_nullable
+              as int?,
+      until: freezed == until
+          ? _value.until
+          : until // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
@@ -106,18 +100,16 @@ class _$RecurrenceCopyWithImpl<$Res, $Val extends Recurrence>
 abstract class _$$RecurrenceImplCopyWith<$Res>
     implements $RecurrenceCopyWith<$Res> {
   factory _$$RecurrenceImplCopyWith(
-    _$RecurrenceImpl value,
-    $Res Function(_$RecurrenceImpl) then,
-  ) = __$$RecurrenceImplCopyWithImpl<$Res>;
+          _$RecurrenceImpl value, $Res Function(_$RecurrenceImpl) then) =
+      __$$RecurrenceImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String rule,
-    int? interval,
-    List<int>? byWeekdays,
-    int? byMonthDay,
-    DateTime? until,
-  });
+  $Res call(
+      {String rule,
+      int? interval,
+      List<int>? byWeekdays,
+      int? byMonthDay,
+      DateTime? until});
 }
 
 /// @nodoc
@@ -125,9 +117,8 @@ class __$$RecurrenceImplCopyWithImpl<$Res>
     extends _$RecurrenceCopyWithImpl<$Res, _$RecurrenceImpl>
     implements _$$RecurrenceImplCopyWith<$Res> {
   __$$RecurrenceImplCopyWithImpl(
-    _$RecurrenceImpl _value,
-    $Res Function(_$RecurrenceImpl) _then,
-  ) : super(_value, _then);
+      _$RecurrenceImpl _value, $Res Function(_$RecurrenceImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Recurrence
   /// with the given fields replaced by the non-null parameter values.
@@ -140,43 +131,41 @@ class __$$RecurrenceImplCopyWithImpl<$Res>
     Object? byMonthDay = freezed,
     Object? until = freezed,
   }) {
-    return _then(
-      _$RecurrenceImpl(
-        rule: null == rule
-            ? _value.rule
-            : rule // ignore: cast_nullable_to_non_nullable
-                  as String,
-        interval: freezed == interval
-            ? _value.interval
-            : interval // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        byWeekdays: freezed == byWeekdays
-            ? _value._byWeekdays
-            : byWeekdays // ignore: cast_nullable_to_non_nullable
-                  as List<int>?,
-        byMonthDay: freezed == byMonthDay
-            ? _value.byMonthDay
-            : byMonthDay // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        until: freezed == until
-            ? _value.until
-            : until // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-      ),
-    );
+    return _then(_$RecurrenceImpl(
+      rule: null == rule
+          ? _value.rule
+          : rule // ignore: cast_nullable_to_non_nullable
+              as String,
+      interval: freezed == interval
+          ? _value.interval
+          : interval // ignore: cast_nullable_to_non_nullable
+              as int?,
+      byWeekdays: freezed == byWeekdays
+          ? _value._byWeekdays
+          : byWeekdays // ignore: cast_nullable_to_non_nullable
+              as List<int>?,
+      byMonthDay: freezed == byMonthDay
+          ? _value.byMonthDay
+          : byMonthDay // ignore: cast_nullable_to_non_nullable
+              as int?,
+      until: freezed == until
+          ? _value.until
+          : until // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$RecurrenceImpl implements _Recurrence {
-  const _$RecurrenceImpl({
-    this.rule = 'none',
-    this.interval,
-    final List<int>? byWeekdays,
-    this.byMonthDay,
-    this.until,
-  }) : _byWeekdays = byWeekdays;
+  const _$RecurrenceImpl(
+      {this.rule = 'none',
+      this.interval,
+      final List<int>? byWeekdays,
+      this.byMonthDay,
+      this.until})
+      : _byWeekdays = byWeekdays;
 
   factory _$RecurrenceImpl.fromJson(Map<String, dynamic> json) =>
       _$$RecurrenceImplFromJson(json);
@@ -214,10 +203,8 @@ class _$RecurrenceImpl implements _Recurrence {
             (identical(other.rule, rule) || other.rule == rule) &&
             (identical(other.interval, interval) ||
                 other.interval == interval) &&
-            const DeepCollectionEquality().equals(
-              other._byWeekdays,
-              _byWeekdays,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._byWeekdays, _byWeekdays) &&
             (identical(other.byMonthDay, byMonthDay) ||
                 other.byMonthDay == byMonthDay) &&
             (identical(other.until, until) || other.until == until));
@@ -225,14 +212,8 @@ class _$RecurrenceImpl implements _Recurrence {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    rule,
-    interval,
-    const DeepCollectionEquality().hash(_byWeekdays),
-    byMonthDay,
-    until,
-  );
+  int get hashCode => Object.hash(runtimeType, rule, interval,
+      const DeepCollectionEquality().hash(_byWeekdays), byMonthDay, until);
 
   /// Create a copy of Recurrence
   /// with the given fields replaced by the non-null parameter values.
@@ -244,18 +225,19 @@ class _$RecurrenceImpl implements _Recurrence {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$RecurrenceImplToJson(this);
+    return _$$RecurrenceImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Recurrence implements Recurrence {
-  const factory _Recurrence({
-    final String rule,
-    final int? interval,
-    final List<int>? byWeekdays,
-    final int? byMonthDay,
-    final DateTime? until,
-  }) = _$RecurrenceImpl;
+  const factory _Recurrence(
+      {final String rule,
+      final int? interval,
+      final List<int>? byWeekdays,
+      final int? byMonthDay,
+      final DateTime? until}) = _$RecurrenceImpl;
 
   factory _Recurrence.fromJson(Map<String, dynamic> json) =
       _$RecurrenceImpl.fromJson;

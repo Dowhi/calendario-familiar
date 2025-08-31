@@ -25,8 +25,7 @@ _$AppEventImpl _$$AppEventImplFromJson(Map<String, dynamic> json) =>
       allDay: json['allDay'] as bool? ?? false,
       isAllDay: json['isAllDay'] as bool? ?? true,
       colorHex: json['colorHex'] as String?,
-      participants:
-          (json['participants'] as List<dynamic>?)
+      participants: (json['participants'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],

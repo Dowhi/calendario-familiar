@@ -38,6 +38,11 @@
 </head>
 <body>
   <script>
+    window.flutterWebRenderer = "html";
+  </script>
+  <script src="./flutter_bootstrap.js"></script>
+  <script src="./main.dart.js" defer></script>
+  <script>
     // Registro del Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -50,24 +55,6 @@
           });
       });
     }
-
-    // Configuración de Firebase para web
-    window.flutterWebRenderer = "html";
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
-        }
-      });
-    });
   </script>
-  <script src="./flutter_bootstrap.js"></script>
-  <script src="./main.dart.js" defer></script>
 </body>
 </html>

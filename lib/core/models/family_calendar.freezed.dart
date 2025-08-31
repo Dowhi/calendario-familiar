@@ -12,8 +12,7 @@ part of 'family_calendar.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 FamilyCalendar _$FamilyCalendarFromJson(Map<String, dynamic> json) {
   return _FamilyCalendar.fromJson(json);
@@ -40,17 +39,15 @@ mixin _$FamilyCalendar {
 /// @nodoc
 abstract class $FamilyCalendarCopyWith<$Res> {
   factory $FamilyCalendarCopyWith(
-    FamilyCalendar value,
-    $Res Function(FamilyCalendar) then,
-  ) = _$FamilyCalendarCopyWithImpl<$Res, FamilyCalendar>;
+          FamilyCalendar value, $Res Function(FamilyCalendar) then) =
+      _$FamilyCalendarCopyWithImpl<$Res, FamilyCalendar>;
   @useResult
-  $Res call({
-    String id,
-    String name,
-    List<String> members,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  });
+  $Res call(
+      {String id,
+      String name,
+      List<String> members,
+      DateTime? createdAt,
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -74,50 +71,45 @@ class _$FamilyCalendarCopyWithImpl<$Res, $Val extends FamilyCalendar>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            members: null == members
-                ? _value.members
-                : members // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            createdAt: freezed == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            updatedAt: freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      members: null == members
+          ? _value.members
+          : members // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$FamilyCalendarImplCopyWith<$Res>
     implements $FamilyCalendarCopyWith<$Res> {
-  factory _$$FamilyCalendarImplCopyWith(
-    _$FamilyCalendarImpl value,
-    $Res Function(_$FamilyCalendarImpl) then,
-  ) = __$$FamilyCalendarImplCopyWithImpl<$Res>;
+  factory _$$FamilyCalendarImplCopyWith(_$FamilyCalendarImpl value,
+          $Res Function(_$FamilyCalendarImpl) then) =
+      __$$FamilyCalendarImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String name,
-    List<String> members,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  });
+  $Res call(
+      {String id,
+      String name,
+      List<String> members,
+      DateTime? createdAt,
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -125,9 +117,8 @@ class __$$FamilyCalendarImplCopyWithImpl<$Res>
     extends _$FamilyCalendarCopyWithImpl<$Res, _$FamilyCalendarImpl>
     implements _$$FamilyCalendarImplCopyWith<$Res> {
   __$$FamilyCalendarImplCopyWithImpl(
-    _$FamilyCalendarImpl _value,
-    $Res Function(_$FamilyCalendarImpl) _then,
-  ) : super(_value, _then);
+      _$FamilyCalendarImpl _value, $Res Function(_$FamilyCalendarImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of FamilyCalendar
   /// with the given fields replaced by the non-null parameter values.
@@ -140,43 +131,41 @@ class __$$FamilyCalendarImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(
-      _$FamilyCalendarImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        members: null == members
-            ? _value._members
-            : members // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        createdAt: freezed == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        updatedAt: freezed == updatedAt
-            ? _value.updatedAt
-            : updatedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-      ),
-    );
+    return _then(_$FamilyCalendarImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      members: null == members
+          ? _value._members
+          : members // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$FamilyCalendarImpl implements _FamilyCalendar {
-  const _$FamilyCalendarImpl({
-    required this.id,
-    required this.name,
-    final List<String> members = const [],
-    this.createdAt,
-    this.updatedAt,
-  }) : _members = members;
+  const _$FamilyCalendarImpl(
+      {required this.id,
+      required this.name,
+      final List<String> members = const [],
+      this.createdAt,
+      this.updatedAt})
+      : _members = members;
 
   factory _$FamilyCalendarImpl.fromJson(Map<String, dynamic> json) =>
       _$$FamilyCalendarImplFromJson(json);
@@ -220,14 +209,8 @@ class _$FamilyCalendarImpl implements _FamilyCalendar {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    const DeepCollectionEquality().hash(_members),
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, name,
+      const DeepCollectionEquality().hash(_members), createdAt, updatedAt);
 
   /// Create a copy of FamilyCalendar
   /// with the given fields replaced by the non-null parameter values.
@@ -236,24 +219,23 @@ class _$FamilyCalendarImpl implements _FamilyCalendar {
   @pragma('vm:prefer-inline')
   _$$FamilyCalendarImplCopyWith<_$FamilyCalendarImpl> get copyWith =>
       __$$FamilyCalendarImplCopyWithImpl<_$FamilyCalendarImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FamilyCalendarImplToJson(this);
+    return _$$FamilyCalendarImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _FamilyCalendar implements FamilyCalendar {
-  const factory _FamilyCalendar({
-    required final String id,
-    required final String name,
-    final List<String> members,
-    final DateTime? createdAt,
-    final DateTime? updatedAt,
-  }) = _$FamilyCalendarImpl;
+  const factory _FamilyCalendar(
+      {required final String id,
+      required final String name,
+      final List<String> members,
+      final DateTime? createdAt,
+      final DateTime? updatedAt}) = _$FamilyCalendarImpl;
 
   factory _FamilyCalendar.fromJson(Map<String, dynamic> json) =
       _$FamilyCalendarImpl.fromJson;

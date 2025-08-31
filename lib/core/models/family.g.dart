@@ -7,20 +7,20 @@ part of 'family.dart';
 // **************************************************************************
 
 _$FamilyImpl _$$FamilyImplFromJson(Map<String, dynamic> json) => _$FamilyImpl(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  code: json['code'] as String,
-  password: json['password'] as String,
-  createdBy: json['createdBy'] as String,
-  members: (json['members'] as List<dynamic>).map((e) => e as String).toList(),
-  roles:
-      (json['roles'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as String),
-      ) ??
-      const {},
-  createdAt: _timestampToDateTime(json['createdAt']),
-  updatedAt: _timestampToDateTime(json['updatedAt']),
-);
+      id: json['id'] as String,
+      name: json['name'] as String,
+      code: json['code'] as String,
+      password: json['password'] as String,
+      createdBy: json['createdBy'] as String,
+      members:
+          (json['members'] as List<dynamic>).map((e) => e as String).toList(),
+      roles: (json['roles'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, e as String),
+          ) ??
+          const {},
+      createdAt: _timestampToDateTime(json['createdAt']),
+      updatedAt: _timestampToDateTime(json['updatedAt']),
+    );
 
 Map<String, dynamic> _$$FamilyImplToJson(_$FamilyImpl instance) =>
     <String, dynamic>{

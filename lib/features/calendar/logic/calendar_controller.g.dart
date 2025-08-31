@@ -39,15 +39,21 @@ class CalendarStreamFamily extends Family<AsyncValue<FamilyCalendar?>> {
   const CalendarStreamFamily();
 
   /// See also [calendarStream].
-  CalendarStreamProvider call(String calendarId) {
-    return CalendarStreamProvider(calendarId);
+  CalendarStreamProvider call(
+    String calendarId,
+  ) {
+    return CalendarStreamProvider(
+      calendarId,
+    );
   }
 
   @override
   CalendarStreamProvider getProviderOverride(
     covariant CalendarStreamProvider provider,
   ) {
-    return call(provider.calendarId);
+    return call(
+      provider.calendarId,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -69,19 +75,24 @@ class CalendarStreamFamily extends Family<AsyncValue<FamilyCalendar?>> {
 class CalendarStreamProvider
     extends AutoDisposeStreamProvider<FamilyCalendar?> {
   /// See also [calendarStream].
-  CalendarStreamProvider(String calendarId)
-    : this._internal(
-        (ref) => calendarStream(ref as CalendarStreamRef, calendarId),
-        from: calendarStreamProvider,
-        name: r'calendarStreamProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$calendarStreamHash,
-        dependencies: CalendarStreamFamily._dependencies,
-        allTransitiveDependencies:
-            CalendarStreamFamily._allTransitiveDependencies,
-        calendarId: calendarId,
-      );
+  CalendarStreamProvider(
+    String calendarId,
+  ) : this._internal(
+          (ref) => calendarStream(
+            ref as CalendarStreamRef,
+            calendarId,
+          ),
+          from: calendarStreamProvider,
+          name: r'calendarStreamProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$calendarStreamHash,
+          dependencies: CalendarStreamFamily._dependencies,
+          allTransitiveDependencies:
+              CalendarStreamFamily._allTransitiveDependencies,
+          calendarId: calendarId,
+        );
 
   CalendarStreamProvider._internal(
     super._createNotifier, {
@@ -153,19 +164,16 @@ String _$calendarControllerHash() =>
 
 /// See also [CalendarController].
 @ProviderFor(CalendarController)
-final calendarControllerProvider =
-    AutoDisposeAsyncNotifierProvider<
-      CalendarController,
-      FamilyCalendar?
-    >.internal(
-      CalendarController.new,
-      name: r'calendarControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$calendarControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final calendarControllerProvider = AutoDisposeAsyncNotifierProvider<
+    CalendarController, FamilyCalendar?>.internal(
+  CalendarController.new,
+  name: r'calendarControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$calendarControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$CalendarController = AutoDisposeAsyncNotifier<FamilyCalendar?>;
 // ignore_for_file: type=lint

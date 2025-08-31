@@ -12,8 +12,7 @@ part of 'app_event.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 AppEvent _$AppEventFromJson(Map<String, dynamic> json) {
   return _AppEvent.fromJson(json);
@@ -35,9 +34,11 @@ mixin _$AppEvent {
   @JsonKey(name: 'date')
   String get dateKey => throw _privateConstructorUsedError;
   @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-  DateTime? get startAt => throw _privateConstructorUsedError; // Mantener para compatibilidad
+  DateTime? get startAt =>
+      throw _privateConstructorUsedError; // Mantener para compatibilidad
   @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-  DateTime? get endAt => throw _privateConstructorUsedError; // Mantener para compatibilidad
+  DateTime? get endAt =>
+      throw _privateConstructorUsedError; // Mantener para compatibilidad
   String? get startTime =>
       throw _privateConstructorUsedError; // Hora de inicio como string "HH:mm"
   String? get endTime =>
@@ -74,35 +75,35 @@ abstract class $AppEventCopyWith<$Res> {
   factory $AppEventCopyWith(AppEvent value, $Res Function(AppEvent) then) =
       _$AppEventCopyWithImpl<$Res, AppEvent>;
   @useResult
-  $Res call({
-    String id,
-    @JsonKey(name: 'familyId') String familyId,
-    String? ownerId,
-    String title,
-    String? notes,
-    String? description,
-    @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
-    EventType type,
-    @JsonKey(name: 'date') String dateKey,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) DateTime? startAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) DateTime? endAt,
-    String? startTime,
-    String? endTime,
-    bool allDay,
-    bool isAllDay,
-    String? colorHex,
-    List<String> participants,
-    String? category,
-    Recurrence? recurrence,
-    int notifyMinutesBefore,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    DateTime? createdAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    DateTime? updatedAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    DateTime? deletedAt,
-    String? location,
-  });
+  $Res call(
+      {String id,
+      @JsonKey(name: 'familyId') String familyId,
+      String? ownerId,
+      String title,
+      String? notes,
+      String? description,
+      @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
+      EventType type,
+      @JsonKey(name: 'date') String dateKey,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? startAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) DateTime? endAt,
+      String? startTime,
+      String? endTime,
+      bool allDay,
+      bool isAllDay,
+      String? colorHex,
+      List<String> participants,
+      String? category,
+      Recurrence? recurrence,
+      int notifyMinutesBefore,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? createdAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? updatedAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? deletedAt,
+      String? location});
 
   $RecurrenceCopyWith<$Res>? get recurrence;
 }
@@ -146,103 +147,100 @@ class _$AppEventCopyWithImpl<$Res, $Val extends AppEvent>
     Object? deletedAt = freezed,
     Object? location = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            familyId: null == familyId
-                ? _value.familyId
-                : familyId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            ownerId: freezed == ownerId
-                ? _value.ownerId
-                : ownerId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            title: null == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String,
-            notes: freezed == notes
-                ? _value.notes
-                : notes // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            description: freezed == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            type: null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                      as EventType,
-            dateKey: null == dateKey
-                ? _value.dateKey
-                : dateKey // ignore: cast_nullable_to_non_nullable
-                      as String,
-            startAt: freezed == startAt
-                ? _value.startAt
-                : startAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            endAt: freezed == endAt
-                ? _value.endAt
-                : endAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            startTime: freezed == startTime
-                ? _value.startTime
-                : startTime // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            endTime: freezed == endTime
-                ? _value.endTime
-                : endTime // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            allDay: null == allDay
-                ? _value.allDay
-                : allDay // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            isAllDay: null == isAllDay
-                ? _value.isAllDay
-                : isAllDay // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            colorHex: freezed == colorHex
-                ? _value.colorHex
-                : colorHex // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            participants: null == participants
-                ? _value.participants
-                : participants // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            category: freezed == category
-                ? _value.category
-                : category // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            recurrence: freezed == recurrence
-                ? _value.recurrence
-                : recurrence // ignore: cast_nullable_to_non_nullable
-                      as Recurrence?,
-            notifyMinutesBefore: null == notifyMinutesBefore
-                ? _value.notifyMinutesBefore
-                : notifyMinutesBefore // ignore: cast_nullable_to_non_nullable
-                      as int,
-            createdAt: freezed == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            updatedAt: freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            deletedAt: freezed == deletedAt
-                ? _value.deletedAt
-                : deletedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            location: freezed == location
-                ? _value.location
-                : location // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      familyId: null == familyId
+          ? _value.familyId
+          : familyId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ownerId: freezed == ownerId
+          ? _value.ownerId
+          : ownerId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as EventType,
+      dateKey: null == dateKey
+          ? _value.dateKey
+          : dateKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      startAt: freezed == startAt
+          ? _value.startAt
+          : startAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      endAt: freezed == endAt
+          ? _value.endAt
+          : endAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      startTime: freezed == startTime
+          ? _value.startTime
+          : startTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      endTime: freezed == endTime
+          ? _value.endTime
+          : endTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      allDay: null == allDay
+          ? _value.allDay
+          : allDay // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAllDay: null == isAllDay
+          ? _value.isAllDay
+          : isAllDay // ignore: cast_nullable_to_non_nullable
+              as bool,
+      colorHex: freezed == colorHex
+          ? _value.colorHex
+          : colorHex // ignore: cast_nullable_to_non_nullable
+              as String?,
+      participants: null == participants
+          ? _value.participants
+          : participants // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
+      recurrence: freezed == recurrence
+          ? _value.recurrence
+          : recurrence // ignore: cast_nullable_to_non_nullable
+              as Recurrence?,
+      notifyMinutesBefore: null == notifyMinutesBefore
+          ? _value.notifyMinutesBefore
+          : notifyMinutesBefore // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      deletedAt: freezed == deletedAt
+          ? _value.deletedAt
+          : deletedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      location: freezed == location
+          ? _value.location
+          : location // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 
   /// Create a copy of AppEvent
@@ -264,40 +262,39 @@ class _$AppEventCopyWithImpl<$Res, $Val extends AppEvent>
 abstract class _$$AppEventImplCopyWith<$Res>
     implements $AppEventCopyWith<$Res> {
   factory _$$AppEventImplCopyWith(
-    _$AppEventImpl value,
-    $Res Function(_$AppEventImpl) then,
-  ) = __$$AppEventImplCopyWithImpl<$Res>;
+          _$AppEventImpl value, $Res Function(_$AppEventImpl) then) =
+      __$$AppEventImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    @JsonKey(name: 'familyId') String familyId,
-    String? ownerId,
-    String title,
-    String? notes,
-    String? description,
-    @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
-    EventType type,
-    @JsonKey(name: 'date') String dateKey,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) DateTime? startAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) DateTime? endAt,
-    String? startTime,
-    String? endTime,
-    bool allDay,
-    bool isAllDay,
-    String? colorHex,
-    List<String> participants,
-    String? category,
-    Recurrence? recurrence,
-    int notifyMinutesBefore,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    DateTime? createdAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    DateTime? updatedAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    DateTime? deletedAt,
-    String? location,
-  });
+  $Res call(
+      {String id,
+      @JsonKey(name: 'familyId') String familyId,
+      String? ownerId,
+      String title,
+      String? notes,
+      String? description,
+      @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
+      EventType type,
+      @JsonKey(name: 'date') String dateKey,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? startAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) DateTime? endAt,
+      String? startTime,
+      String? endTime,
+      bool allDay,
+      bool isAllDay,
+      String? colorHex,
+      List<String> participants,
+      String? category,
+      Recurrence? recurrence,
+      int notifyMinutesBefore,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? createdAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? updatedAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      DateTime? deletedAt,
+      String? location});
 
   @override
   $RecurrenceCopyWith<$Res>? get recurrence;
@@ -308,9 +305,8 @@ class __$$AppEventImplCopyWithImpl<$Res>
     extends _$AppEventCopyWithImpl<$Res, _$AppEventImpl>
     implements _$$AppEventImplCopyWith<$Res> {
   __$$AppEventImplCopyWithImpl(
-    _$AppEventImpl _value,
-    $Res Function(_$AppEventImpl) _then,
-  ) : super(_value, _then);
+      _$AppEventImpl _value, $Res Function(_$AppEventImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of AppEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -341,134 +337,132 @@ class __$$AppEventImplCopyWithImpl<$Res>
     Object? deletedAt = freezed,
     Object? location = freezed,
   }) {
-    return _then(
-      _$AppEventImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        familyId: null == familyId
-            ? _value.familyId
-            : familyId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        ownerId: freezed == ownerId
-            ? _value.ownerId
-            : ownerId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        title: null == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String,
-        notes: freezed == notes
-            ? _value.notes
-            : notes // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        description: freezed == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                  as EventType,
-        dateKey: null == dateKey
-            ? _value.dateKey
-            : dateKey // ignore: cast_nullable_to_non_nullable
-                  as String,
-        startAt: freezed == startAt
-            ? _value.startAt
-            : startAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        endAt: freezed == endAt
-            ? _value.endAt
-            : endAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        startTime: freezed == startTime
-            ? _value.startTime
-            : startTime // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        endTime: freezed == endTime
-            ? _value.endTime
-            : endTime // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        allDay: null == allDay
-            ? _value.allDay
-            : allDay // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        isAllDay: null == isAllDay
-            ? _value.isAllDay
-            : isAllDay // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        colorHex: freezed == colorHex
-            ? _value.colorHex
-            : colorHex // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        participants: null == participants
-            ? _value._participants
-            : participants // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        category: freezed == category
-            ? _value.category
-            : category // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        recurrence: freezed == recurrence
-            ? _value.recurrence
-            : recurrence // ignore: cast_nullable_to_non_nullable
-                  as Recurrence?,
-        notifyMinutesBefore: null == notifyMinutesBefore
-            ? _value.notifyMinutesBefore
-            : notifyMinutesBefore // ignore: cast_nullable_to_non_nullable
-                  as int,
-        createdAt: freezed == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        updatedAt: freezed == updatedAt
-            ? _value.updatedAt
-            : updatedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        deletedAt: freezed == deletedAt
-            ? _value.deletedAt
-            : deletedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        location: freezed == location
-            ? _value.location
-            : location // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
+    return _then(_$AppEventImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      familyId: null == familyId
+          ? _value.familyId
+          : familyId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ownerId: freezed == ownerId
+          ? _value.ownerId
+          : ownerId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as EventType,
+      dateKey: null == dateKey
+          ? _value.dateKey
+          : dateKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      startAt: freezed == startAt
+          ? _value.startAt
+          : startAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      endAt: freezed == endAt
+          ? _value.endAt
+          : endAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      startTime: freezed == startTime
+          ? _value.startTime
+          : startTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      endTime: freezed == endTime
+          ? _value.endTime
+          : endTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      allDay: null == allDay
+          ? _value.allDay
+          : allDay // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAllDay: null == isAllDay
+          ? _value.isAllDay
+          : isAllDay // ignore: cast_nullable_to_non_nullable
+              as bool,
+      colorHex: freezed == colorHex
+          ? _value.colorHex
+          : colorHex // ignore: cast_nullable_to_non_nullable
+              as String?,
+      participants: null == participants
+          ? _value._participants
+          : participants // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
+      recurrence: freezed == recurrence
+          ? _value.recurrence
+          : recurrence // ignore: cast_nullable_to_non_nullable
+              as Recurrence?,
+      notifyMinutesBefore: null == notifyMinutesBefore
+          ? _value.notifyMinutesBefore
+          : notifyMinutesBefore // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      deletedAt: freezed == deletedAt
+          ? _value.deletedAt
+          : deletedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      location: freezed == location
+          ? _value.location
+          : location // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AppEventImpl implements _AppEvent {
-  const _$AppEventImpl({
-    required this.id,
-    @JsonKey(name: 'familyId') required this.familyId,
-    this.ownerId,
-    required this.title,
-    this.notes,
-    this.description,
-    @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
-    this.type = EventType.event,
-    @JsonKey(name: 'date') required this.dateKey,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.startAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.endAt,
-    this.startTime,
-    this.endTime,
-    this.allDay = false,
-    this.isAllDay = true,
-    this.colorHex,
-    final List<String> participants = const [],
-    this.category,
-    this.recurrence,
-    this.notifyMinutesBefore = 30,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.createdAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.updatedAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.deletedAt,
-    this.location,
-  }) : _participants = participants;
+  const _$AppEventImpl(
+      {required this.id,
+      @JsonKey(name: 'familyId') required this.familyId,
+      this.ownerId,
+      required this.title,
+      this.notes,
+      this.description,
+      @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
+      this.type = EventType.event,
+      @JsonKey(name: 'date') required this.dateKey,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.startAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.endAt,
+      this.startTime,
+      this.endTime,
+      this.allDay = false,
+      this.isAllDay = true,
+      this.colorHex,
+      final List<String> participants = const [],
+      this.category,
+      this.recurrence,
+      this.notifyMinutesBefore = 30,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.createdAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.updatedAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp) this.deletedAt,
+      this.location})
+      : _participants = participants;
 
   factory _$AppEventImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppEventImplFromJson(json);
@@ -484,10 +478,10 @@ class _$AppEventImpl implements _AppEvent {
   final String title;
   @override
   final String? notes;
-  // Mantener 'notes' para compatibilidad
+// Mantener 'notes' para compatibilidad
   @override
   final String? description;
-  // Añadir 'description' para nueva estructura
+// Añadir 'description' para nueva estructura
   @override
   @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
   final EventType type;
@@ -497,25 +491,25 @@ class _$AppEventImpl implements _AppEvent {
   @override
   @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
   final DateTime? startAt;
-  // Mantener para compatibilidad
+// Mantener para compatibilidad
   @override
   @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
   final DateTime? endAt;
-  // Mantener para compatibilidad
+// Mantener para compatibilidad
   @override
   final String? startTime;
-  // Hora de inicio como string "HH:mm"
+// Hora de inicio como string "HH:mm"
   @override
   final String? endTime;
-  // Hora de fin como string "HH:mm"
+// Hora de fin como string "HH:mm"
   @override
   @JsonKey()
   final bool allDay;
-  // Mantener para compatibilidad
+// Mantener para compatibilidad
   @override
   @JsonKey()
   final bool isAllDay;
-  // Añadir para nueva estructura
+// Añadir para nueva estructura
   @override
   final String? colorHex;
   final List<String> _participants;
@@ -576,10 +570,8 @@ class _$AppEventImpl implements _AppEvent {
                 other.isAllDay == isAllDay) &&
             (identical(other.colorHex, colorHex) ||
                 other.colorHex == colorHex) &&
-            const DeepCollectionEquality().equals(
-              other._participants,
-              _participants,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._participants, _participants) &&
             (identical(other.category, category) ||
                 other.category == category) &&
             (identical(other.recurrence, recurrence) ||
@@ -599,31 +591,31 @@ class _$AppEventImpl implements _AppEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hashAll([
-    runtimeType,
-    id,
-    familyId,
-    ownerId,
-    title,
-    notes,
-    description,
-    type,
-    dateKey,
-    startAt,
-    endAt,
-    startTime,
-    endTime,
-    allDay,
-    isAllDay,
-    colorHex,
-    const DeepCollectionEquality().hash(_participants),
-    category,
-    recurrence,
-    notifyMinutesBefore,
-    createdAt,
-    updatedAt,
-    deletedAt,
-    location,
-  ]);
+        runtimeType,
+        id,
+        familyId,
+        ownerId,
+        title,
+        notes,
+        description,
+        type,
+        dateKey,
+        startAt,
+        endAt,
+        startTime,
+        endTime,
+        allDay,
+        isAllDay,
+        colorHex,
+        const DeepCollectionEquality().hash(_participants),
+        category,
+        recurrence,
+        notifyMinutesBefore,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        location
+      ]);
 
   /// Create a copy of AppEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -635,42 +627,43 @@ class _$AppEventImpl implements _AppEvent {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AppEventImplToJson(this);
+    return _$$AppEventImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _AppEvent implements AppEvent {
-  const factory _AppEvent({
-    required final String id,
-    @JsonKey(name: 'familyId') required final String familyId,
-    final String? ownerId,
-    required final String title,
-    final String? notes,
-    final String? description,
-    @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
-    final EventType type,
-    @JsonKey(name: 'date') required final String dateKey,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    final DateTime? startAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    final DateTime? endAt,
-    final String? startTime,
-    final String? endTime,
-    final bool allDay,
-    final bool isAllDay,
-    final String? colorHex,
-    final List<String> participants,
-    final String? category,
-    final Recurrence? recurrence,
-    final int notifyMinutesBefore,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    final DateTime? createdAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    final DateTime? updatedAt,
-    @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-    final DateTime? deletedAt,
-    final String? location,
-  }) = _$AppEventImpl;
+  const factory _AppEvent(
+      {required final String id,
+      @JsonKey(name: 'familyId') required final String familyId,
+      final String? ownerId,
+      required final String title,
+      final String? notes,
+      final String? description,
+      @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
+      final EventType type,
+      @JsonKey(name: 'date') required final String dateKey,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      final DateTime? startAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      final DateTime? endAt,
+      final String? startTime,
+      final String? endTime,
+      final bool allDay,
+      final bool isAllDay,
+      final String? colorHex,
+      final List<String> participants,
+      final String? category,
+      final Recurrence? recurrence,
+      final int notifyMinutesBefore,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      final DateTime? createdAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      final DateTime? updatedAt,
+      @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
+      final DateTime? deletedAt,
+      final String? location}) = _$AppEventImpl;
 
   factory _AppEvent.fromJson(Map<String, dynamic> json) =
       _$AppEventImpl.fromJson;

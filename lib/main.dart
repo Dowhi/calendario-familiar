@@ -44,8 +44,8 @@ void handleNotificationResponse(NotificationResponse response) {
   if (response.payload != null && response.payload!.startsWith('alarm|')) {
     final payloadParts = response.payload!.split('|');
     if (payloadParts.length >= 3) {
-      String eventText = payloadParts[1];
-      DateTime eventDate = DateTime.parse(payloadParts[2]);
+      final String eventText = payloadParts[1];
+      final DateTime eventDate = DateTime.parse(payloadParts[2]);
       
       if (response.actionId == 'dismiss') {
         print('🔇 Notificación de alarma descartada');
@@ -235,7 +235,7 @@ Future<void> _initializeNotifications() async {
   const LinuxInitializationSettings initializationSettingsLinux =
       LinuxInitializationSettings(defaultActionName: 'Open notification');
 
-  final InitializationSettings initializationSettings = InitializationSettings(
+  const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsIOS,
     linux: initializationSettingsLinux,
@@ -319,7 +319,7 @@ void _showAlarmNotification(String eventText, DateTime eventDate) async {
         ledOffMs: 500,
       );
 
-      platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+      platformChannelSpecifics = const NotificationDetails(android: androidPlatformChannelSpecifics);
     }
 
     if (!kIsWeb && platformChannelSpecifics != null) {
@@ -480,7 +480,7 @@ Future<void> _scheduleAlarmFromFirebase(Map<String, dynamic> alarmData, String d
     NotificationDetails? platformChannelSpecifics;
     
     if (!kIsWeb) {
-      final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      const androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'event_reminders',
         'Recordatorios de eventos',
         channelDescription: 'Notificaciones para recordar eventos del calendario',
