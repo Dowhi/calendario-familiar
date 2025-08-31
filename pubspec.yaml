@@ -48,12 +48,12 @@ dependencies:
   equatable: ^2.0.5
   uuid: ^3.0.7  # Versión requerida por custom_lint_core
 
-  # Firebase
-  firebase_core: ^2.24.2  # Versión compatible con firebase_messaging
-  cloud_firestore: ^4.14.0  # Versión compatible con firebase_core
-  firebase_auth: ^4.16.0  # Versión compatible con firebase_core
+  # Firebase - VERSIONES ACTUALIZADAS PARA COMPATIBILIDAD WEB
+  firebase_core: ^3.15.2
+  cloud_firestore: ^5.6.12
+  firebase_auth: ^5.7.0
   google_sign_in: ^6.1.5
-  firebase_messaging: ^14.7.10  # Versión compatible con firebase_core
+  firebase_messaging: ^14.6.7
 
   # Notificaciones
   flutter_local_notifications: ^15.1.1
