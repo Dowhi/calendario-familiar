@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'dart:html' as html;
 import 'package:calendario_familiar/core/models/shift_template.dart';
 import 'package:collection/collection.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
@@ -97,7 +98,7 @@ class CalendarDataService extends ChangeNotifier {
   void _checkWebConnectivity() {
     if (kIsWeb) {
       final wasOnline = _isOnline;
-      _isOnline = navigator.onLine;
+      _isOnline = html.window.navigator.onLine ?? true;
       
       if (wasOnline != _isOnline) {
         print('🌐 Estado de conectividad cambió: ${_isOnline ? "ONLINE" : "OFFLINE"}');
