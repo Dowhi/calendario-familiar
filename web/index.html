@@ -74,6 +74,53 @@
     <img src="icons/Icon-192.png" alt="Loading indicator..." />
   </div>
   
+  <!-- CONFIGURACIÓN DE FIREBASE PARA WEB -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyD_dHKJyrAOPt3xpBsCU7W_lj8G9qKKAwE',
+      authDomain: 'apptaxi-f2190.firebaseapp.com',
+      projectId: 'apptaxi-f2190',
+      storageBucket: 'apptaxi-f2190.appspot.com',
+      messagingSenderId: '804273724178',
+      appId: '1:804273724178:web:1cb45dc889866ee2e7f1cb',
+      databaseURL: 'https://apptaxi-f2190.firebaseio.com',
+      measurementId: 'G-MEASUREMENT-ID'
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Conectar a emuladores en desarrollo
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      try {
+        connectFirestoreEmulator(db, 'localhost', 8080);
+        connectAuthEmulator(auth, 'http://localhost:9099');
+        connectStorageEmulator(storage, 'localhost', 9199);
+        console.log('🌐 Conectado a emuladores de Firebase');
+      } catch (error) {
+        console.log('⚠️ Error conectando a emuladores:', error);
+      }
+    }
+
+    // Hacer Firebase disponible globalmente para Flutter
+    window.firebaseApp = app;
+    window.firebaseDb = db;
+    window.firebaseAuth = auth;
+    window.firebaseStorage = storage;
+    
+    console.log('✅ Firebase inicializado para web');
+  </script>
+  
   <script>
     window.flutterWebRenderer = "html";
   </script>

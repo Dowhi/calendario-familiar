@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:calendario_familiar/core/models/family.dart';
 import 'package:calendario_familiar/core/models/app_user.dart';
 import 'package:calendario_familiar/core/models/app_event.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 final calendarDataServiceProvider = ChangeNotifierProvider((ref) => CalendarDataService(ref));
 
@@ -33,8 +35,18 @@ class CalendarDataService extends ChangeNotifier {
   String? _userFamilyId; 
   String? get userFamilyId => _userFamilyId;
 
+  // Control de conectividad y reconexión
+  bool _isOnline = true;
+  bool get isOnline => _isOnline;
+  Timer? _reconnectionTimer;
+  int _reconnectionAttempts = 0;
+  static const int _maxReconnectionAttempts = 5;
+  static const Duration _reconnectionDelay = Duration(seconds: 5);
+
   CalendarDataService(this._ref) {
     print('🔧 CalendarDataService constructor iniciado');
+    _setupConnectivityListener();
+    
     _ref.listen<AppUser?>(authControllerProvider, (previous, next) {
       print('🔧 AuthController cambió:');
       print('  - Previous familyId: ${previous?.familyId}');
@@ -53,16 +65,100 @@ class CalendarDataService extends ChangeNotifier {
     _reinitializeSubscriptions();
   }
 
+  // Configurar listener de conectividad
+  void _setupConnectivityListener() {
+    if (kIsWeb) {
+      // En web, usar eventos del navegador
+      _setupWebConnectivityListener();
+    } else {
+      // En móvil, usar eventos del sistema
+      _setupMobileConnectivityListener();
+    }
+  }
+
+  void _setupWebConnectivityListener() {
+    // Listener para cambios de conectividad en web
+    if (kIsWeb) {
+      // Usar eventos del navegador para detectar cambios de conectividad
+      _checkWebConnectivity();
+      
+      // Verificar conectividad cada 30 segundos
+      Timer.periodic(const Duration(seconds: 30), (_) {
+        _checkWebConnectivity();
+      });
+    }
+  }
+
+  void _setupMobileConnectivityListener() {
+    // En móvil, usar eventos del sistema (implementar si es necesario)
+    print('📱 Configurando listener de conectividad móvil');
+  }
+
+  void _checkWebConnectivity() {
+    if (kIsWeb) {
+      final wasOnline = _isOnline;
+      _isOnline = navigator.onLine;
+      
+      if (wasOnline != _isOnline) {
+        print('🌐 Estado de conectividad cambió: ${_isOnline ? "ONLINE" : "OFFLINE"}');
+        
+        if (_isOnline) {
+          _onConnectionRestored();
+        } else {
+          _onConnectionLost();
+        }
+        
+        notifyListeners();
+      }
+    }
+  }
+
+  void _onConnectionLost() {
+    print('❌ Conexión perdida, pausando sincronización...');
+    _cancelSubscriptions();
+    _startReconnectionTimer();
+  }
+
+  void _onConnectionRestored() {
+    print('✅ Conexión restaurada, reiniciando sincronización...');
+    _reconnectionAttempts = 0;
+    _reconnectionTimer?.cancel();
+    _reinitializeSubscriptions();
+  }
+
+  void _startReconnectionTimer() {
+    _reconnectionTimer?.cancel();
+    _reconnectionTimer = Timer.periodic(_reconnectionDelay, (_) {
+      if (_reconnectionAttempts < _maxReconnectionAttempts) {
+        _reconnectionAttempts++;
+        print('🔄 Intento de reconexión $_reconnectionAttempts/$_maxReconnectionAttempts');
+        _attemptReconnection();
+      } else {
+        print('❌ Máximo de intentos de reconexión alcanzado');
+        _reconnectionTimer?.cancel();
+      }
+    });
+  }
+
+  void _attemptReconnection() {
+    if (_isOnline && _userFamilyId != null) {
+      print('🔄 Intentando reconexión...');
+      _reinitializeSubscriptions();
+    }
+  }
+
   void _reinitializeSubscriptions() {
     print('🔧 _reinitializeSubscriptions iniciado');
     print('🔧 FamilyId actual: $_userFamilyId');
+    print('🔧 Estado de conectividad: ${_isOnline ? "ONLINE" : "OFFLINE"}');
     
     _cancelSubscriptions();
-    if (_userFamilyId != null) {
-      print('🔧 FamilyId válido, inicializando sincronización...');
+    
+    if (_userFamilyId != null && _isOnline) {
+      print('🔧 FamilyId válido y online, inicializando sincronización...');
       initialize();
     } else {
-      print('🔧 No hay familyId, limpiando datos locales...');
+      print('🔧 No hay familyId o está offline, limpiando datos locales...');
       _events.clear();
       _dayCategories.clear();
       _shiftTemplates.clear();
@@ -84,42 +180,85 @@ class CalendarDataService extends ChangeNotifier {
       return;
     }
 
+    if (!_isOnline) {
+      print('⚠️ Sin conexión, saltando inicialización de sincronización.');
+      return;
+    }
+
     print('🚀 Inicializando sincronización en tiempo real para familyId: $_userFamilyId');
     
     try {
+      // Configurar timeout para las suscripciones
+      final timeout = const Duration(seconds: 30);
+      
       // Suscripción legacy para compatibilidad
       _eventsSubscription = _firestore
           .collection('events')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .listen(_onEventsChanged);
+          .timeout(timeout)
+          .listen(
+            _onEventsChanged,
+            onError: (error) {
+              print('❌ Error en suscripción de eventos: $error');
+              _handleSubscriptionError('events', error);
+            },
+          );
       
       // Nueva suscripción para notas
       _notesSubscription = _firestore
           .collection('notes')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .listen(_onNotesChanged);
+          .timeout(timeout)
+          .listen(
+            _onNotesChanged,
+            onError: (error) {
+              print('❌ Error en suscripción de notas: $error');
+              _handleSubscriptionError('notes', error);
+            },
+          );
       
       // Nueva suscripción para turnos
       _shiftsSubscription = _firestore
           .collection('shifts')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .listen(_onShiftsChanged);
+          .timeout(timeout)
+          .listen(
+            _onShiftsChanged,
+            onError: (error) {
+              print('❌ Error en suscripción de turnos: $error');
+              _handleSubscriptionError('shifts', error);
+            },
+          );
       
       _categoriesSubscription = _firestore
           .collection('dayCategories')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .listen(_onCategoriesChanged);
+          .timeout(timeout)
+          .listen(
+            _onCategoriesChanged,
+            onError: (error) {
+              print('❌ Error en suscripción de categorías: $error');
+              _handleSubscriptionError('categories', error);
+            },
+          );
 
       print('🔧 Configurando suscripción a shift_templates con familyId: $_userFamilyId');
       _shiftTemplatesSubscription = _firestore
           .collection('shift_templates')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .listen(_onShiftTemplatesChanged);
+          .timeout(timeout)
+          .listen(
+            _onShiftTemplatesChanged,
+            onError: (error) {
+              print('❌ Error en suscripción de plantillas: $error');
+              _handleSubscriptionError('shift_templates', error);
+            },
+          );
       
       print('✅ Sincronización en tiempo real activada para familyId: $_userFamilyId');
       
@@ -135,7 +274,48 @@ class CalendarDataService extends ChangeNotifier {
       
     } catch (e) {
       print('❌ Error inicializando sincronización: $e');
-      loadSampleData();
+      _handleInitializationError(e);
+    }
+  }
+
+  // Manejar errores de suscripción
+  void _handleSubscriptionError(String subscriptionType, dynamic error) {
+    print('❌ Error en suscripción $subscriptionType: $error');
+    
+    // Si es un error de timeout o conexión, intentar reconectar
+    if (error.toString().contains('timeout') || 
+        error.toString().contains('connection') ||
+        error.toString().contains('network')) {
+      print('🔄 Error de conexión detectado, programando reconexión...');
+      _scheduleReconnection();
+    }
+  }
+
+  // Manejar errores de inicialización
+  void _handleInitializationError(dynamic error) {
+    print('❌ Error de inicialización: $error');
+    
+    // Cargar datos de ejemplo como fallback
+    loadSampleData();
+    
+    // Programar reintento de inicialización
+    _scheduleReconnection();
+  }
+
+  // Programar reconexión
+  void _scheduleReconnection() {
+    if (_reconnectionAttempts < _maxReconnectionAttempts) {
+      _reconnectionAttempts++;
+      print('🔄 Programando reconexión en ${_reconnectionDelay.inSeconds} segundos...');
+      
+      Timer(_reconnectionDelay, () {
+        if (_isOnline && _userFamilyId != null) {
+          print('🔄 Ejecutando reconexión programada...');
+          _reinitializeSubscriptions();
+        }
+      });
+    } else {
+      print('❌ Máximo de intentos de reconexión alcanzado');
     }
   }
 
@@ -1060,6 +1240,7 @@ class CalendarDataService extends ChangeNotifier {
   @override
   void dispose() {
     _cancelSubscriptions();
+    _reconnectionTimer?.cancel();
     super.dispose();
   }
 
