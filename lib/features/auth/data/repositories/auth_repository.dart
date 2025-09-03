@@ -169,7 +169,8 @@ class AuthRepository {
       }
 
       // SEGUNDO: Si no existe por UID, buscar por email para verificar si es el mismo usuario
-      if (firebaseUser.email == null || firebaseUser.email!.isEmpty) {
+      final String? userEmail = firebaseUser.email;
+      if (userEmail == null || userEmail.isEmpty) {
         print('❌ Usuario de Google no tiene email válido');
         // Crear usuario sin buscar por email
         final appUser = AppUser(
