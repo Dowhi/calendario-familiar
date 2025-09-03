@@ -20,12 +20,6 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black87,
       ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 2,
@@ -70,12 +64,6 @@ class AppTheme {
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
