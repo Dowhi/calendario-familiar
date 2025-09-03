@@ -185,7 +185,7 @@ class AuthRepository {
         return appUser;
       }
       
-      final userByEmail = await getUserByEmail(firebaseUser.email!);
+      final userByEmail = await getUserByEmail(userEmail!);
       if (userByEmail != null) {
         print('✅ Usuario encontrado por email: ${userByEmail.displayName}');
         print('⚠️ Actualizando UID del usuario existente de ${userByEmail.uid} a ${firebaseUser.uid}');
