@@ -1,0 +1,55 @@
+# Configuración de Jekyll para GitHub Pages
+# Excluir archivos y directorios que no deben ser procesados
+
+exclude:
+  - node_modules
+  - functions/node_modules
+  - .dart_tool
+  - build
+  - android
+  - ios
+  - linux
+  - macos
+  - windows
+  - .git
+  - .vs
+  - .vscode
+  - backup_restore_point
+  - scripts
+  - temp_icon.html
+  - *.bat
+  - *.sh
+  - *.ps1
+
+# Configuración básica de Jekyll
+title: "Calendario Familiar"
+description: "Calendario familiar compartido con sincronización en tiempo real"
+baseurl: ""
+url: ""
+
+# Configuración de GitHub Pages
+github:
+  is_project_page: false
+
+# Configuración de plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Configuración de colecciones
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name/
+
+# Configuración de permalinks
+permalink: /:title/
+
+# Configuración de markdown
+markdown: kramdown
+highlighter: rouge
+
+# Configuración de servidor
+host: 0.0.0.0
+port: 4000
+livereload: true
