@@ -170,9 +170,20 @@ class AuthRepository {
 
       // SEGUNDO: Si no existe por UID, buscar por email para verificar si es el mismo usuario
       final String? userEmail = firebaseUser.email;
-      if (userEmail == null || userEmail.isEmpty) {
-        print('❌ Usuario de Google no tiene email válido');
-        // Crear usuario sin buscar por email
+      if (userEmail == null) {
+        print('❌ Usuario de Google no tiene email (es null)');
+        final appUser = AppUser(
+          uid: firebaseUser.uid,
+          email: '',
+          displayName: firebaseUser.displayName ?? 'Usuario',
+          photoUrl: firebaseUser.photoURL,
+          deviceTokens: [],
+          familyId: null,
+        );
+        await _saveUserToFirestore(appUser);
+        return appUser;
+      } else if (userEmail.isEmpty) {
+        print('❌ Usuario de Google tiene email vacío');
         final appUser = AppUser(
           uid: firebaseUser.uid,
           email: '',
@@ -184,26 +195,23 @@ class AuthRepository {
         await _saveUserToFirestore(appUser);
         return appUser;
       }
-      
-      final userByEmail = await getUserByEmail(userEmail!);
+
+      final userByEmail = await getUserByEmail(userEmail);
       if (userByEmail != null) {
         print('✅ Usuario encontrado por email: ${userByEmail.displayName}');
         print('⚠️ Actualizando UID del usuario existente de ${userByEmail.uid} a ${firebaseUser.uid}');
         
-        // Actualizar el UID del usuario existente al nuevo UID de Google
         final updatedUser = AppUser(
           uid: firebaseUser.uid,
           email: userByEmail.email,
           displayName: userByEmail.displayName,
           photoUrl: firebaseUser.photoURL ?? userByEmail.photoUrl,
           deviceTokens: userByEmail.deviceTokens,
-          familyId: userByEmail.familyId, // Mantener la familia existente
+          familyId: userByEmail.familyId,
         );
         
-        // Guardar con el nuevo UID
         await _saveUserToFirestore(updatedUser);
         
-        // Eliminar el documento anterior con el UID viejo
         await _firestore.collection('users').doc(userByEmail.uid).delete();
         
         print('✅ Usuario actualizado con nuevo UID y familia mantenida');
@@ -228,7 +236,7 @@ class AuthRepository {
       
     } catch (e) {
       print('❌ Error en signInWithGoogle: $e');
-      rethrow;
+      return null;
     }
   }
 
