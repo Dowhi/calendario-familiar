@@ -17,9 +17,11 @@ exclude:
   - backup_restore_point
   - scripts
   - temp_icon.html
-  - *.bat
-  - *.sh
-  - *.ps1
+  - build_pwa.bat
+  - build_pwa.sh
+  - commit_changes.sh
+  - serve_pwa.ps1
+  - simple_server.ps1
 
 # Configuración básica de Jekyll
 title: "Calendario Familiar"
