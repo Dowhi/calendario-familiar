@@ -66,7 +66,7 @@ dependencies:
   shared_preferences: ^2.2.1
   path_provider: ^2.1.1
   flutter_launcher_icons: ^0.13.1
-  intl: ^0.20.2  # Requerido por flutter_localizations
+  intl: ^0.20.2  # Compatible con Flutter 3.35.2 localmente
   
   # PDF y exportación
   pdf: ^3.10.7
