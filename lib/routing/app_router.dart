@@ -16,6 +16,7 @@ import 'package:calendario_familiar/features/auth/presentation/email_signup_scre
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
 import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
+import 'package:calendario_familiar/features/auth/presentation/widgets/auth_wrapper.dart';
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -24,20 +25,35 @@ final appRouter = GoRouter(
   navigatorKey: navigatorKey,
   initialLocation: openedFromNotification ? '/notification-screen' : '/',
   redirect: (context, state) {
-    // TEMPORALMENTE DESHABILITAR REDIRECCIÓN PARA DEBUG
-    /*
+    // Redirección para notificaciones
     if (openedFromNotification && state.fullPath != '/notification-screen') {
       openedFromNotification = false;
       return '/notification-screen';
     }
-    */
+    
+    // Redirección de autenticación
+    final container = ProviderScope.containerOf(context);
+    final authController = container.read(authControllerProvider.notifier);
+    final currentUser = container.read(authControllerProvider);
+    
+    // Si estamos en login y ya estamos autenticados, ir al calendario
+    if (state.fullPath == '/login' && currentUser != null) {
+      return '/';
+    }
+    
+    // Si no estamos autenticados y no estamos en login, ir a login
+    if (currentUser == null && state.fullPath != '/login' && state.fullPath != '/email-signup' && state.fullPath != '/password-recovery') {
+      return '/login';
+    }
+    
+    // Si estamos autenticados, permitir acceso a todas las rutas
     return null;
   },
   routes: [
     // Ruta principal del calendario
     GoRoute(
       path: '/',
-      builder: (context, state) => const CalendarScreen(),
+      builder: (context, state) => const AuthWrapper(),
     ),
     
     // Ruta de detalle del día

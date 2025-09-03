@@ -36,12 +36,8 @@ mixin _$Family {
   @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Family to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Family
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $FamilyCopyWith<Family> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -74,8 +70,6 @@ class _$FamilyCopyWithImpl<$Res, $Val extends Family>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Family
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -159,8 +153,6 @@ class __$$FamilyImplCopyWithImpl<$Res>
       _$FamilyImpl _value, $Res Function(_$FamilyImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Family
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -300,7 +292,7 @@ class _$FamilyImpl implements _Family {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -314,9 +306,7 @@ class _$FamilyImpl implements _Family {
       createdAt,
       updatedAt);
 
-  /// Create a copy of Family
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$FamilyImplCopyWith<_$FamilyImpl> get copyWith =>
@@ -351,26 +341,23 @@ abstract class _Family implements Family {
   @override
   String get name;
   @override
-  String get code; // Código de invitación de la familia
-  @override
-  String get password; // Contraseña de la familia (solo visible para admin)
-  @override
+  String get code;
+  @override // Código de invitación de la familia
+  String get password;
+  @override // Contraseña de la familia (solo visible para admin)
   String get createdBy;
   @override
-  List<String> get members; // UIDs de los miembros
-  @override
-  Map<String, String> get roles; // Map<UID, Role>
-  @override
+  List<String> get members;
+  @override // UIDs de los miembros
+  Map<String, String> get roles;
+  @override // Map<UID, Role>
   @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
   DateTime? get createdAt;
   @override
   @JsonKey(fromJson: _timestampToDateTime, toJson: _dateTimeToTimestamp)
   DateTime? get updatedAt;
-
-  /// Create a copy of Family
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$FamilyImplCopyWith<_$FamilyImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

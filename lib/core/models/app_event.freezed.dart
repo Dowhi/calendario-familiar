@@ -60,12 +60,8 @@ mixin _$AppEvent {
   DateTime? get deletedAt => throw _privateConstructorUsedError;
   String? get location => throw _privateConstructorUsedError;
 
-  /// Serializes this AppEvent to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AppEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AppEventCopyWith<AppEvent> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -118,8 +114,6 @@ class _$AppEventCopyWithImpl<$Res, $Val extends AppEvent>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AppEvent
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -243,8 +237,6 @@ class _$AppEventCopyWithImpl<$Res, $Val extends AppEvent>
     ) as $Val);
   }
 
-  /// Create a copy of AppEvent
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $RecurrenceCopyWith<$Res>? get recurrence {
@@ -308,8 +300,6 @@ class __$$AppEventImplCopyWithImpl<$Res>
       _$AppEventImpl _value, $Res Function(_$AppEventImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AppEvent
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -588,7 +578,7 @@ class _$AppEventImpl implements _AppEvent {
                 other.location == location));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hashAll([
         runtimeType,
@@ -617,9 +607,7 @@ class _$AppEventImpl implements _AppEvent {
         location
       ]);
 
-  /// Create a copy of AppEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AppEventImplCopyWith<_$AppEventImpl> get copyWith =>
@@ -678,10 +666,10 @@ abstract class _AppEvent implements AppEvent {
   @override
   String get title;
   @override
-  String? get notes; // Mantener 'notes' para compatibilidad
-  @override
-  String? get description; // Añadir 'description' para nueva estructura
-  @override
+  String? get notes;
+  @override // Mantener 'notes' para compatibilidad
+  String? get description;
+  @override // Añadir 'description' para nueva estructura
   @JsonKey(fromJson: _eventTypeFromString, toJson: _eventTypeToString)
   EventType get type;
   @override
@@ -689,19 +677,19 @@ abstract class _AppEvent implements AppEvent {
   String get dateKey;
   @override
   @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-  DateTime? get startAt; // Mantener para compatibilidad
-  @override
+  DateTime? get startAt;
+  @override // Mantener para compatibilidad
   @JsonKey(fromJson: _fromTimestamp, toJson: _toTimestamp)
-  DateTime? get endAt; // Mantener para compatibilidad
-  @override
-  String? get startTime; // Hora de inicio como string "HH:mm"
-  @override
-  String? get endTime; // Hora de fin como string "HH:mm"
-  @override
-  bool get allDay; // Mantener para compatibilidad
-  @override
-  bool get isAllDay; // Añadir para nueva estructura
-  @override
+  DateTime? get endAt;
+  @override // Mantener para compatibilidad
+  String? get startTime;
+  @override // Hora de inicio como string "HH:mm"
+  String? get endTime;
+  @override // Hora de fin como string "HH:mm"
+  bool get allDay;
+  @override // Mantener para compatibilidad
+  bool get isAllDay;
+  @override // Añadir para nueva estructura
   String? get colorHex;
   @override
   List<String> get participants;
@@ -722,11 +710,8 @@ abstract class _AppEvent implements AppEvent {
   DateTime? get deletedAt;
   @override
   String? get location;
-
-  /// Create a copy of AppEvent
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AppEventImplCopyWith<_$AppEventImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

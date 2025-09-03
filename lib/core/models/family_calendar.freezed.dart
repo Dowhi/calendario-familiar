@@ -26,12 +26,8 @@ mixin _$FamilyCalendar {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this FamilyCalendar to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of FamilyCalendar
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $FamilyCalendarCopyWith<FamilyCalendar> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -60,8 +56,6 @@ class _$FamilyCalendarCopyWithImpl<$Res, $Val extends FamilyCalendar>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of FamilyCalendar
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -120,8 +114,6 @@ class __$$FamilyCalendarImplCopyWithImpl<$Res>
       _$FamilyCalendarImpl _value, $Res Function(_$FamilyCalendarImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of FamilyCalendar
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -207,14 +199,12 @@ class _$FamilyCalendarImpl implements _FamilyCalendar {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, name,
       const DeepCollectionEquality().hash(_members), createdAt, updatedAt);
 
-  /// Create a copy of FamilyCalendar
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$FamilyCalendarImplCopyWith<_$FamilyCalendarImpl> get copyWith =>
@@ -250,11 +240,8 @@ abstract class _FamilyCalendar implements FamilyCalendar {
   DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
-
-  /// Create a copy of FamilyCalendar
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$FamilyCalendarImplCopyWith<_$FamilyCalendarImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -15,5 +15,15 @@ class AppUser with _$AppUser {
   }) = _AppUser;
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  
+  // Usuario vacío para representar "no autenticado"
+  factory AppUser.empty() => const AppUser(
+    uid: '',
+    email: '',
+    displayName: null,
+    photoUrl: null,
+    familyId: null,
+    deviceTokens: [],
+  );
 }
 

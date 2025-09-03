@@ -13,7 +13,7 @@ class AuthController extends _$AuthController {
     _authRepository = AuthRepository();
     // Inicializar con el usuario actual si ya está autenticado
     _initializeCurrentUser();
-    return null;
+    return null; // null significa "cargando"
   }
   
   Future<void> _initializeCurrentUser() async {
@@ -35,9 +35,13 @@ class AuthController extends _$AuthController {
         }
       } else {
         print('❌ No hay usuario autenticado');
+        // Establecer estado como usuario vacío (no null) para indicar "no autenticado"
+        state = AppUser.empty();
       }
     } catch (e) {
       print('❌ Error inicializando usuario actual: $e');
+      // En caso de error, establecer como no autenticado
+      state = AppUser.empty();
     }
   }
   

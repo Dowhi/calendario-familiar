@@ -30,12 +30,8 @@ mixin _$ShiftTemplate {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this ShiftTemplate to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ShiftTemplate
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ShiftTemplateCopyWith<ShiftTemplate> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -67,8 +63,6 @@ class _$ShiftTemplateCopyWithImpl<$Res, $Val extends ShiftTemplate>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ShiftTemplate
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -145,8 +139,6 @@ class __$$ShiftTemplateImplCopyWithImpl<$Res>
       _$ShiftTemplateImpl _value, $Res Function(_$ShiftTemplateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ShiftTemplate
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -258,14 +250,12 @@ class _$ShiftTemplateImpl implements _ShiftTemplate {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, name, colorHex, startTime,
       endTime, description, createdAt, updatedAt);
 
-  /// Create a copy of ShiftTemplate
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ShiftTemplateImplCopyWith<_$ShiftTemplateImpl> get copyWith =>
@@ -298,22 +288,19 @@ abstract class _ShiftTemplate implements ShiftTemplate {
   @override
   String get name;
   @override
-  String get colorHex; // Color por defecto (azul)
-  @override
-  String get startTime; // Formato "HH:mm"
-  @override
-  String get endTime; // Formato "HH:mm"
-  @override
+  String get colorHex;
+  @override // Color por defecto (azul)
+  String get startTime;
+  @override // Formato "HH:mm"
+  String get endTime;
+  @override // Formato "HH:mm"
   String? get description;
   @override
   DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
-
-  /// Create a copy of ShiftTemplate
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ShiftTemplateImplCopyWith<_$ShiftTemplateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
