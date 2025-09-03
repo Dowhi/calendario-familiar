@@ -379,7 +379,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: Container(
                 padding: const EdgeInsets.all(2),
                 decoration: isToday ? BoxDecoration(
-                  color: Colors.Red,
+                  color: Colors.red,
                   shape: BoxShape.circle,
                 ) : null,
                 child: Text(
