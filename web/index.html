@@ -103,8 +103,8 @@
     // Conectar a emuladores en desarrollo (SOLO para Firestore y Storage)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       try {
-        // Solo conectar Firestore y Storage a emuladores
-        connectFirestoreEmulator(db, 'localhost', 8080);
+        // Solo conectar Firestore y Storage a emuladores (puertos correctos)
+        connectFirestoreEmulator(db, 'localhost', 8081);
         connectStorageEmulator(storage, 'localhost', 9199);
         console.log('🌐 Conectado a emuladores de Firestore y Storage');
         
