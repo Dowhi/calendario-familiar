@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         flutter pub get
-        flutter pub upgrade
+        # flutter pub upgrade  # Removido para evitar conflictos
       
     - name: Build PWA
       run: flutter build web --release
