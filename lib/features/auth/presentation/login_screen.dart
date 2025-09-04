@@ -46,49 +46,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Usar AuthController para iniciar sesión con Google
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       
-      print('🔧 Google Sign-In completado, verificando usuario...');
+      print('🔧 Google Sign-In completado');
       
-      // Esperar un poco para que se complete la autenticación
-      await Future.delayed(const Duration(milliseconds: 1000));
-      
-      // Verificar usuario directamente
-      final authRepository = AuthRepository();
-      final firebaseUser = authRepository.currentUser;
-      
-      print('🔧 Usuario verificado: ${firebaseUser?.displayName ?? 'null'}');
-      
-      if (firebaseUser != null) {
-        print('🔧 Login exitoso: ${firebaseUser.displayName}');
-        
-        if (mounted) {
-          // Mostrar mensaje de éxito simple
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✅ Bienvenido, ${firebaseUser.displayName ?? 'Usuario'}!'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 5),
-            ),
-          );
-          
-          // Redirigir automáticamente después de 2 segundos
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              print('🔧 Redirigiendo a gestión familiar...');
-              context.go('/family-management');
-            }
-          });
-        }
-      } else {
-        print('🔧 Login falló: usuario es null');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('❌ Error: No se pudo iniciar sesión'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      // NAVEGACIÓN INMEDIATA - sin verificaciones complejas
+      if (mounted) {
+        print('🔧 Navegando inmediatamente a /family-management');
+        context.go('/family-management');
       }
+      
     } catch (e) {
       print('❌ Error en _signInWithGoogle: $e');
       if (mounted) {
