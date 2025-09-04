@@ -72,25 +72,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Bienvenido, ${userToUse.displayName ?? 'Usuario'}'),
+                content: Row(
+                  children: [
+                    Text('✅ Bienvenido, ${userToUse.displayName ?? 'Usuario'}. '),
+                    TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        context.go('/');
+                      },
+                      child: const Text(
+                        'Ir al Calendario',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
                 backgroundColor: Colors.green,
+                duration: const Duration(seconds: 10),
               ),
             );
           } else {
             // Si no tiene familia, ir a la pantalla de gestión familiar
             print('⚠️ Usuario no tiene familia, redirigiendo a gestión familiar...');
             
-            // Forzar redirección después de un pequeño delay
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) {
-                context.go('/family-management');
-              }
-            });
-            
+            // Mostrar botón para continuar en lugar de redirección automática
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Bienvenido. Ahora necesitas crear o unirte a una familia.'),
+                content: Row(
+                  children: [
+                    const Text('✅ Bienvenido. '),
+                    TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        context.go('/family-management');
+                      },
+                      child: const Text(
+                        'Continuar',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
                 backgroundColor: Colors.blue,
+                duration: const Duration(seconds: 10),
               ),
             );
           }
