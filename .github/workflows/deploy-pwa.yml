@@ -37,6 +37,13 @@ jobs:
         echo "/*" > build/web/_headers
         echo "  Cross-Origin-Opener-Policy: same-origin-allow-popups" >> build/web/_headers
         echo "  Cross-Origin-Embedder-Policy: unsafe-none" >> build/web/_headers
+        echo "  Cross-Origin-Resource-Policy: cross-origin" >> build/web/_headers
+        
+    - name: Create .htaccess file
+      run: |
+        echo "Header always set Cross-Origin-Opener-Policy \"same-origin-allow-popups\"" > build/web/.htaccess
+        echo "Header always set Cross-Origin-Embedder-Policy \"unsafe-none\"" >> build/web/.htaccess
+        echo "Header always set Cross-Origin-Resource-Policy \"cross-origin\"" >> build/web/.htaccess
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
