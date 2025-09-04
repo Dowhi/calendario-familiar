@@ -46,7 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Usar AuthController para iniciar sesión con Google
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       
-      // SOLUCIÓN DEFINITIVA: Verificar directamente desde Firebase Auth
+      // SOLUCIÓN SIMPLE: Solo mostrar mensaje de éxito y botón manual
       final authRepository = AuthRepository();
       final firebaseUser = authRepository.currentUser;
       
@@ -59,65 +59,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         
         print('🔧 Login exitoso: ${userToUse.displayName}');
         
-        // Verificar si el usuario tiene familia
-        final hasFamily = userToUse.familyId != null && userToUse.familyId!.isNotEmpty;
-        print('🔍 Usuario familyId: ${userToUse.familyId}');
-        print('🔍 Tiene familia: $hasFamily');
-        
         if (mounted) {
-          if (hasFamily) {
-            // Si tiene familia, ir al calendario principal
-            print('✅ Usuario tiene familia, redirigiendo al calendario...');
-            context.go('/');
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Text('✅ Bienvenido, ${userToUse.displayName ?? 'Usuario'}. '),
-                    TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        context.go('/');
-                      },
-                      child: const Text(
-                        'Ir al Calendario',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          // Mostrar mensaje de éxito con botón para continuar
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('✅ Bienvenido, ${userToUse.displayName ?? 'Usuario'}!'),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          context.go('/');
+                        },
+                        child: const Text('Ir al Calendario'),
                       ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 10),
-              ),
-            );
-          } else {
-            // Si no tiene familia, ir a la pantalla de gestión familiar
-            print('⚠️ Usuario no tiene familia, redirigiendo a gestión familiar...');
-            
-            // Mostrar botón para continuar en lugar de redirección automática
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Text('✅ Bienvenido. '),
-                    TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        context.go('/family-management');
-                      },
-                      child: const Text(
-                        'Continuar',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ElevatedButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          context.go('/family-management');
+                        },
+                        child: const Text('Gestionar Familia'),
                       ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.blue,
-                duration: const Duration(seconds: 10),
+                    ],
+                  ),
+                ],
               ),
-            );
-          }
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 30),
+            ),
+          );
         }
       } else {
         print('🔧 Login falló: usuario es null');
