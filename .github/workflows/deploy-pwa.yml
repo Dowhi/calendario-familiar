@@ -32,8 +32,11 @@ jobs:
     - name: Build PWA
       run: flutter build web --release
       
-    - name: Copy headers file
-      run: cp public/_headers build/web/
+    - name: Create headers file
+      run: |
+        echo "/*" > build/web/_headers
+        echo "  Cross-Origin-Opener-Policy: same-origin-allow-popups" >> build/web/_headers
+        echo "  Cross-Origin-Embedder-Policy: unsafe-none" >> build/web/_headers
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

@@ -118,6 +118,17 @@
     window.firebaseStorage = storage;
     
     console.log('✅ Firebase inicializado para web');
+    
+    // Manejo defensivo para COOP
+    window.addEventListener('beforeunload', function() {
+      try {
+        if (window.opener && !window.closed) {
+          window.close();
+        }
+      } catch (e) {
+        console.warn('COOP policy blocked window.close():', e.message);
+      }
+    });
   </script>
   
   <script>
