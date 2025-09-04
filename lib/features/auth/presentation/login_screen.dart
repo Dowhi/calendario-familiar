@@ -46,12 +46,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       
       // Esperar un poco para que el estado se actualice
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
       
-      // Verificar si el login fue exitoso
-      final currentUser = ref.read(authControllerProvider);
+      // Verificar si el login fue exitoso - usar watch para obtener el estado actual
+      final currentUser = ref.watch(authControllerProvider);
       
-      if (currentUser != null) {
+      if (currentUser != null && currentUser.uid.isNotEmpty) {
         print('🔧 Login exitoso: ${currentUser.displayName}');
         
         // Verificar si el usuario tiene familia
