@@ -61,6 +61,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         
         // Verificar si el usuario tiene familia
         final hasFamily = userToUse.familyId != null && userToUse.familyId!.isNotEmpty;
+        print('🔍 Usuario familyId: ${userToUse.familyId}');
+        print('🔍 Tiene familia: $hasFamily');
         
         if (mounted) {
           if (hasFamily) {
@@ -77,7 +79,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           } else {
             // Si no tiene familia, ir a la pantalla de gestión familiar
             print('⚠️ Usuario no tiene familia, redirigiendo a gestión familiar...');
-            context.go('/family-management');
+            
+            // Forzar redirección después de un pequeño delay
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                context.go('/family-management');
+              }
+            });
             
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
