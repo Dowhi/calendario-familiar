@@ -49,14 +49,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       print('🔧 Google Sign-In completado');
       
       // Esperar a que el estado se actualice
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
       
-      // Verificar que el estado se haya actualizado
-      final currentUser = ref.read(authControllerProvider);
-      print('🔧 Estado del usuario después del sign-in: ${currentUser?.displayName ?? 'null'}');
+      // Verificar directamente desde AuthRepository
+      final authRepository = AuthRepository();
+      final firebaseUser = authRepository.currentUser;
+      print('🔧 Usuario verificado desde AuthRepository: ${firebaseUser?.displayName ?? 'null'}');
       
       if (mounted) {
-        if (currentUser != null && currentUser.uid.isNotEmpty) {
+        if (firebaseUser != null) {
           print('🔧 Usuario autenticado, navegando a /family-management');
           context.go('/family-management');
         } else {
