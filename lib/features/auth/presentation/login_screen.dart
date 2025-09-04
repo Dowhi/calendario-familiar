@@ -45,17 +45,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Usar AuthController para iniciar sesión con Google
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       
-      // Esperar un poco para que el estado se actualice
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // SOLUCIÓN DEFINITIVA: Verificar directamente desde Firebase Auth
+      final authRepository = AuthRepository();
+      final firebaseUser = authRepository.currentUser;
       
-      // Verificar si el login fue exitoso - usar watch para obtener el estado actual
-      final currentUser = ref.watch(authControllerProvider);
-      
-      if (currentUser != null && currentUser.uid.isNotEmpty) {
-        print('🔧 Login exitoso: ${currentUser.displayName}');
+      if (firebaseUser != null) {
+        print('🔧 Usuario encontrado en Firebase: ${firebaseUser.displayName}');
+        
+        // Obtener datos completos del usuario
+        final fullUserData = await authRepository.getUserData(firebaseUser.uid);
+        final userToUse = fullUserData ?? firebaseUser;
+        
+        print('🔧 Login exitoso: ${userToUse.displayName}');
         
         // Verificar si el usuario tiene familia
-        final hasFamily = await ref.read(authControllerProvider.notifier).currentUserHasFamily();
+        final hasFamily = userToUse.familyId != null && userToUse.familyId!.isNotEmpty;
         
         if (mounted) {
           if (hasFamily) {
@@ -65,7 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Bienvenido, ${currentUser.displayName ?? 'Usuario'}'),
+                content: Text('✅ Bienvenido, ${userToUse.displayName ?? 'Usuario'}'),
                 backgroundColor: Colors.green,
               ),
             );
