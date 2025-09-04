@@ -1,123 +1,120 @@
 # 🔧 Configuración de Google Sign-In en Firebase
 
-## Paso 1: Configurar Firebase Console
+## Paso 1: Obtener el Client ID de Google Cloud Console
 
-### 1.1 Ir a Firebase Console
-- Ve a: https://console.firebase.google.com/
-- Selecciona tu proyecto: `apptaxi-f2190`
+### 1.1 Ir a Google Cloud Console
+1. Ve a: https://console.cloud.google.com/
+2. Selecciona tu proyecto: **apptaxi-f2190** (el mismo que usas en Firebase)
 
-### 1.2 Habilitar Google Sign-In
-- Ve a **Authentication** en el menú lateral
-- Haz clic en **Sign-in method**
-- Busca **Google** en la lista de proveedores
-- Haz clic en **Google** para habilitarlo
+### 1.2 Habilitar Google+ API
+1. En el menú lateral, ve a **APIs y servicios** → **Biblioteca**
+2. Busca "Google+ API" o "Google Sign-In API"
+3. Haz clic en **Habilitar**
 
-### 1.3 Configurar Google Sign-In
-- **Habilita** Google como proveedor de autenticación
-- **Nombre del proyecto público**: `Calendario Familiar`
-- **Correo de soporte**: Tu correo personal
-- **Dominios autorizados**: Deja vacío por ahora
+### 1.3 Crear credenciales OAuth 2.0
+1. Ve a **APIs y servicios** → **Credenciales**
+2. Haz clic en **+ CREAR CREDENCIALES** → **ID de cliente OAuth 2.0**
+3. Selecciona **Aplicación web**
+4. Configura:
+   - **Nombre**: `Calendario Familiar Web`
+   - **Orígenes JavaScript autorizados**: 
+     ```
+     https://dowhi.github.io
+     http://localhost
+     http://localhost:8080
+     http://127.0.0.1
+     http://127.0.0.1:8080
+     ```
+   - **URI de redirección autorizados**:
+     ```
+     https://dowhi.github.io/calendario-familiar/
+     http://localhost:8080
+     ```
 
-### 1.4 Agregar SHA-1 de tu aplicación
-- En la misma página de Google Sign-In
-- Busca la sección **SHA certificate fingerprints**
-- Haz clic en **Agregar huella**
-- Agrega este SHA-1: `9E:E8:32:BE:61:A1:B6:26:AD:F0:95:42:B8:F2:F2:5B:07:C2:2C:D5`
-- Haz clic en **Guardar**
+### 1.4 Copiar el Client ID
+Después de crear, copia el **Client ID** que aparece (algo como: `804273724178-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com`)
 
-## Paso 2: Descargar google-services.json actualizado
+## Paso 2: Configurar Firebase Console
 
-### 2.1 Descargar el archivo
-- Ve a **Configuración del proyecto** (ícono de engranaje)
-- Selecciona **Configuración del proyecto**
-- En la pestaña **General**, busca **Tus apps**
-- Selecciona tu app Android: `com.juancarlos.calendariofamiliar`
-- Haz clic en **Descargar google-services.json**
+### 2.1 Ir a Firebase Console
+1. Ve a: https://console.firebase.google.com/
+2. Selecciona tu proyecto: **apptaxi-f2190**
 
-### 2.2 Reemplazar el archivo
-- Reemplaza el archivo actual en: `android/app/google-services.json`
-- El nuevo archivo debería tener una sección `oauth_client` con datos
+### 2.2 Configurar Google Sign-In
+1. Ve a **Authentication** → **Sign-in method**
+2. Haz clic en **Google** en la lista de proveedores
+3. Haz clic en **Editar** (ícono de lápiz)
+4. Asegúrate de que esté **Habilitado**
+5. En **Dominios autorizados**, agrega:
+   ```
+   dowhi.github.io
+   localhost
+   127.0.0.1
+   ```
+6. Haz clic en **Guardar**
 
-## Paso 3: Verificar configuración
+## Paso 3: Actualizar el código
 
-### 3.1 Verificar google-services.json
-El archivo debería tener una estructura como esta:
-```json
-{
-  "project_info": {
-    "project_number": "804273724178",
-    "project_id": "apptaxi-f2190",
-    "storage_bucket": "apptaxi-f2190.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:804273724178:android:7e8c68a174ca93bce7f1cb",
-        "android_client_info": {
-          "package_name": "com.juancarlos.calendariofamiliar"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "804273724178-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.juancarlos.calendariofamiliar",
-            "certificate_hash": "9E:E8:32:BE:61:A1:B6:26:AD:F0:95:42:B8:F2:F2:5B:07:C2:2C:D5"
-          }
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD_dHKJyrAOPt3xpBsCU7W_lj8G9qKKAwE"
-        }
-      ]
-    }
-  ]
-}
+### 3.1 Actualizar AuthRepository con el Client ID real:
+
+```dart:lib/features/auth/data/repositories/auth_repository.dart
+// ... existing code ...
+class AuthRepository {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: '804273724178-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com', // Reemplaza con tu Client ID real
+  );
+// ... existing code ...
 ```
 
-## Paso 4: Probar la aplicación
+### 3.2 Actualizar index.html con el Client ID:
 
-### 4.1 Ejecutar la aplicación
-```bash
-flutter run
+```html:web/index.html
+// ... existing code ...
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyD_dHKJyrAOPt3xpBsCU7W_lj8G9qKKAwE',
+      authDomain: 'apptaxi-f2190.firebaseapp.com',
+      projectId: 'apptaxi-f2190',
+      storageBucket: 'apptaxi-f2190.appspot.com',
+      messagingSenderId: '804273724178',
+      appId: '1:804273724178:web:1cb45dc889866ee2e7f1cb',
+      databaseURL: 'https://apptaxi-f2190.firebaseio.com',
+      measurementId: 'G-MEASUREMENT-ID',
+      clientId: '804273724178-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com' // Agregar tu Client ID aquí
+    };
+// ... existing code ...
 ```
 
-### 4.2 Probar Google Sign-In
-- Ve a la pantalla de login
-- Haz clic en "Continuar con Google"
-- Debería abrirse el selector de cuentas de Google
-- Selecciona tu cuenta
-- Deberías ver un mensaje de éxito
+## Paso 4: Alternativa más simple (si no encuentras el Client ID)
 
-### 4.3 Probar crear familia
-- Después de iniciar sesión, ve a "Gestión Familiar"
-- Haz clic en "Crear Nueva Familia"
-- Ingresa un nombre para la familia
-- Haz clic en "Crear Nueva Familia"
-- Debería funcionar correctamente
+Si no puedes encontrar el Client ID, puedes usar esta configuración más simple:
 
-## Solución de problemas
+```dart:lib/features/auth/data/repositories/auth_repository.dart
+// ... existing code ...
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
+// ... existing code ...
+```
 
-### Error: "No se pudo obtener usuario de Firebase"
-- Verifica que el SHA-1 esté correctamente configurado en Firebase Console
-- Asegúrate de que el google-services.json esté actualizado
+## Paso 5: Probar la aplicación
 
-### Error: "Google Sign-In no está configurado"
-- Verifica que Google Sign-In esté habilitado en Firebase Console
-- Asegúrate de que el google-services.json tenga la sección `oauth_client`
+1. **Haz commit y push de los cambios:**
+   ```bash
+   git add .
+   git commit -m "fix: configure Google Sign-In with proper client ID"
+   git push
+   ```
 
-### Error: "No se pudo crear la familia"
-- Verifica que el usuario esté autenticado correctamente
-- Revisa los logs de la aplicación para más detalles
+2. **Espera a que se despliegue en GitHub Pages**
 
-## Notas importantes
+3. **Prueba Google Sign-In en:** `https://dowhi.github.io/calendario-familiar/`
 
-- El SHA-1 que proporcionamos es para desarrollo (debug)
-- Para producción, necesitarás el SHA-1 de tu keystore de release
-- Google Sign-In requiere conexión a internet
-- La primera vez que uses Google Sign-In, se creará automáticamente un usuario en Firestore
+## ¿Necesitas que te ayude con algún paso específico?
+
+Si tienes problemas con alguno de estos pasos, dime exactamente en cuál te quedas y te ayudo más detalladamente. También puedo intentar hacer algunos de estos pasos por ti si me das acceso a la configuración.
 
 
 
