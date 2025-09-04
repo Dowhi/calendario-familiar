@@ -25,7 +25,9 @@ jobs:
         channel: 'stable'
         
     - name: Install dependencies
-      run: flutter pub get
+      run: |
+        flutter pub get
+        flutter pub upgrade
       
     - name: Build PWA
       run: flutter build web --release
