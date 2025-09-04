@@ -48,10 +48,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       
       print('🔧 Google Sign-In completado');
       
-      // NAVEGACIÓN INMEDIATA - sin verificaciones complejas
+      // Esperar a que el estado se actualice
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Verificar que el estado se haya actualizado
+      final currentUser = ref.read(authControllerProvider);
+      print('🔧 Estado del usuario después del sign-in: ${currentUser?.displayName ?? 'null'}');
+      
       if (mounted) {
-        print('🔧 Navegando inmediatamente a /family-management');
-        context.go('/family-management');
+        if (currentUser != null && currentUser.uid.isNotEmpty) {
+          print('🔧 Usuario autenticado, navegando a /family-management');
+          context.go('/family-management');
+        } else {
+          print('🔧 Usuario no autenticado, navegando a /');
+          context.go('/');
+        }
       }
       
     } catch (e) {
