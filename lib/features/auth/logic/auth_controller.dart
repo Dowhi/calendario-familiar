@@ -86,13 +86,26 @@ class AuthController extends _$AuthController {
       print('🔧 Iniciando Google Sign-In desde AuthController...');
       final user = await _authRepository.signInWithGoogle();
       if (user != null) {
-        state = user;
         print('✅ Google Sign-In exitoso: ${user.displayName}');
-        // Forzar actualización del estado
-        await refreshCurrentUser();
+        state = user;
+        print('✅ Estado actualizado con usuario: ${user.displayName}');
       } else {
         print('❌ Google Sign-In falló: usuario es null');
-        state = AppUser.empty();
+        // Verificar si hay un usuario autenticado en Firebase
+        final firebaseUser = _authRepository.currentUser;
+        if (firebaseUser != null) {
+          print('⚠️ Usuario encontrado en Firebase, obteniendo datos completos...');
+          final fullUserData = await _authRepository.getUserData(firebaseUser.uid);
+          if (fullUserData != null) {
+            state = fullUserData;
+            print('✅ Usuario completo cargado desde Firestore: ${fullUserData.displayName}');
+          } else {
+            state = firebaseUser;
+            print('✅ Usuario básico cargado desde Firebase: ${firebaseUser.displayName}');
+          }
+        } else {
+          state = AppUser.empty();
+        }
       }
     } catch (e) {
       // Mantener el estado actual en caso de error

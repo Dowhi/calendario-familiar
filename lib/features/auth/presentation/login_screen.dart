@@ -45,6 +45,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Usar AuthController para iniciar sesión con Google
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       
+      // Esperar un poco para que el estado se actualice
+      await Future.delayed(const Duration(milliseconds: 500));
+      
       // Verificar si el login fue exitoso
       final currentUser = ref.read(authControllerProvider);
       
