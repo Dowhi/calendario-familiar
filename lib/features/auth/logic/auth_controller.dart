@@ -88,6 +88,8 @@ class AuthController extends _$AuthController {
       if (user != null) {
         state = user;
         print('✅ Google Sign-In exitoso: ${user.displayName}');
+        // Forzar actualización del estado
+        await refreshCurrentUser();
       } else {
         print('❌ Google Sign-In falló: usuario es null');
         state = AppUser.empty();
