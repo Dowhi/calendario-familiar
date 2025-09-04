@@ -83,11 +83,19 @@ class AuthController extends _$AuthController {
   
   Future<void> signInWithGoogle() async {
     try {
+      print('🔧 Iniciando Google Sign-In desde AuthController...');
       final user = await _authRepository.signInWithGoogle();
-      state = user;
+      if (user != null) {
+        state = user;
+        print('✅ Google Sign-In exitoso: ${user.displayName}');
+      } else {
+        print('❌ Google Sign-In falló: usuario es null');
+        state = AppUser.empty();
+      }
     } catch (e) {
       // Mantener el estado actual en caso de error
-      print('Error en signInWithGoogle: $e');
+      print('❌ Error en signInWithGoogle: $e');
+      state = AppUser.empty();
     }
   }
   
