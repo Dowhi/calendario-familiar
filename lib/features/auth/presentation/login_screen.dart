@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/models/app_user.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
+import 'package:calendario_familiar/features/auth/data/repositories/auth_repository.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
