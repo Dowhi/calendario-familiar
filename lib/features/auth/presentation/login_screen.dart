@@ -46,53 +46,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Usar AuthController para iniciar sesión con Google
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       
-      // SOLUCIÓN SIMPLE: Solo mostrar mensaje de éxito y botón manual
+      print('🔧 Google Sign-In completado, verificando usuario...');
+      
+      // Esperar un poco para que se complete la autenticación
+      await Future.delayed(const Duration(milliseconds: 1000));
+      
+      // Verificar usuario directamente
       final authRepository = AuthRepository();
       final firebaseUser = authRepository.currentUser;
       
+      print('🔧 Usuario verificado: ${firebaseUser?.displayName ?? 'null'}');
+      
       if (firebaseUser != null) {
-        print('🔧 Usuario encontrado en Firebase: ${firebaseUser.displayName}');
-        
-        // Obtener datos completos del usuario
-        final fullUserData = await authRepository.getUserData(firebaseUser.uid);
-        final userToUse = fullUserData ?? firebaseUser;
-        
-        print('🔧 Login exitoso: ${userToUse.displayName}');
+        print('🔧 Login exitoso: ${firebaseUser.displayName}');
         
         if (mounted) {
-          // Mostrar mensaje de éxito con botón para continuar
+          // Mostrar mensaje de éxito simple
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('✅ Bienvenido, ${userToUse.displayName ?? 'Usuario'}!'),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          context.go('/');
-                        },
-                        child: const Text('Ir al Calendario'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          context.go('/family-management');
-                        },
-                        child: const Text('Gestionar Familia'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              content: Text('✅ Bienvenido, ${firebaseUser.displayName ?? 'Usuario'}!'),
               backgroundColor: Colors.green,
-              duration: const Duration(seconds: 30),
+              duration: const Duration(seconds: 5),
             ),
           );
+          
+          // Redirigir automáticamente después de 2 segundos
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              print('🔧 Redirigiendo a gestión familiar...');
+              context.go('/family-management');
+            }
+          });
         }
       } else {
         print('🔧 Login falló: usuario es null');
