@@ -7,7 +7,7 @@ class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
+    clientId: '804273724178-178k...', // Reemplaza con el Client ID completo que copiaste
   );
 
   Stream<AppUser?> get authStateChanges {
