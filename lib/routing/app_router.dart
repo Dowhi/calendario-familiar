@@ -33,13 +33,7 @@ final appRouter = GoRouter(
     
     // Redirección de autenticación
     final container = ProviderScope.containerOf(context);
-    final authController = container.read(authControllerProvider.notifier);
     final currentUser = container.read(authControllerProvider);
-    
-    // Si estamos en login y ya estamos autenticados, ir al calendario
-    if (state.fullPath == '/login' && currentUser != null) {
-      return '/';
-    }
     
     // Si no estamos autenticados y no estamos en login, ir a login
     if (currentUser == null && state.fullPath != '/login' && state.fullPath != '/email-signup' && state.fullPath != '/password-recovery') {

@@ -53,9 +53,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         print('✅ Inicio de sesión exitoso: ${user.displayName}');
         
         if (mounted) {
-          // Navegar directamente a family-management
-          // El AuthWrapper se encargará de la lógica de navegación
-          context.go('/family-management');
+          // Verificar si el usuario tiene familia
+          final hasFamily = await ref.read(authControllerProvider.notifier).currentUserHasFamily();
+          
+          if (hasFamily) {
+            // Si tiene familia, ir al calendario principal
+            context.go('/');
+          } else {
+            // Si no tiene familia, ir a gestión familiar
+            context.go('/family-management');
+          }
           
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -115,8 +122,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         print('✅ Registro exitoso: ${user.displayName}');
         
         if (mounted) {
-          // Navegar directamente a family-management
-          context.go('/family-management');
+          // Verificar si el usuario tiene familia
+          final hasFamily = await ref.read(authControllerProvider.notifier).currentUserHasFamily();
+          
+          if (hasFamily) {
+            // Si tiene familia, ir al calendario principal
+            context.go('/');
+          } else {
+            // Si no tiene familia, ir a gestión familiar
+            context.go('/family-management');
+          }
           
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
