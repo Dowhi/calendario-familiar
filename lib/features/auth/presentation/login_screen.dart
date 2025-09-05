@@ -53,8 +53,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         print('✅ Inicio de sesión exitoso: ${user.displayName}');
         
         if (mounted) {
-          // Navegar directamente a family-management sin verificaciones
-          context.go('/family-management');
+          // Navegar directamente a la ruta raíz (calendario)
+          context.go('/');
           
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -114,8 +114,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         print('✅ Registro exitoso: ${user.displayName}');
         
         if (mounted) {
-          // Navegar directamente a family-management sin verificaciones
-          context.go('/family-management');
+          // Navegar directamente a la ruta raíz (calendario)
+          context.go('/');
           
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
