@@ -410,10 +410,11 @@ Future<void> _checkScheduledAlarms() async {
       
       if (!enabled) continue;
       
-      final hour = alarmData['hour'] as int;
-      final minute = alarmData['minute'] as int;
-      final eventText = alarmData['eventText'] as String;
-      final eventDate = alarmData['eventDate'] as String;
+      // Manejar valores nulos con valores por defecto
+      final hour = alarmData['hour'] as int? ?? 0;
+      final minute = alarmData['minute'] as int? ?? 0;
+      final eventText = alarmData['eventText'] as String? ?? 'Evento sin título';
+      final eventDate = alarmData['eventDate'] as String? ?? today; // Usar 'today' como fallback
       
       // Verificar si es el momento de la alarma (con un margen de 1 minuto)
       if ((now.hour == hour && now.minute == minute) || 
@@ -445,14 +446,15 @@ Future<void> _checkScheduledAlarms() async {
 
 Future<void> _scheduleAlarmFromFirebase(Map<String, dynamic> alarmData, String docId) async {
   try {
-    final eventDate = alarmData['eventDate'] as String;
-    final hour = alarmData['hour'] as int;
-    final minute = alarmData['minute'] as int;
-    final daysBefore = alarmData['daysBefore'] as int;
-    final eventText = alarmData['eventText'] as String;
+    // Manejar valores nulos con valores por defecto
+    final eventDate = alarmData['eventDate'] as String? ?? '';
+    final hour = alarmData['hour'] as int? ?? 0;
+    final minute = alarmData['minute'] as int? ?? 0;
+    final daysBefore = alarmData['daysBefore'] as int? ?? 0;
+    final eventText = alarmData['eventText'] as String? ?? 'Evento sin título';
     final enabled = alarmData['enabled'] as bool? ?? false;
     
-    if (!enabled) return;
+    if (!enabled || eventDate.isEmpty) return; // Si la fecha está vacía o no habilitado, salir
     
     // Parsear fecha del evento
     final year = int.parse(eventDate.substring(0, 4));
@@ -490,15 +492,15 @@ Future<void> _scheduleAlarmFromFirebase(Map<String, dynamic> alarmData, String d
         priority: Priority.high,
         enableVibration: true,
         playSound: true,
-        sound: const RawResourceAndroidNotificationSound('alarm_sound'),
+        sound: RawResourceAndroidNotificationSound('alarm_sound'),
         showWhen: true,
         fullScreenIntent: true,
         category: AndroidNotificationCategory.alarm,
         timeoutAfter: 30000,
-        largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-        color: const Color(0xFF2196F3),
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF2196F3),
         enableLights: true,
-        ledColor: const Color(0xFF2196F3),
+        ledColor: Color(0xFF2196F3),
         ledOnMs: 1000,
         ledOffMs: 500,
       );

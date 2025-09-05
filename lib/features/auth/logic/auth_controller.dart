@@ -11,9 +11,11 @@ class AuthController extends _$AuthController {
   @override
   AppUser? build() {
     _authRepository = AuthRepository();
-    // Inicializar con el usuario actual si ya está autenticado
-    _initializeCurrentUser();
-    return null; // null significa "cargando"
+    // ⚠️ COMENTADO: Desactivar la inicialización del usuario al inicio
+    // Esto evita que el AuthController intente cargar un usuario y potencialmente
+    // cause redirecciones o errores si la lógica de autenticación no es deseada al inicio.
+    // _initializeCurrentUser();
+    return null; // null significa "cargando", pero en este contexto solo inicializa el estado
   }
   
   Future<void> _initializeCurrentUser() async {
