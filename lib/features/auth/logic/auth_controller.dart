@@ -81,7 +81,7 @@ class AuthController extends _$AuthController {
     }
   }
   
-  Future<void> signInWithGoogle() async {
+  Future<AppUser?> signInWithGoogle() async {
     try {
       print('🔧 Iniciando Google Sign-In desde AuthController...');
       final user = await _authRepository.signInWithGoogle();
@@ -89,6 +89,7 @@ class AuthController extends _$AuthController {
         print('✅ Google Sign-In exitoso: ${user.displayName}');
         state = user;
         print('✅ Estado actualizado con usuario: ${user.displayName}');
+        return user;
       } else {
         print('❌ Google Sign-In falló: usuario es null');
         // Verificar si hay un usuario autenticado en Firebase
@@ -99,18 +100,22 @@ class AuthController extends _$AuthController {
           if (fullUserData != null) {
             state = fullUserData;
             print('✅ Usuario completo cargado desde Firestore: ${fullUserData.displayName}');
+            return fullUserData;
           } else {
             state = firebaseUser;
             print('✅ Usuario básico cargado desde Firebase: ${firebaseUser.displayName}');
+            return firebaseUser;
           }
         } else {
           state = AppUser.empty();
+          return null;
         }
       }
     } catch (e) {
       // Mantener el estado actual en caso de error
       print('❌ Error en signInWithGoogle: $e');
       state = AppUser.empty();
+      return null;
     }
   }
   
