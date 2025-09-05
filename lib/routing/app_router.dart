@@ -109,10 +109,10 @@ final appRouter = GoRouter(
       builder: (context, state) => const AdvancedReportsScreen(),
     ),
     
-    // Nueva ruta para el login
+    // Ruta de login también va al calendario
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const CalendarScreen(),
     ),
     
     // Nueva ruta para el registro por email
