@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/calendar_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/day_detail_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/year_summary_screen.dart';
@@ -16,7 +15,6 @@ import 'package:calendario_familiar/features/auth/presentation/email_signup_scre
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
 import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
-import 'package:calendario_familiar/features/auth/presentation/widgets/auth_wrapper.dart';
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -31,23 +29,14 @@ final appRouter = GoRouter(
       return '/notification-screen';
     }
     
-    // Redirección de autenticación
-    final container = ProviderScope.containerOf(context);
-    final currentUser = container.read(authControllerProvider);
-    
-    // Si no estamos autenticados y no estamos en login, ir a login
-    if (currentUser == null && state.fullPath != '/login' && state.fullPath != '/email-signup' && state.fullPath != '/password-recovery') {
-      return '/login';
-    }
-    
-    // Si estamos autenticados, permitir acceso a todas las rutas
+    // Permitir acceso a todas las rutas sin verificación de autenticación
     return null;
   },
   routes: [
-    // Ruta principal del calendario
+    // Ruta principal del calendario - DIRECTO
     GoRoute(
       path: '/',
-      builder: (context, state) => const AuthWrapper(),
+      builder: (context, state) => const CalendarScreen(),
     ),
     
     // Ruta de detalle del día
@@ -174,26 +163,15 @@ final appRouter = GoRouter(
     ),
   ],
   errorBuilder: (context, state) => Scaffold(
+    appBar: AppBar(title: const Text('Error')),
     body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
-          ),
+          const Icon(Icons.error, size: 64, color: Colors.red),
           const SizedBox(height: 16),
-          Text(
-            'Error 404',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Página no encontrada',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 24),
+          Text('Error: ${state.error}'),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.go('/'),
             child: const Text('Volver al inicio'),
