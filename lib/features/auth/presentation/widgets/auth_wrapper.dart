@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/calendar_screen.dart';
-import 'package:calendario_familiar/features/family/presentation/screens/family_management_screen.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
