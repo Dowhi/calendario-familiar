@@ -58,8 +58,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       
       if (mounted) {
         if (firebaseUser != null) {
-          print('🔧 Usuario autenticado, navegando a /family-management');
-          context.go('/family-management');
+          // Verificar si el usuario tiene familia
+          final hasFamily = await ref.read(authControllerProvider.notifier).currentUserHasFamily();
+          
+          if (hasFamily) {
+            // Si tiene familia, ir al calendario principal
+            print('✅ Usuario tiene familia, redirigiendo al calendario...');
+            context.go('/');
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Bienvenido, ${firebaseUser.displayName ?? 'Usuario'}'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else {
+            // Si no tiene familia, ir a la pantalla de gestión familiar
+            print('⚠️ Usuario no tiene familia, redirigiendo a gestión familiar...');
+            context.go('/family-management');
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Bienvenido. Ahora necesitas crear o unirte a una familia.'),
+                backgroundColor: Colors.blue,
+              ),
+            );
+          }
         } else {
           print('🔧 Usuario no autenticado, navegando a /');
           context.go('/');
