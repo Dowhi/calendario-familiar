@@ -59,7 +59,8 @@ void handleNotificationResponse(NotificationResponse response) {
         print('🔔 Marcado para abrir pantalla automáticamente desde handleNotificationResponse: $pendingEventText');
         
         // _tryOpenNotificationScreen(); // Eliminado, GoRouter ahora maneja la navegación inicial
-
+        // No llamamos context.go aquí porque podría no estar listo el contexto de navegación
+        // La redirección se maneja a través de appRouter.redirect al inicio o con un Navigator.push
       } else {
         print('❌ Payload de alarma malformado en handleNotificationResponse: ${response.payload}');
       }
