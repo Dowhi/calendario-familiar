@@ -2,6 +2,7 @@ import 'package:calendario_familiar/core/models/app_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart' show kIsWeb; // Importar kIsWeb
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -138,7 +139,9 @@ class AuthRepository {
     try {
       print('🔐 Iniciando Google Sign-In...');
       
+      // Usar signIn() que funciona tanto en web como en otras plataformas
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      
       if (googleUser == null) {
         print('❌ Usuario canceló el inicio de sesión');
         return null;
@@ -173,20 +176,8 @@ class AuthRepository {
 
       // SEGUNDO: Si no existe por UID, buscar por email para verificar si es el mismo usuario
       final String? userEmail = firebaseUser.email;
-      if (userEmail == null) {
-        print('❌ Usuario de Google no tiene email (es null)');
-        final appUser = AppUser(
-          uid: firebaseUser.uid,
-          email: '',
-          displayName: firebaseUser.displayName ?? 'Usuario',
-          photoUrl: firebaseUser.photoURL,
-          deviceTokens: [],
-          familyId: null,
-        );
-        await _saveUserToFirestore(appUser);
-        return appUser;
-      } else if (userEmail.isEmpty) {
-        print('❌ Usuario de Google tiene email vacío');
+      if (userEmail == null || userEmail.isEmpty) {
+        print('❌ Usuario de Google no tiene email o email vacío');
         final appUser = AppUser(
           uid: firebaseUser.uid,
           email: '',
@@ -215,7 +206,10 @@ class AuthRepository {
         
         await _saveUserToFirestore(updatedUser);
         
-        await _firestore.collection('users').doc(userByEmail.uid).delete();
+        // Eliminar el documento antiguo con el UID previo si es diferente
+        if (userByEmail.uid != firebaseUser.uid) {
+          await _firestore.collection('users').doc(userByEmail.uid).delete();
+        }
         
         print('✅ Usuario actualizado con nuevo UID y familia mantenida');
         return updatedUser;

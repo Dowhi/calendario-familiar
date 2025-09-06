@@ -36,24 +36,24 @@ dependencies:
   # UI y navegación
   cupertino_icons: ^1.0.5
   table_calendar: ^3.0.9
-  go_router: ^14.8.1  # Versión compatible con Dart 3.4.0+
+  go_router: ^16.2.1 # Actualizado
 
   # Estado y DI
   flutter_riverpod: ^2.3.6
-  riverpod_annotation: ^2.1.1
+  riverpod_annotation: ^2.1.1  # Revertir a versión que funcionaba
 
   # Modelos y serialización
-  freezed_annotation: ^2.4.4  # Versión requerida por riverpod_generator
+  freezed_annotation: ^2.4.4  # Mantener versión que funcionaba
   json_annotation: ^4.8.1
   equatable: ^2.0.5
-  uuid: ^3.0.7  # Versión requerida por custom_lint_core
+  uuid: ^3.0.7  # Mantener versión que funcionaba
 
   # Firebase - VERSIONES COMPATIBLES
-  firebase_core: ^3.15.2
-  cloud_firestore: ^5.6.12
-  firebase_auth: ^5.7.0
-  google_sign_in: ^6.1.5
-  firebase_messaging: ^15.2.10  # ACTUALIZADO según sugerencia del error
+  firebase_core: ^3.15.2  # Mantener versión que funcionaba
+  cloud_firestore: ^5.6.12  # Mantener versión que funcionaba
+  firebase_auth: ^5.7.0  # Mantener versión que funcionaba
+  google_sign_in: ^6.1.5  # Mantener versión que funcionaba
+  firebase_messaging: ^15.2.10
 
   # Notificaciones
   flutter_local_notifications: ^15.1.1
@@ -66,8 +66,7 @@ dependencies:
   shared_preferences: ^2.2.1
   path_provider: ^2.1.1
   flutter_launcher_icons: ^0.13.1
-  # intl: ^0.20.2  # Removido - flutter_localizations ya lo incluye
-  
+
   # PDF y exportación
   pdf: ^3.10.7
   printing: ^5.11.1
@@ -86,13 +85,13 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^4.0.0  # Mantener versión que funcionaba
 
   # Code generation - VERSIONES COMPATIBLES CON DART SDK 3.4.0
-  build_runner: ^2.4.7
-  freezed: ^2.5.2
-  json_serializable: ^6.7.1
-  riverpod_generator: ^2.3.9  # BAJADO para compatibilidad con Dart SDK 3.4.0
+  build_runner: ^2.4.7  # Mantener versión que funcionaba
+  freezed: ^2.5.2  # Mantener versión que funcionaba
+  json_serializable: ^6.7.1  # Mantener versión que funcionaba
+  riverpod_generator: ^2.3.9  # Mantener versión que funcionaba
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

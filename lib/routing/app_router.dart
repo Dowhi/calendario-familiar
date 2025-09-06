@@ -15,6 +15,7 @@ import 'package:calendario_familiar/features/auth/presentation/email_signup_scre
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
 import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
+import 'package:calendario_familiar/features/auth/logic/auth_controller.dart'; // Importar AuthController
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -22,14 +23,48 @@ final navigatorKey = GlobalKey<NavigatorState>();
 final appRouter = GoRouter(
   navigatorKey: navigatorKey,
   initialLocation: openedFromNotification ? '/notification-screen' : '/',
-  redirect: (context, state) {
-    // Redirección para notificaciones
+  redirect: (context, state) async { // Hacer el redirect async
+    // Primero, manejar la redirección por notificaciones si aplica
     if (openedFromNotification && state.fullPath != '/notification-screen') {
       openedFromNotification = false;
       return '/notification-screen';
     }
-    
-    // Permitir acceso a todas las rutas sin verificación de autenticación
+
+    // Obtener el proveedor de Riverpod para AuthController
+    final container = ProviderScope.containerOf(context);
+    final authController = container.read(authControllerProvider.notifier);
+    final appUser = await authController.refreshCurrentUser(); // Forzar la actualización del usuario
+
+    final isAuthenticated = appUser != null && appUser.uid.isNotEmpty;
+    final hasFamily = isAuthenticated && (appUser?.familyId != null && appUser!.familyId!.isNotEmpty);
+
+    final loggingIn = state.matchedLocation == '/login';
+    final creatingAccount = state.matchedLocation == '/email-signup';
+    final recoveringPassword = state.matchedLocation == '/password-recovery';
+
+    // Rutas permitidas para usuarios no autenticados
+    final bool isAuthRoute = loggingIn || creatingAccount || recoveringPassword;
+
+    // Si no está autenticado y no está en una ruta de autenticación, ir a login
+    if (!isAuthenticated && !isAuthRoute) {
+      print('➡️ Usuario no autenticado, redirigiendo a /login');
+      return '/login';
+    }
+
+    // Si está autenticado, pero no tiene familia y no está en la gestión familiar, ir a gestión familiar
+    if (isAuthenticated && !hasFamily && state.matchedLocation != '/family-management') {
+      print('➡️ Usuario autenticado sin familia, redirigiendo a /family-management');
+      return '/family-management';
+    }
+
+    // Si está autenticado y tiene familia, y está en una ruta de autenticación o gestión familiar, ir al calendario
+    if (isAuthenticated && hasFamily && (isAuthRoute || state.matchedLocation == '/family-management')) {
+      print('➡️ Usuario autenticado con familia, redirigiendo a /');
+      return '/';
+    }
+
+    // Para cualquier otro caso, no redirigir
+    print('✅ No se requiere redirección. Ruta actual: ${state.matchedLocation}');
     return null;
   },
   routes: [
@@ -109,10 +144,10 @@ final appRouter = GoRouter(
       builder: (context, state) => const AdvancedReportsScreen(),
     ),
     
-    // Ruta de login también va al calendario
+    // Ruta de login para la pantalla de inicio de sesión
     GoRoute(
       path: '/login',
-      builder: (context, state) => const CalendarScreen(),
+      builder: (context, state) => const LoginScreen(),
     ),
     
     // Nueva ruta para el registro por email

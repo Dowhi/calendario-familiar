@@ -153,6 +153,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      print('🔧 Iniciando Google Sign-In desde LoginScreen...');
+      final user = await ref.read(authControllerProvider.notifier).signInWithGoogle();
+      if (user != null) {
+        print('✅ Google Sign-In exitoso: ${user.displayName}');
+        if (mounted) {
+          context.go('/');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Bienvenido con Google, ${user.displayName ?? 'Usuario'}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('❌ Error al iniciar sesión con Google'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error en _signInWithGoogle: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al iniciar sesión con Google: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,6 +233,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Icon(
                           Icons.calendar_today,
                           size: 60,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 16),
+                        // Icono de taxi
+                        Icon(
+                          Icons.local_taxi,
+                          size: 40,
                           color: Colors.white,
                         ),
                         const SizedBox(height: 16),
@@ -373,6 +427,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
+                          
+                          // Botón de Iniciar Sesión con Google
+                          if (!_isSignUpMode) // Solo mostrar en modo de inicio de sesión
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                icon: Image.asset(
+                                  'assets/icons/google_logo.png', // Asegúrate de tener un logo de Google en assets/icons
+                                  height: 24,
+                                  width: 24,
+                                ),
+                                label: const Text(
+                                  'Iniciar Sesión con Google',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                onPressed: _isLoading ? null : _signInWithGoogle,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.black87,
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(color: Colors.grey),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (!_isSignUpMode) const SizedBox(height: 16),
                           
                           // Enlace para cambiar modo
                           TextButton(

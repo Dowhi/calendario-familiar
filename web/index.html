@@ -136,9 +136,9 @@
   </script>
   <script src="flutter.js" defer></script>
   <script>
-    // USAR CALLBACK APPROACH EN LUGAR DE PROMISES
+    // USAR LA NUEVA API DE FLUTTER
     window.addEventListener('load', function(ev) {
-      _flutter.loader.loadEntrypoint({
+      _flutter.loader.load({
         serviceWorker: null,
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {

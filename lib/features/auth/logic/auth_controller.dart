@@ -14,11 +14,11 @@ class AuthController extends _$AuthController {
     // ⚠️ COMENTADO: Desactivar la inicialización del usuario al inicio
     // Esto evita que el AuthController intente cargar un usuario y potencialmente
     // cause redirecciones o errores si la lógica de autenticación no es deseada al inicio.
-    // _initializeCurrentUser();
+    _initializeCurrentUser(); // Descomentar esta línea
     return null; // null significa "cargando", pero en este contexto solo inicializa el estado
   }
   
-  Future<void> _initializeCurrentUser() async {
+  Future<AppUser?> _initializeCurrentUser() async { // Cambiado de Future<void> a Future<AppUser?>
     try {
       print('🔧 _initializeCurrentUser iniciado');
       final currentUser = _authRepository.currentUser;
@@ -31,24 +31,28 @@ class AuthController extends _$AuthController {
         if (fullUserData != null) {
           print('✅ Usuario completo cargado: ${fullUserData.displayName}');
           state = fullUserData;
+          return fullUserData; // Retornar el usuario completo
         } else {
           print('⚠️ Usuario básico cargado: ${currentUser.displayName}');
           state = currentUser;
+          return currentUser; // Retornar el usuario básico
         }
       } else {
         print('❌ No hay usuario autenticado');
         // Establecer estado como usuario vacío (no null) para indicar "no autenticado"
         state = AppUser.empty();
+        return null; // No hay usuario autenticado
       }
     } catch (e) {
       print('❌ Error inicializando usuario actual: $e');
       // En caso de error, establecer como no autenticado
       state = AppUser.empty();
+      return null; // Error, no hay usuario autenticado
     }
   }
   
-  Future<void> refreshCurrentUser() async {
-    await _initializeCurrentUser();
+  Future<AppUser?> refreshCurrentUser() async { // Cambiado de Future<void> a Future<AppUser?>
+    return await _initializeCurrentUser(); // Retornar el resultado de _initializeCurrentUser
   }
   
   /// Registro por correo electrónico y contraseña
