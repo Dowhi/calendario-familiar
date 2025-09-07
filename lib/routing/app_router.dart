@@ -33,7 +33,10 @@ final appRouter = GoRouter(
     // Obtener el proveedor de Riverpod para AuthController
     final container = ProviderScope.containerOf(context);
     final authController = container.read(authControllerProvider.notifier);
+    
+    // Forzar verificación del usuario actual
     final appUser = await authController.refreshCurrentUser();
+    print('🔍 Usuario actual en redirect: $appUser');
 
     final isAuthenticated = appUser != null && appUser.uid.isNotEmpty;
     final hasFamily = isAuthenticated && (appUser?.familyId != null && appUser!.familyId!.isNotEmpty);
@@ -44,6 +47,8 @@ final appRouter = GoRouter(
 
     // Rutas permitidas para usuarios no autenticados
     final bool isAuthRoute = loggingIn || creatingAccount || recoveringPassword;
+
+    print(' Estado de autenticación: isAuthenticated=$isAuthenticated, hasFamily=$hasFamily, isAuthRoute=$isAuthRoute, currentPath=${state.matchedLocation}');
 
     // Si no está autenticado y no está en una ruta de autenticación, ir a login
     if (!isAuthenticated && !isAuthRoute) {
