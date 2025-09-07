@@ -132,14 +132,13 @@
   </script>
   
   <script>
-    window.flutterWebRenderer = "html";
+    window.flutterWebRenderer = "html"; // Puedes probar "canvaskit" si tienes problemas de rendimiento o renderizado en ciertos navegadores
   </script>
   <script src="flutter.js" defer></script>
   <script>
-    // USAR LA NUEVA API DE FLUTTER
-    window.addEventListener('load', function(ev) {
-      _flutter.loader.load().then(function(engineInitializer) {
-        engineInitializer.initializeEngine().then(function(appRunner) {
+    window.addEventListener('load', function () {
+      _flutter.loader.load().then(function (engineInitializer) {
+        engineInitializer.initializeEngine().then(function (appRunner) {
           appRunner.runApp();
         });
       });
