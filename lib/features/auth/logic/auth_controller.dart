@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:calendario_familiar/core/models/app_user.dart';
 import 'package:calendario_familiar/features/auth/data/repositories/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Importar FirebaseAuth para acceder al usuario actual
 
 part 'auth_controller.g.dart';
 
@@ -16,41 +17,52 @@ class AuthController extends _$AuthController {
     return null; // null significa "cargando"
   }
   
-  Future<AppUser?> _initializeCurrentUser() async { // Cambiado de Future<void> a Future<AppUser?>
+  Future<AppUser?> _initializeCurrentUser() async {
     try {
       print('🔧 _initializeCurrentUser iniciado');
-      final currentUser = _authRepository.currentUser;
-      print('🔧 currentUser del repositorio: $currentUser');
-      
-      if (currentUser != null) {
-        print('🔧 Usuario encontrado, obteniendo datos completos...');
-        // Obtener datos completos de Firestore
-        final fullUserData = await _authRepository.getUserData(currentUser.uid);
+      // Obtener el usuario actual de Firebase Authentication directamente
+      final firebaseAuthUser = FirebaseAuth.instance.currentUser;
+      print('🔧 FirebaseAuth.instance.currentUser: ${firebaseAuthUser?.uid ?? 'null'}');
+
+      if (firebaseAuthUser != null) {
+        print('🔧 Usuario Firebase encontrado (${firebaseAuthUser.uid}), obteniendo datos completos de Firestore...');
+        // Forzar la obtención de los datos más recientes del AppUser desde Firestore
+        final fullUserData = await _authRepository.getUserData(firebaseAuthUser.uid);
+        
         if (fullUserData != null) {
-          print('✅ Usuario completo cargado: ${fullUserData.displayName}');
+          print('✅ Usuario completo cargado de Firestore: ${fullUserData.displayName}, FamilyId: ${fullUserData.familyId}');
           state = fullUserData;
-          return fullUserData; // Retornar el usuario completo
+          return fullUserData;
         } else {
-          print('⚠️ Usuario básico cargado: ${currentUser.displayName}');
-          state = currentUser;
-          return currentUser; // Retornar el usuario básico
+          // Si no hay datos completos en Firestore, crear un AppUser básico
+          final basicUser = AppUser(
+            uid: firebaseAuthUser.uid,
+            email: firebaseAuthUser.email ?? '',
+            displayName: firebaseAuthUser.displayName ?? '',
+            photoUrl: firebaseAuthUser.photoURL,
+            familyId: null, // Asegurarse de que si no hay familyId en Firestore, se refleje aquí
+            deviceTokens: [],
+          );
+          print('⚠️ Usuario básico creado (no datos completos en Firestore): ${basicUser.displayName}, FamilyId: ${basicUser.familyId}');
+          state = basicUser;
+          return basicUser;
         }
       } else {
-        print('❌ No hay usuario autenticado');
-        // Establecer estado como usuario vacío (no null) para indicar "no autenticado"
+        print('❌ No hay usuario autenticado en Firebase');
         state = AppUser.empty();
-        return null; // No hay usuario autenticado
+        return null;
       }
     } catch (e) {
       print('❌ Error inicializando usuario actual: $e');
-      // En caso de error, establecer como no autenticado
       state = AppUser.empty();
-      return null; // Error, no hay usuario autenticado
+      return null;
     }
   }
   
-  Future<AppUser?> refreshCurrentUser() async { // Cambiado de Future<void> a Future<AppUser?>
-    return await _initializeCurrentUser(); // Retornar el resultado de _initializeCurrentUser
+  Future<AppUser?> refreshCurrentUser() async {
+    print('🔄 refreshCurrentUser llamado, forzando una nueva inicialización...');
+    // Reutilizar _initializeCurrentUser para asegurar una carga fresca desde Firebase Auth y Firestore
+    return await _initializeCurrentUser(); 
   }
   
   /// Registro por correo electrónico y contraseña
@@ -171,19 +183,25 @@ class AuthController extends _$AuthController {
   Future<void> updateUserFamilyId(String? familyId) async {
     try {
       final currentUser = state;
+      print('🔧 updateUserFamilyId iniciado. Usuario actual en estado: ${currentUser?.uid ?? 'null'}, FamilyId actual en estado: ${currentUser?.familyId ?? 'null'}');
+
       if (currentUser == null) {
-        print('❌ No hay usuario autenticado');
+        print('❌ updateUserFamilyId: No hay usuario autenticado en el estado. No se puede actualizar familyId.');
         return;
       }
       
+      print('🔧 Actualizando familyId en Firestore para ${currentUser.uid} a: ${familyId ?? 'null'}');
       await _authRepository.updateUserFamilyId(currentUser.uid, familyId);
       
       // Actualizar el estado local
-      state = currentUser.copyWith(familyId: familyId);
+      final updatedUserState = currentUser.copyWith(familyId: familyId);
+      state = updatedUserState;
       
-      print('✅ FamilyId actualizado: $familyId');
+      print('✅ FamilyId actualizado en estado del controlador: ${state?.familyId ?? 'null'}');
+      print('✅ Usuario en estado después de la actualización de familyId: $state');
+      
     } catch (e) {
-      print('Error actualizando familyId: $e');
+      print('❌ Error en updateUserFamilyId: $e');
       rethrow;
     }
   }

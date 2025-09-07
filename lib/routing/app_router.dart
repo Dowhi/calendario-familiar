@@ -27,6 +27,7 @@ final appRouter = GoRouter(
     // Primero, manejar la redirección por notificaciones si aplica
     if (openedFromNotification && state.fullPath != '/notification-screen') {
       openedFromNotification = false;
+      print('➡️ Redirigiendo por notificación a /notification-screen');
       return '/notification-screen';
     }
 
@@ -48,17 +49,17 @@ final appRouter = GoRouter(
     // Rutas permitidas para usuarios no autenticados
     final bool isAuthRoute = loggingIn || creatingAccount || recoveringPassword;
 
-    print(' Estado de autenticación: isAuthenticated=$isAuthenticated, hasFamily=$hasFamily, isAuthRoute=$isAuthRoute, currentPath=${state.matchedLocation}');
+    print(' Estado de autenticación en redirect: isAuthenticated=$isAuthenticated, hasFamily=$hasFamily, isAuthRoute=$isAuthRoute, currentPath=${state.matchedLocation}');
 
     // Si no está autenticado y no está en una ruta de autenticación, ir a login
     if (!isAuthenticated && !isAuthRoute) {
-      print('➡️ Usuario no autenticado, redirigiendo a /login');
+      print('➡️ Usuario no autenticado y no en ruta de auth, redirigiendo a /login');
       return '/login';
     }
 
     // Si está autenticado, pero no tiene familia y no está en la gestión familiar, ir a gestión familiar
     if (isAuthenticated && !hasFamily && state.matchedLocation != '/family-management') {
-      print('➡️ Usuario autenticado sin familia, redirigiendo a /family-management');
+      print('➡️ Usuario autenticado sin familia y no en gestión familiar, redirigiendo a /family-management');
       return '/family-management';
     }
 
