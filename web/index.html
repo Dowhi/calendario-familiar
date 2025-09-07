@@ -119,30 +119,19 @@
     
     console.log('✅ Firebase inicializado para web');
     
-    // Manejo defensivo para COOP
-    window.addEventListener('beforeunload', function() {
-      try {
-        if (window.opener && !window.closed) {
-          window.close();
-        }
-      } catch (e) {
-        console.warn('COOP policy blocked window.close():', e.message);
-      }
-    });
+    // Esto ya no es necesario aquí si se usa flutter_bootstrap.js
+    // window.addEventListener('beforeunload', function() {
+    //   try {
+    //     if (window.opener && !window.closed) {
+    //       window.close();
+    //     }
+    //   } catch (e) {
+    //     console.warn('COOP policy blocked window.close():', e.message);
+    //   }
+    // });
   </script>
   
-  <script>
-    window.flutterWebRenderer = "html"; // Puedes probar "canvaskit" si tienes problemas de rendimiento o renderizado en ciertos navegadores
-  </script>
-  <script src="flutter.js" defer></script>
-  <script>
-    window.addEventListener('load', function () {
-      _flutter.loader.load().then(function (engineInitializer) {
-        engineInitializer.initializeEngine().then(function (appRunner) {
-          appRunner.runApp();
-        });
-      });
-    });
-  </script>
+  <!-- Inclusión del script de bootstrap de Flutter -->
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
