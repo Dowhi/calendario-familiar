@@ -22,7 +22,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: navigatorKey,
-  initialLocation: openedFromNotification ? '/notification-screen' : '/',
+  initialLocation: '/login', // Cambiado de 'openedFromNotification ? '/notification-screen' : '/' a '/login'
   redirect: (context, state) async {
     // Primero, manejar la redirección por notificaciones si aplica
     if (openedFromNotification && state.fullPath != '/notification-screen') {
