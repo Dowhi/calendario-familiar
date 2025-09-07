@@ -23,7 +23,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 final appRouter = GoRouter(
   navigatorKey: navigatorKey,
   initialLocation: openedFromNotification ? '/notification-screen' : '/',
-  redirect: (context, state) async { // Hacer el redirect async
+  redirect: (context, state) async {
     // Primero, manejar la redirección por notificaciones si aplica
     if (openedFromNotification && state.fullPath != '/notification-screen') {
       openedFromNotification = false;
@@ -33,7 +33,7 @@ final appRouter = GoRouter(
     // Obtener el proveedor de Riverpod para AuthController
     final container = ProviderScope.containerOf(context);
     final authController = container.read(authControllerProvider.notifier);
-    final appUser = await authController.refreshCurrentUser(); // Forzar la actualización del usuario
+    final appUser = await authController.refreshCurrentUser();
 
     final isAuthenticated = appUser != null && appUser.uid.isNotEmpty;
     final hasFamily = isAuthenticated && (appUser?.familyId != null && appUser!.familyId!.isNotEmpty);

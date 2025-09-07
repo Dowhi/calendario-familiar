@@ -24,14 +24,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.35.3'
           channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release
+        run: flutter build web --release --base-href "/calendario-familiar/"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
