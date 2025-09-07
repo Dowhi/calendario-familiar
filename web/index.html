@@ -138,13 +138,10 @@
   <script>
     // USAR LA NUEVA API DE FLUTTER
     window.addEventListener('load', function(ev) {
-      _flutter.loader.load({
-        serviceWorker: null,
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
-        }
+      _flutter.loader.load().then(function(engineInitializer) {
+        engineInitializer.initializeEngine().then(function(appRunner) {
+          appRunner.runApp();
+        });
       });
     });
   </script>
