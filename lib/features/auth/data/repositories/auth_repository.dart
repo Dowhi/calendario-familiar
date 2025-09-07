@@ -398,12 +398,14 @@ class AuthRepository {
 
   Future<void> updateUserFamilyId(String uid, String? familyId) async {
     try {
-      await _firestore.collection('users').doc(uid).update({
+      print('🔧 AuthRepository: Actualizando familyId en Firestore para $uid a: ${familyId ?? 'null'}');
+      await _firestore.collection('users').doc(uid).set({
         'familyId': familyId,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+      }, SetOptions(merge: true)); // Usar set con merge: true para mayor robustez
+      print('✅ AuthRepository: familyId actualizado en Firestore.');
     } catch (e) {
-      print('Error actualizando familyId: $e');
+      print('❌ AuthRepository: Error actualizando familyId en Firestore: $e');
       rethrow;
     }
   }
