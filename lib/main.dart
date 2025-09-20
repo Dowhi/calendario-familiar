@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:calendario_familiar/core/utils/error_tracker.dart';
 
 // Variable global para manejar la navegación
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -151,6 +152,9 @@ void _tryOpenNotificationScreen() {
 // }
 
 void main() async {
+  // Configurar tracking de errores desde el inicio
+  ErrorTracker.registerCode('main_start', 'Inicio de la aplicación');
+  
   WidgetsFlutterBinding.ensureInitialized();
   
   // Obtener detalles de lanzamiento si la app se abrió desde una notificación
@@ -186,17 +190,23 @@ void main() async {
   await initializeDateFormatting('es_ES', null);
   print('✅ Localización inicializada para DateFormat');
   
-  // Inicializar Firebase
+  // Inicializar Firebase con tracking
   try {
-    // Verificar si Firebase ya está inicializado
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-      print('✅ Firebase inicializado correctamente');
-    } else {
-      print('✅ Firebase ya estaba inicializado');
-    }
+    await ErrorTracker.trackAsyncExecution(
+      'firebase_init',
+      'Inicialización de Firebase',
+      () async {
+        // Verificar si Firebase ya está inicializado
+        if (Firebase.apps.isEmpty) {
+          await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform,
+          );
+          print('✅ Firebase inicializado correctamente');
+        } else {
+          print('✅ Firebase ya estaba inicializado');
+        }
+      },
+    );
   } catch (e) {
     if (e.toString().contains('duplicate-app')) {
       print('✅ Firebase ya está inicializado (ignorando error de duplicado)');
@@ -219,10 +229,17 @@ void main() async {
   // Inicializar verificación de alarmas programadas
   _initializeAlarmChecker();
   
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
+  // Ejecutar la aplicación con tracking
+  ErrorTracker.trackExecution(
+    'run_app',
+    'Ejecutando la aplicación Flutter',
+    () {
+      runApp(
+        const ProviderScope(
+          child: MyApp(),
+        ),
+      );
+    },
   );
 }
 

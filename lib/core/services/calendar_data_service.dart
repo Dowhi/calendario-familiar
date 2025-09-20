@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-import 'dart:html' as html;
+// import 'dart:html' as html; // Comentado para compatibilidad con WebAssembly
 import 'package:calendario_familiar/core/models/shift_template.dart';
 import 'package:collection/collection.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
@@ -11,6 +11,7 @@ import 'package:calendario_familiar/core/models/app_user.dart';
 import 'package:calendario_familiar/core/models/app_event.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:calendario_familiar/core/utils/error_tracker.dart';
 
 final calendarDataServiceProvider = ChangeNotifierProvider((ref) => CalendarDataService(ref));
 
@@ -98,7 +99,8 @@ class CalendarDataService extends ChangeNotifier {
   void _checkWebConnectivity() {
     if (kIsWeb) {
       final wasOnline = _isOnline;
-      _isOnline = html.window.navigator.onLine ?? true;
+      // _isOnline = html.window.navigator.onLine ?? true; // Comentado para compatibilidad
+      _isOnline = true; // Asumir online por defecto
       
       if (wasOnline != _isOnline) {
         print('🌐 Estado de conectividad cambió: ${_isOnline ? "ONLINE" : "OFFLINE"}');
@@ -321,7 +323,11 @@ class CalendarDataService extends ChangeNotifier {
   }
 
   void _onEventsChanged(QuerySnapshot snapshot) {
-    print('🔄 Eventos actualizados desde Firebase: ${snapshot.docs.length} documentos');
+    ErrorTracker.trackExecution(
+      'on_events_changed',
+      'Procesando cambios en eventos de Firebase',
+      () {
+        print('🔄 Eventos actualizados desde Firebase: ${snapshot.docs.length} documentos');
     
     _events.clear();
     
@@ -349,8 +355,10 @@ class CalendarDataService extends ChangeNotifier {
       _events[entry.key] = entry.value.map((e) => e.toString()).toList();
     }
     
-    notifyListeners();
-    print('📊 Datos locales actualizados: $_events');
+        notifyListeners();
+        print('📊 Datos locales actualizados: $_events');
+      },
+    );
   }
 
   void _onNotesChanged(QuerySnapshot snapshot) {
