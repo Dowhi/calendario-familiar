@@ -136,45 +136,92 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         color: const Color(0xFF1B5E20),
         border: Border.all(color: Colors.transparent, width: 0), // Eliminar cualquier borde
       ),
-      child: Row(
+      child: Column(
         children: [
-          const Text(
-            'Calendario',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          // 🚀 INDICADOR DE DEPLOYMENT - NUEVO
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.rocket_launch,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  '🚀 DEPLOYMENT TEST - v2.1.0',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 16,
+                ),
+              ],
             ),
           ),
-          const Spacer(),
-          // Año clickeable para ir al resumen anual
-          GestureDetector(
-            onTap: () {
-              context.push('/year-summary', extra: _focusedDay.year);
-            },
-            child: Text(
-              _currentMonth.year.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+          // Contenido original
+          Row(
+            children: [
+              const Text(
+                'Calendario',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ),
-          const Spacer(),
-          // RESUMEN clickeable para estadísticas
-          GestureDetector(
-            onTap: () {
-              context.push('/statistics');
-            },
-            child: const Text(
-              'RESUMEN',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+              const Spacer(),
+              // Año clickeable para ir al resumen anual
+              GestureDetector(
+                onTap: () {
+                  context.push('/year-summary', extra: _focusedDay.year);
+                },
+                child: Text(
+                  _currentMonth.year.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
+              const Spacer(),
+              // RESUMEN clickeable para estadísticas
+              GestureDetector(
+                onTap: () {
+                  context.push('/statistics');
+                },
+                child: const Text(
+                  'RESUMEN',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
