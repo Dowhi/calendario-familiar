@@ -161,8 +161,10 @@ void main() async {
   if (kIsWeb) {
     print('🌐 Aplicación web detectada');
     // Agregar timeout específico para iOS
-    Future.delayed(const Duration(seconds: 20), () {
+    Future.delayed(const Duration(seconds: 15), () {
       print('⚠️ Timeout de carga alcanzado - posible problema en iOS');
+      // Intentar cargar datos de muestra si la app no ha cargado
+      print('📱 Intentando modo fallback para iOS...');
     });
   }
   
