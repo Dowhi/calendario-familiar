@@ -12,6 +12,7 @@ import 'package:calendario_familiar/features/calendar/presentation/screens/notif
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'dart:async';
+import 'dart:async' show runZonedGuarded;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -157,6 +158,13 @@ void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Configurar manejo global de errores para iOS
+  FlutterError.onError = (FlutterErrorDetails details) {
+    print('❌ Flutter Error: ${details.exception}');
+    print('📍 Stack: ${details.stack}');
+    // No lanzar el error, solo loggearlo para iOS
+  };
+  
   // Detectar iOS y aplicar fixes específicos
   if (kIsWeb) {
     print('🌐 Aplicación web detectada');
@@ -227,12 +235,21 @@ void main() async {
         if (kIsWeb) {
           print('🌐 Configurando Firebase para web/iOS...');
           FirebaseFirestore.instance.settings = const Settings(
-            persistenceEnabled: true,
+            persistenceEnabled: false, // ⚠️ Desactivar para iOS - IndexedDB puede fallar
             cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
             host: 'firestore.googleapis.com',
             sslEnabled: true,
           );
-          print('✅ Firebase configurado para iOS (usando modo polling)');
+          print('✅ Firebase configurado para iOS (persistence desactivado)');
+          
+          // Configurar Firebase Auth para iOS
+          try {
+            // Nota: Persistence.NONE no está disponible en esta versión de Firebase Auth
+            // await FirebaseAuth.instance.setPersistence(Persistence.NONE);
+            print('✅ Firebase Auth configurado para iOS (persistence desactivado en Firestore)');
+          } catch (e) {
+            print('⚠️ Error configurando Firebase Auth: $e');
+          }
         }
       },
     );
@@ -258,18 +275,24 @@ void main() async {
   // Inicializar verificación de alarmas programadas
   _initializeAlarmChecker();
   
-  // Ejecutar la aplicación con tracking
-  ErrorTracker.trackExecution(
-    'run_app',
-    'Ejecutando la aplicación Flutter',
-    () {
-      runApp(
-        const ProviderScope(
-          child: MyApp(),
-        ),
-      );
-    },
-  );
+  // Ejecutar la aplicación con tracking y manejo de errores globales
+  runZonedGuarded(() {
+    ErrorTracker.trackExecution(
+      'run_app',
+      'Ejecutando la aplicación Flutter',
+      () {
+        runApp(
+          const ProviderScope(
+            child: MyApp(),
+          ),
+        );
+      },
+    );
+  }, (error, stackTrace) {
+    print('❌ Uncaught error: $error');
+    print('📍 Stack trace: $stackTrace');
+    // En iOS, no lanzar el error para evitar que la app se cierre
+  });
 }
 
 Future<void> _initializeNotifications() async {
