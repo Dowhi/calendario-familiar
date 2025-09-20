@@ -14,7 +14,27 @@ class AppUser with _$AppUser {
     @Default([]) List<String> deviceTokens,
   }) = _AppUser;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  factory AppUser.fromJson(Map<String, dynamic> json) {
+    try {
+      return _$AppUserFromJson(json);
+    } catch (e) {
+      print('❌ Error en AppUser.fromJson: $e');
+      print('🔍 JSON problemático: $json');
+      
+      // Crear usuario con valores seguros
+      return AppUser(
+        uid: json['uid']?.toString() ?? 'unknown',
+        email: json['email']?.toString() ?? '',
+        displayName: json['displayName']?.toString(),
+        photoUrl: json['photoUrl']?.toString(),
+        familyId: json['familyId']?.toString(),
+        deviceTokens: (json['deviceTokens'] as List<dynamic>?)
+            ?.map((e) => e?.toString() ?? '')
+            .where((e) => e.isNotEmpty)
+            .toList() ?? [],
+      );
+    }
+  }
   
   // Usuario vacío para representar "no autenticado"
   factory AppUser.empty() => const AppUser(

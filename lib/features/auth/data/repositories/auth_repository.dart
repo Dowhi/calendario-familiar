@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb; // Importar kIsWeb
+import 'package:calendario_familiar/core/utils/error_tracker.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -318,41 +319,60 @@ class AuthRepository {
   }
 
   Future<AppUser?> getUserData(String uid) async {
-    try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      if (doc.exists) {
-        return AppUser.fromJson(doc.data()!);
-      }
-      return null;
-    } catch (e) {
-      print('Error obteniendo datos del usuario: $e');
-      return null;
-    }
+    return await ErrorTracker.trackAsyncExecution(
+      'get_user_data',
+      'Obteniendo datos del usuario desde Firestore',
+      () async {
+        try {
+          final doc = await _firestore.collection('users').doc(uid).get();
+          if (doc.exists) {
+            print('🔍 Datos raw de Firestore para $uid: ${doc.data()}');
+            final userData = AppUser.fromJson(doc.data()!);
+            print('✅ Usuario convertido exitosamente: ${userData.displayName}');
+            return userData;
+          }
+          print('❌ Documento de usuario no existe: $uid');
+          return null;
+        } catch (e) {
+          print('❌ Error obteniendo datos del usuario: $e');
+          print('📍 Stack trace: ${StackTrace.current}');
+          return null;
+        }
+      },
+    );
   }
 
   /// Buscar usuario por email
   Future<AppUser?> getUserByEmail(String email) async {
-    try {
-      print('🔍 Buscando usuario por email: $email');
-      
-      final querySnapshot = await _firestore
-          .collection('users')
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
-      
-      if (querySnapshot.docs.isNotEmpty) {
-        final userData = AppUser.fromJson(querySnapshot.docs.first.data());
-        print('✅ Usuario encontrado por email: ${userData.displayName}');
-        return userData;
-      }
-      
-      print('❌ No se encontró usuario con email: $email');
-      return null;
-    } catch (e) {
-      print('❌ Error buscando usuario por email: $e');
-      return null;
-    }
+    return await ErrorTracker.trackAsyncExecution(
+      'get_user_by_email',
+      'Buscando usuario por email en Firestore',
+      () async {
+        try {
+          print('🔍 Buscando usuario por email: $email');
+          
+          final querySnapshot = await _firestore
+              .collection('users')
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
+          
+          if (querySnapshot.docs.isNotEmpty) {
+            print('🔍 Datos raw de Firestore por email: ${querySnapshot.docs.first.data()}');
+            final userData = AppUser.fromJson(querySnapshot.docs.first.data());
+            print('✅ Usuario encontrado por email: ${userData.displayName}');
+            return userData;
+          }
+          
+          print('❌ No se encontró usuario con email: $email');
+          return null;
+        } catch (e) {
+          print('❌ Error buscando usuario por email: $e');
+          print('📍 Stack trace: ${StackTrace.current}');
+          return null;
+        }
+      },
+    );
   }
 
   /// Recuperar contraseña por email
