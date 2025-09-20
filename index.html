@@ -78,8 +78,8 @@
   </div>
 
   <script>
-    // Timeout para iOS - mostrar mensaje si no carga en 15 segundos
-    setTimeout(function() {
+            // Timeout para iOS - mostrar mensaje si no carga en 8 segundos
+            setTimeout(function() {
       const loading = document.getElementById('loading');
       if (loading) {
         loading.innerHTML = `
@@ -98,7 +98,7 @@
           </div>
         `;
       }
-    }, 15000);
+            }, 8000);
 
     // Detectar iOS y agregar clases específicas
     if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {

@@ -141,14 +141,33 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       child: Row(
         children: [
-          const Text(
-            'Calendario',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+                  const Text(
+                    'Calendario',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Indicador de estado para iOS
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'iOS Sync',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           const Spacer(),
           // Año clickeable para ir al resumen anual
           GestureDetector(

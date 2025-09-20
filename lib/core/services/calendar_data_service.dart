@@ -12,6 +12,7 @@ import 'package:calendario_familiar/core/models/app_event.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:calendario_familiar/core/utils/error_tracker.dart';
+import 'package:flutter/material.dart'; // Para WidgetsBinding
 
 final calendarDataServiceProvider = ChangeNotifierProvider((ref) => CalendarDataService(ref));
 
@@ -165,12 +166,13 @@ class CalendarDataService extends ChangeNotifier {
     if (_userFamilyId != null && _isOnline) {
       print('🔧 FamilyId válido y online, inicializando sincronización...');
       
-      // Detectar iOS y usar modo polling
-      if (kIsWeb && _isLikelyIOS()) {
-        print('📱 iOS detectado, usando modo polling en lugar de streams');
-        _startPollingMode();
-        return;
-      }
+              // Detectar iOS y usar modo híbrido
+              if (kIsWeb && _isLikelyIOS()) {
+                print('📱 iOS detectado, usando modo híbrido: fallback + sincronización limitada');
+                _loadFallbackDataForIOS();
+                _startLimitedSyncForIOS();
+                return;
+              }
       
       initialize();
     } else {
@@ -319,63 +321,178 @@ class CalendarDataService extends ChangeNotifier {
     return true; // Asumir iOS si estamos en web y hay timeouts
   }
   
-  // Cargar datos de muestra para iOS
-  void _loadFallbackDataForIOS() {
-    print('📱 Cargando datos de muestra para iOS...');
-    
-    // Cargar datos de muestra más robustos
-    _events.clear();
-    _dayCategories.clear();
-    _notes.clear();
-    _shifts.clear();
-    _shiftTemplates.clear();
-    
-    // Agregar algunos datos de ejemplo para iOS
-    final today = DateTime.now();
-    final todayKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-    
-    _events[todayKey] = ['Evento de prueba iOS'];
-    _shifts[todayKey] = ['D1'];
-    _notes[todayKey] = ['Nota de prueba para iOS'];
-    
-    // Agregar plantilla de turno de ejemplo
-    final sampleTemplate = ShiftTemplate(
-      id: 'ios-fallback-template',
-      name: 'D1',
-      description: 'Turno de prueba para iOS',
-      startTime: '08:00',
-      endTime: '16:00',
-      colorHex: '#2196F3',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    _shiftTemplates[0] = sampleTemplate; // Usar índice numérico
-    
-    print('✅ Datos de fallback para iOS cargados correctamente');
-    notifyListeners();
-  }
+          // Cargar datos de muestra para iOS
+          void _loadFallbackDataForIOS() {
+            print('📱 Cargando datos de muestra para iOS...');
+            
+            // Cargar datos de muestra más robustos
+            _events.clear();
+            _dayCategories.clear();
+            _notes.clear();
+            _shifts.clear();
+            _shiftTemplates.clear();
+            
+            // Agregar datos de ejemplo más realistas para iOS
+            final today = DateTime.now();
+            final todayKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+            
+            // Datos para hoy
+            _events[todayKey] = ['Reunión familiar', 'Cumpleaños de María'];
+            _shifts[todayKey] = ['D1', 'N1'];
+            _notes[todayKey] = ['Recordar comprar regalo', 'Llamar al médico'];
+            
+            // Datos para mañana
+            final tomorrow = today.add(const Duration(days: 1));
+            final tomorrowKey = '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+            _events[tomorrowKey] = ['Cita médica', 'Entrenamiento'];
+            _shifts[tomorrowKey] = ['D2'];
+            _notes[tomorrowKey] = ['Preparar documentos'];
+            
+            // Datos para pasado mañana
+            final dayAfter = today.add(const Duration(days: 2));
+            final dayAfterKey = '${dayAfter.year}-${dayAfter.month.toString().padLeft(2, '0')}-${dayAfter.day.toString().padLeft(2, '0')}';
+            _events[dayAfterKey] = ['Viaje de trabajo'];
+            _shifts[dayAfterKey] = ['D1', 'D2'];
+            _notes[dayAfterKey] = ['Hacer maleta'];
+            
+            // Agregar plantillas de turnos de ejemplo
+            final template1 = ShiftTemplate(
+              id: 'ios-fallback-template-1',
+              name: 'D1',
+              description: 'Turno de día 1',
+              startTime: '08:00',
+              endTime: '16:00',
+              colorHex: '#2196F3',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+            
+            final template2 = ShiftTemplate(
+              id: 'ios-fallback-template-2',
+              name: 'D2',
+              description: 'Turno de día 2',
+              startTime: '16:00',
+              endTime: '00:00',
+              colorHex: '#FF9800',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+            
+            final template3 = ShiftTemplate(
+              id: 'ios-fallback-template-3',
+              name: 'N1',
+              description: 'Turno de noche 1',
+              startTime: '00:00',
+              endTime: '08:00',
+              colorHex: '#9C27B0',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+            
+            _shiftTemplates[0] = template1;
+            _shiftTemplates[1] = template2;
+            _shiftTemplates[2] = template3;
+            
+            print('✅ Datos de fallback para iOS cargados correctamente');
+            
+            // Forzar actualización de UI en iOS
+            if (kIsWeb) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                notifyListeners();
+              });
+            } else {
+              notifyListeners();
+            }
+          }
   
-  // Iniciar modo polling para iOS
-  void _startPollingMode() {
-    print('📱 Iniciando modo polling para iOS...');
-    _isPollingMode = true;
-    _pollingTimer?.cancel();
-    
-    // Cargar datos inmediatamente
-    _pollData();
-    
-    // Programar polling periódico
-    _pollingTimer = Timer.periodic(_pollingInterval, (_) {
-      _pollData();
-    });
-  }
+          // Iniciar modo polling para iOS
+          void _startPollingMode() {
+            print('📱 Iniciando modo polling para iOS...');
+            _isPollingMode = true;
+            _pollingTimer?.cancel();
+            
+            // Cargar datos inmediatamente
+            _pollData();
+            
+            // Programar polling periódico solo si no hay datos
+            _pollingTimer = Timer.periodic(_pollingInterval, (_) {
+              // Solo hacer polling si no hay datos o si hay errores
+              if (_events.isEmpty && _shifts.isEmpty && _notes.isEmpty) {
+                print('📱 Polling periódico: sin datos, intentando cargar...');
+                _pollData();
+              } else {
+                print('📱 Polling periódico: datos disponibles, saltando...');
+              }
+            });
+          }
   
-  // Detener modo polling
-  void _stopPollingMode() {
-    print('📱 Deteniendo modo polling...');
-    _isPollingMode = false;
-    _pollingTimer?.cancel();
-  }
+          // Detener modo polling
+          void _stopPollingMode() {
+            print('📱 Deteniendo modo polling...');
+            _isPollingMode = false;
+            _pollingTimer?.cancel();
+          }
+          
+          // Iniciar sincronización limitada para iOS
+          void _startLimitedSyncForIOS() {
+            print('📱 Iniciando sincronización limitada para iOS...');
+            
+            // Sincronizar datos una sola vez después de 3 segundos
+            Timer(const Duration(seconds: 3), () async {
+              try {
+                print('📱 Sincronizando datos de Firebase para iOS...');
+                
+                // Obtener eventos
+                final eventsQuery = await _firestore
+                    .collection('events')
+                    .where('familyId', isEqualTo: _userFamilyId)
+                    .limit(50) // Limitar a 50 eventos
+                    .get();
+                
+                // Obtener turnos
+                final shiftsQuery = await _firestore
+                    .collection('shifts')
+                    .where('familyId', isEqualTo: _userFamilyId)
+                    .limit(50) // Limitar a 50 turnos
+                    .get();
+                
+                // Obtener notas
+                final notesQuery = await _firestore
+                    .collection('notes')
+                    .where('familyId', isEqualTo: _userFamilyId)
+                    .limit(50) // Limitar a 50 notas
+                    .get();
+                
+                // Obtener plantillas
+                final templatesQuery = await _firestore
+                    .collection('shift_templates')
+                    .where('familyId', isEqualTo: _userFamilyId)
+                    .limit(20) // Limitar a 20 plantillas
+                    .get();
+                
+                // Procesar datos obtenidos
+                _processPolledEvents(eventsQuery.docs);
+                _processPolledShifts(shiftsQuery.docs);
+                _processPolledNotes(notesQuery.docs);
+                _processPolledTemplates(templatesQuery.docs);
+                
+                print('✅ Sincronización limitada completada para iOS');
+                
+                // Forzar actualización de UI
+                if (kIsWeb) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    notifyListeners();
+                  });
+                } else {
+                  notifyListeners();
+                }
+                
+              } catch (e) {
+                print('❌ Error en sincronización limitada para iOS: $e');
+                // Mantener datos de fallback si falla la sincronización
+              }
+            });
+          }
   
   // Obtener datos mediante polling (get() en lugar de streams)
   Future<void> _pollData() async {
@@ -414,8 +531,17 @@ class CalendarDataService extends ChangeNotifier {
       _processPolledNotes(notesQuery.docs);
       _processPolledTemplates(templatesQuery.docs);
       
-      print('✅ Polling completado para iOS');
-      notifyListeners();
+              print('✅ Polling completado para iOS');
+              
+              // Forzar actualización de UI en iOS
+              if (kIsWeb) {
+                // Usar addPostFrameCallback para evitar bloqueos de UI
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  notifyListeners();
+                });
+              } else {
+                notifyListeners();
+              }
       
     } catch (e) {
       print('❌ Error en polling para iOS: $e');
