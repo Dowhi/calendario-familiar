@@ -44,6 +44,11 @@ class CalendarDataService extends ChangeNotifier {
   int _reconnectionAttempts = 0;
   static const int _maxReconnectionAttempts = 5;
   static const Duration _reconnectionDelay = Duration(seconds: 5);
+  
+  // Modo polling para iOS
+  bool _isPollingMode = false;
+  Timer? _pollingTimer;
+  static const Duration _pollingInterval = Duration(seconds: 30);
 
   CalendarDataService(this._ref) {
     print('🔧 CalendarDataService constructor iniciado');
@@ -159,6 +164,14 @@ class CalendarDataService extends ChangeNotifier {
     
     if (_userFamilyId != null && _isOnline) {
       print('🔧 FamilyId válido y online, inicializando sincronización...');
+      
+      // Detectar iOS y usar modo polling
+      if (kIsWeb && _isLikelyIOS()) {
+        print('📱 iOS detectado, usando modo polling en lugar de streams');
+        _startPollingMode();
+        return;
+      }
+      
       initialize();
     } else {
       print('🔧 No hay familyId o está offline, limpiando datos locales...');
@@ -340,6 +353,151 @@ class CalendarDataService extends ChangeNotifier {
     
     print('✅ Datos de fallback para iOS cargados correctamente');
     notifyListeners();
+  }
+  
+  // Iniciar modo polling para iOS
+  void _startPollingMode() {
+    print('📱 Iniciando modo polling para iOS...');
+    _isPollingMode = true;
+    _pollingTimer?.cancel();
+    
+    // Cargar datos inmediatamente
+    _pollData();
+    
+    // Programar polling periódico
+    _pollingTimer = Timer.periodic(_pollingInterval, (_) {
+      _pollData();
+    });
+  }
+  
+  // Detener modo polling
+  void _stopPollingMode() {
+    print('📱 Deteniendo modo polling...');
+    _isPollingMode = false;
+    _pollingTimer?.cancel();
+  }
+  
+  // Obtener datos mediante polling (get() en lugar de streams)
+  Future<void> _pollData() async {
+    if (_userFamilyId == null) return;
+    
+    try {
+      print('📱 Polling datos para iOS...');
+      
+      // Obtener eventos
+      final eventsQuery = await _firestore
+          .collection('events')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      // Obtener turnos
+      final shiftsQuery = await _firestore
+          .collection('shifts')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      // Obtener notas
+      final notesQuery = await _firestore
+          .collection('notes')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      // Obtener plantillas
+      final templatesQuery = await _firestore
+          .collection('shift_templates')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      // Procesar datos obtenidos
+      _processPolledEvents(eventsQuery.docs);
+      _processPolledShifts(shiftsQuery.docs);
+      _processPolledNotes(notesQuery.docs);
+      _processPolledTemplates(templatesQuery.docs);
+      
+      print('✅ Polling completado para iOS');
+      notifyListeners();
+      
+    } catch (e) {
+      print('❌ Error en polling para iOS: $e');
+      // En caso de error, cargar datos de fallback
+      _loadFallbackDataForIOS();
+    }
+  }
+  
+  // Procesar eventos obtenidos por polling
+  void _processPolledEvents(List<QueryDocumentSnapshot> docs) {
+    _events.clear();
+    final Map<String, Set<String>> tempEvents = {};
+    
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final dateKey = (data['date'] != null) ? data['date'].toString() : '';
+      final title = (data['title'] != null) ? data['title'].toString() : '';
+      if (dateKey.isNotEmpty && title.isNotEmpty) {
+        tempEvents.putIfAbsent(dateKey, () => {});
+        tempEvents[dateKey]!.add(title);
+      }
+    }
+    
+    for (final entry in tempEvents.entries) {
+      _events[entry.key] = entry.value.map((e) => e.toString()).toList();
+    }
+  }
+  
+  // Procesar turnos obtenidos por polling
+  void _processPolledShifts(List<QueryDocumentSnapshot> docs) {
+    _shifts.clear();
+    final Map<String, Set<String>> tempShifts = {};
+    
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final dateKey = (data['date'] != null) ? data['date'].toString() : '';
+      final shiftName = (data['shiftName'] != null) ? data['shiftName'].toString() : '';
+      if (dateKey.isNotEmpty && shiftName.isNotEmpty) {
+        tempShifts.putIfAbsent(dateKey, () => {});
+        tempShifts[dateKey]!.add(shiftName);
+      }
+    }
+    
+    for (final entry in tempShifts.entries) {
+      _shifts[entry.key] = entry.value.map((e) => e.toString()).toList();
+    }
+  }
+  
+  // Procesar notas obtenidas por polling
+  void _processPolledNotes(List<QueryDocumentSnapshot> docs) {
+    _notes.clear();
+    final Map<String, Set<String>> tempNotes = {};
+    
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final dateKey = (data['date'] != null) ? data['date'].toString() : '';
+      final noteText = (data['text'] != null) ? data['text'].toString() : '';
+      if (dateKey.isNotEmpty && noteText.isNotEmpty) {
+        tempNotes.putIfAbsent(dateKey, () => {});
+        tempNotes[dateKey]!.add(noteText);
+      }
+    }
+    
+    for (final entry in tempNotes.entries) {
+      _notes[entry.key] = entry.value.map((e) => e.toString()).toList();
+    }
+  }
+  
+  // Procesar plantillas obtenidas por polling
+  void _processPolledTemplates(List<QueryDocumentSnapshot> docs) {
+    _shiftTemplates.clear();
+    
+    for (int i = 0; i < docs.length; i++) {
+      final doc = docs[i];
+      try {
+        final template = ShiftTemplate.fromJson(doc.data() as Map<String, dynamic>);
+        _shiftTemplates[i] = template;
+        print('📱 Plantilla cargada por polling: ${template.name} (ID: ${template.id})');
+      } catch (e) {
+        print('❌ Error procesando plantilla por polling: $e');
+      }
+    }
   }
 
   // Manejar errores de inicialización
@@ -1298,6 +1456,7 @@ class CalendarDataService extends ChangeNotifier {
   void dispose() {
     _cancelSubscriptions();
     _reconnectionTimer?.cancel();
+    _stopPollingMode();
     super.dispose();
   }
 

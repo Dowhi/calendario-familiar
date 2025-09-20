@@ -216,6 +216,18 @@ void main() async {
         } else {
           print('✅ Firebase ya estaba inicializado');
         }
+        
+        // Configurar Firebase para iOS Safari
+        if (kIsWeb) {
+          print('🌐 Configurando Firebase para web/iOS...');
+          FirebaseFirestore.instance.settings = const Settings(
+            persistenceEnabled: true,
+            cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+            host: 'firestore.googleapis.com',
+            sslEnabled: true,
+          );
+          print('✅ Firebase configurado para iOS (usando modo polling)');
+        }
       },
     );
   } catch (e) {
