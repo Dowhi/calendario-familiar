@@ -436,47 +436,62 @@ class CalendarDataService extends ChangeNotifier {
           // Iniciar sincronización limitada para iOS
           void _startLimitedSyncForIOS() {
             print('📱 Iniciando sincronización limitada para iOS...');
+            print('📱 FamilyId para sincronización: $_userFamilyId');
             
             // Sincronizar datos una sola vez después de 3 segundos
             Timer(const Duration(seconds: 3), () async {
               try {
                 print('📱 Sincronizando datos de Firebase para iOS...');
+                print('📱 FamilyId actual: $_userFamilyId');
                 
                 // Obtener eventos
+                print('📱 Consultando eventos para familyId: $_userFamilyId');
                 final eventsQuery = await _firestore
                     .collection('events')
                     .where('familyId', isEqualTo: _userFamilyId)
                     .limit(50) // Limitar a 50 eventos
                     .get();
+                print('📱 Eventos encontrados: ${eventsQuery.docs.length}');
                 
                 // Obtener turnos
+                print('📱 Consultando turnos para familyId: $_userFamilyId');
                 final shiftsQuery = await _firestore
                     .collection('shifts')
                     .where('familyId', isEqualTo: _userFamilyId)
                     .limit(50) // Limitar a 50 turnos
                     .get();
+                print('📱 Turnos encontrados: ${shiftsQuery.docs.length}');
                 
                 // Obtener notas
+                print('📱 Consultando notas para familyId: $_userFamilyId');
                 final notesQuery = await _firestore
                     .collection('notes')
                     .where('familyId', isEqualTo: _userFamilyId)
                     .limit(50) // Limitar a 50 notas
                     .get();
+                print('📱 Notas encontradas: ${notesQuery.docs.length}');
                 
                 // Obtener plantillas
+                print('📱 Consultando plantillas para familyId: $_userFamilyId');
                 final templatesQuery = await _firestore
                     .collection('shift_templates')
                     .where('familyId', isEqualTo: _userFamilyId)
                     .limit(20) // Limitar a 20 plantillas
                     .get();
+                print('📱 Plantillas encontradas: ${templatesQuery.docs.length}');
                 
                 // Procesar datos obtenidos
+                print('📱 Procesando eventos...');
                 _processPolledEvents(eventsQuery.docs);
+                print('📱 Procesando turnos...');
                 _processPolledShifts(shiftsQuery.docs);
+                print('📱 Procesando notas...');
                 _processPolledNotes(notesQuery.docs);
+                print('📱 Procesando plantillas...');
                 _processPolledTemplates(templatesQuery.docs);
                 
                 print('✅ Sincronización limitada completada para iOS');
+                print('📱 Datos finales - Eventos: ${_events.length}, Turnos: ${_shifts.length}, Notas: ${_notes.length}, Plantillas: ${_shiftTemplates.length}');
                 
                 // Forzar actualización de UI
                 if (kIsWeb) {
@@ -570,25 +585,41 @@ class CalendarDataService extends ChangeNotifier {
     }
   }
   
-  // Procesar turnos obtenidos por polling
-  void _processPolledShifts(List<QueryDocumentSnapshot> docs) {
-    _shifts.clear();
-    final Map<String, Set<String>> tempShifts = {};
-    
-    for (final doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      final dateKey = (data['date'] != null) ? data['date'].toString() : '';
-      final shiftName = (data['shiftName'] != null) ? data['shiftName'].toString() : '';
-      if (dateKey.isNotEmpty && shiftName.isNotEmpty) {
-        tempShifts.putIfAbsent(dateKey, () => {});
-        tempShifts[dateKey]!.add(shiftName);
-      }
-    }
-    
-    for (final entry in tempShifts.entries) {
-      _shifts[entry.key] = entry.value.map((e) => e.toString()).toList();
-    }
-  }
+          // Procesar turnos obtenidos por polling
+          void _processPolledShifts(List<QueryDocumentSnapshot> docs) {
+            print('📱 Procesando ${docs.length} turnos...');
+            _shifts.clear();
+            final Map<String, Set<String>> tempShifts = {};
+            
+            for (final doc in docs) {
+              final data = doc.data() as Map<String, dynamic>;
+              print('📱 Turno raw data: $data');
+              
+              // Intentar diferentes campos para el nombre del turno
+              String shiftName = '';
+              if (data['title'] != null) {
+                shiftName = data['title'].toString();
+              } else if (data['shiftName'] != null) {
+                shiftName = data['shiftName'].toString();
+              } else if (data['name'] != null) {
+                shiftName = data['name'].toString();
+              }
+              
+              final dateKey = (data['date'] != null) ? data['date'].toString() : '';
+              print('📱 Turno procesado - Fecha: $dateKey, Nombre: $shiftName');
+              
+              if (dateKey.isNotEmpty && shiftName.isNotEmpty) {
+                tempShifts.putIfAbsent(dateKey, () => {});
+                tempShifts[dateKey]!.add(shiftName);
+              }
+            }
+            
+            for (final entry in tempShifts.entries) {
+              _shifts[entry.key] = entry.value.map((e) => e.toString()).toList();
+            }
+            
+            print('📱 Turnos procesados: ${_shifts.length} fechas con turnos');
+          }
   
   // Procesar notas obtenidas por polling
   void _processPolledNotes(List<QueryDocumentSnapshot> docs) {
