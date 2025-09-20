@@ -78,54 +78,57 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget build(BuildContext context) {
     final calendarService = ref.watch(calendarDataServiceProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1B5E20),
-        foregroundColor: Colors.white,
-        elevation: 0, // Eliminar sombra del AppBar
-        title: const Text('My Calendar'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              context.push('/settings');
-            },
-          ),
-          // Botón para gestionar plantillas de turnos
-          IconButton(
-            icon: const Icon(Icons.calendar_view_day),
-            onPressed: () {
-              context.push('/shift-templates');
-            },
-          ),
-          // Nuevo botón para gestionar la familia
-          IconButton(
-            icon: const Icon(Icons.group),
-            onPressed: () {
-              context.push('/family-management');
-            },
-          ),
-        ],
+    // Optimización para iOS: usar RepaintBoundary para evitar re-renders innecesarios
+    return RepaintBoundary(
+      child: Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1B5E20),
+          foregroundColor: Colors.white,
+          elevation: 0, // Eliminar sombra del AppBar
+          title: const Text('My Calendar'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                context.push('/settings');
+              },
+            ),
+            // Botón para gestionar plantillas de turnos
+            IconButton(
+              icon: const Icon(Icons.calendar_view_day),
+              onPressed: () {
+                context.push('/shift-templates');
+              },
+            ),
+            // Nuevo botón para gestionar la familia
+            IconButton(
+              icon: const Icon(Icons.group),
+              onPressed: () {
+                context.push('/family-management');
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            // Header superior
+            RepaintBoundary(child: _buildTopBar()),
+
+            // Header del calendario
+            RepaintBoundary(child: _buildCalendarHeader()),
+
+            // Calendario - usar Flexible en lugar de Expanded
+            Flexible(
+              child: RepaintBoundary(child: _buildCalendar()),
+            ),
+
+            // Botones inferiores - solo mostrar cuando no esté en modo pintar
+            if (!_isPaintMode) RepaintBoundary(child: _buildBottomButtons()),
+          ],
+        ),
+        bottomNavigationBar: _isPaintMode ? RepaintBoundary(child: _buildPaintBar(calendarService)) : null,
       ),
-      body: Column(
-        children: [
-          // Header superior
-          _buildTopBar(),
-
-          // Header del calendario
-          _buildCalendarHeader(),
-
-          // Calendario - usar Flexible en lugar de Expanded
-          Flexible(
-            child: _buildCalendar(),
-          ),
-
-          // Botones inferiores - solo mostrar cuando no esté en modo pintar
-          if (!_isPaintMode) _buildBottomButtons(),
-        ],
-      ),
-      bottomNavigationBar: _isPaintMode ? _buildPaintBar(calendarService) : null,
     );
   }
 
@@ -292,12 +295,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildDayCell(DateTime date) {
+    // Optimización para iOS: usar variables locales para evitar recálculos
+    final now = DateTime.now();
     final isSelected = _selectedDay.day == date.day &&
         _selectedDay.month == date.month &&
         _selectedDay.year == date.year;
-    final isToday = DateTime.now().day == date.day &&
-        DateTime.now().month == date.month &&
-        DateTime.now().year == date.year;
+    final isToday = now.day == date.day &&
+        now.month == date.month &&
+        now.year == date.year;
 
     final dateKey = _formatDate(date);
     final events = _dataService.getEventsForDay(date);
@@ -310,8 +315,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           _applyPaintToDay(date);
         } else {
           // Modo normal: seleccionar día y navegar
-          setState(() {
-            _selectedDay = date;
+          // Optimización para iOS: usar addPostFrameCallback para evitar bloqueos
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _selectedDay = date;
+              });
+            }
           });
 
           // Obtener el texto y el ID del evento existente para el día

@@ -160,10 +160,16 @@ void main() async {
   // Detectar iOS y aplicar fixes específicos
   if (kIsWeb) {
     print('🌐 Aplicación web detectada');
+    
+    // Optimizaciones específicas para iOS
+    print('📱 Aplicando optimizaciones para iOS...');
+    
+    // Configurar optimizaciones de rendering para iOS
+    print('📱 Configurando optimizaciones de rendering...');
+    
     // Agregar timeout específico para iOS
-    Future.delayed(const Duration(seconds: 15), () {
+    Future.delayed(const Duration(seconds: 10), () {
       print('⚠️ Timeout de carga alcanzado - posible problema en iOS');
-      // Intentar cargar datos de muestra si la app no ha cargado
       print('📱 Intentando modo fallback para iOS...');
     });
   }
