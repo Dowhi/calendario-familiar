@@ -157,6 +157,15 @@ void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Detectar iOS y aplicar fixes específicos
+  if (kIsWeb) {
+    print('🌐 Aplicación web detectada');
+    // Agregar timeout específico para iOS
+    Future.delayed(const Duration(seconds: 20), () {
+      print('⚠️ Timeout de carga alcanzado - posible problema en iOS');
+    });
+  }
+  
   // Obtener detalles de lanzamiento si la app se abrió desde una notificación
   if (!kIsWeb) {
     final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();

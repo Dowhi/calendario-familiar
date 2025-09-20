@@ -1,16 +1,20 @@
 {
     "name": "Calendario Familiar",
     "short_name": "Calendario",
-    "start_url": "./",
+    "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#2196F3",
+    "background_color": "#1B5E20",
+    "theme_color": "#1B5E20",
     "description": "Calendario familiar compartido con sincronización en tiempo real",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
-    "scope": "./",
+    "scope": "/",
     "lang": "es",
     "categories": ["productivity", "family"],
+    "display_override": ["window-controls-overlay"],
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
     "icons": [
         {
             "src": "icons/Icon-192.png",
