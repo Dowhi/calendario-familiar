@@ -442,6 +442,23 @@ class _ShiftTemplateManagementScreenState extends ConsumerState<ShiftTemplateMan
               ),
             ),
             const Divider(height: 30),
+            // Botón de diagnóstico temporal
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 16),
+              child: ElevatedButton(
+                onPressed: () async {
+                  await calendarService.diagnosticInfo();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Diagnóstico ejecutado - revisa la consola'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: const Text('🔍 Diagnóstico (Consola)'),
+              ),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: calendarService.shiftTemplates.length,

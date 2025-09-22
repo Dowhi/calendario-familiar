@@ -56,20 +56,26 @@ class CalendarDataService extends ChangeNotifier {
     _setupConnectivityListener();
     
     _ref.listen<AppUser?>(authControllerProvider, (previous, next) {
-      print('🔧 AuthController cambió:');
-      print('  - Previous familyId: ${previous?.familyId}');
-      print('  - Next familyId: ${next?.familyId}');
+      print('🔧 DIAGNÓSTICO: AuthController cambió:');
+      print('🔧 DIAGNÓSTICO: - Previous: ${previous?.uid} (familyId: ${previous?.familyId})');
+      print('🔧 DIAGNÓSTICO: - Next: ${next?.uid} (familyId: ${next?.familyId})');
       
       if (previous?.familyId != next?.familyId) {
-        print('🔧 FamilyId cambió, reinicializando suscripciones...');
+        print('🔧 DIAGNÓSTICO: FamilyId cambió, reinicializando suscripciones...');
         _userFamilyId = next?.familyId;
+        print('🔧 DIAGNÓSTICO: Nuevo _userFamilyId: $_userFamilyId');
         _reinitializeSubscriptions();
       } else {
-        print('🔧 FamilyId no cambió, manteniendo suscripciones actuales');
+        print('🔧 DIAGNÓSTICO: FamilyId no cambió, manteniendo suscripciones actuales');
       }
     });
-    _userFamilyId = _ref.read(authControllerProvider)?.familyId;
-    print('🔧 FamilyId inicial: $_userFamilyId');
+    
+    final initialUser = _ref.read(authControllerProvider);
+    _userFamilyId = initialUser?.familyId;
+    print('🔧 DIAGNÓSTICO: Usuario inicial: ${initialUser?.uid}');
+    print('🔧 DIAGNÓSTICO: FamilyId inicial: $_userFamilyId');
+    print('🔧 DIAGNÓSTICO: Usuario completo: $initialUser');
+    
     _reinitializeSubscriptions();
   }
 
@@ -675,18 +681,36 @@ class CalendarDataService extends ChangeNotifier {
 
   // Cargar datos iniciales inmediatamente
   Future<void> _loadInitialData() async {
-    if (_userFamilyId == null) return;
+    if (_userFamilyId == null) {
+      print('❌ No se puede cargar datos iniciales: _userFamilyId es null');
+      return;
+    }
+    
+    print('🔍 DIAGNÓSTICO: Cargando plantillas de turnos iniciales...');
+    print('🔍 DIAGNÓSTICO: _userFamilyId = $_userFamilyId');
     
     try {
-      print('🔍 Cargando plantillas de turnos iniciales...');
+      // Primero, verificar si hay datos en la colección
+      print('🔍 DIAGNÓSTICO: Consultando colección shift_templates...');
+      final allTemplatesQuery = await _firestore
+          .collection('shift_templates')
+          .get();
+      
+      print('🔍 DIAGNÓSTICO: Total documentos en shift_templates: ${allTemplatesQuery.docs.length}');
+      for (final doc in allTemplatesQuery.docs) {
+        final data = doc.data();
+        print('🔍 DIAGNÓSTICO: Documento ${doc.id}: name=${data['name']}, familyId=${data['familyId']}');
+      }
+      
+      // Ahora consultar con filtro de familyId
       final templatesQuery = await _firestore
           .collection('shift_templates')
           .where('familyId', isEqualTo: _userFamilyId)
           .get();
       
-      print('🔍 Plantillas encontradas inicialmente: ${templatesQuery.docs.length}');
+      print('🔍 DIAGNÓSTICO: Plantillas con familyId $_userFamilyId: ${templatesQuery.docs.length}');
       for (final doc in templatesQuery.docs) {
-        print('🔍 Plantilla inicial: ${doc.id} - ${doc.data()['name']}');
+        print('🔍 DIAGNÓSTICO: Plantilla encontrada: ${doc.id} - ${doc.data()['name']}');
       }
       
       // Procesar plantillas iniciales
@@ -694,20 +718,61 @@ class CalendarDataService extends ChangeNotifier {
       for (final doc in templatesQuery.docs) {
         try {
           final data = doc.data();
+          print('🔍 DIAGNÓSTICO: Procesando ${doc.id}: ${data}');
           final template = ShiftTemplate.fromJson(data);
           _shiftTemplates.add(template);
+          print('✅ DIAGNÓSTICO: Plantilla agregada: ${template.name}');
         } catch (e) {
           print('❌ Error procesando plantilla inicial ${doc.id}: $e');
+          print('❌ Datos problemáticos: ${doc.data()}');
         }
       }
       
       _shiftTemplates.sort((a, b) => a.name.compareTo(b.name));
       _notifyChangesOptimized();
       
-      print('✅ Datos iniciales cargados: ${_shiftTemplates.length} plantillas');
+      print('✅ DIAGNÓSTICO: Datos iniciales cargados: ${_shiftTemplates.length} plantillas');
+      print('🔍 DIAGNÓSTICO: Lista final de plantillas: ${_shiftTemplates.map((t) => t.name).toList()}');
     } catch (e) {
       print('❌ Error cargando datos iniciales: $e');
+      print('❌ Stack trace: ${StackTrace.current}');
     }
+  }
+
+  // Método de diagnóstico temporal
+  Future<void> diagnosticInfo() async {
+    print('🔍 === DIAGNÓSTICO COMPLETO ===');
+    print('🔍 _userFamilyId: $_userFamilyId');
+    print('🔍 _isOnline: $_isOnline');
+    print('🔍 _shiftTemplates.length: ${_shiftTemplates.length}');
+    print('🔍 _events.length: ${_events.length}');
+    
+    // Verificar usuario actual
+    final currentUser = _ref.read(authControllerProvider);
+    print('🔍 Usuario actual: ${currentUser?.uid}');
+    print('🔍 FamilyId del usuario: ${currentUser?.familyId}');
+    
+    // Verificar conexión a Firebase
+    try {
+      final testQuery = await _firestore.collection('shift_templates').limit(1).get();
+      print('🔍 Conexión Firebase OK: ${testQuery.docs.length} documentos de prueba');
+    } catch (e) {
+      print('🔍 Error conexión Firebase: $e');
+    }
+    
+    // Consultar todos los documentos
+    try {
+      final allDocs = await _firestore.collection('shift_templates').get();
+      print('🔍 Total documentos en shift_templates: ${allDocs.docs.length}');
+      for (final doc in allDocs.docs) {
+        final data = doc.data();
+        print('🔍 Doc ${doc.id}: name=${data['name']}, familyId=${data['familyId']}');
+      }
+    } catch (e) {
+      print('🔍 Error consultando todos los documentos: $e');
+    }
+    
+    print('🔍 === FIN DIAGNÓSTICO ===');
   }
 
   // Método público para forzar actualización manual
