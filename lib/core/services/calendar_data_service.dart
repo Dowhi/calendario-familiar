@@ -206,15 +206,14 @@ class CalendarDataService extends ChangeNotifier {
     print('🚀 Inicializando sincronización en tiempo real para familyId: $_userFamilyId');
     
     try {
-      // Configurar timeout para las suscripciones (aumentado para mejor estabilidad)
-      final timeout = const Duration(seconds: 30);
+      // Configurar timeout para las suscripciones (reducido para evitar bloqueos)
+      final timeout = const Duration(seconds: 10);
       
-      // Suscripción legacy para compatibilidad
+      // Suscripciones SIN timeout para evitar TimeoutExceptions
       _eventsSubscription = _firestore
           .collection('events')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .timeout(timeout)
           .listen(
             _onEventsChanged,
             onError: (error) {
@@ -223,12 +222,10 @@ class CalendarDataService extends ChangeNotifier {
             },
           );
       
-      // Nueva suscripción para notas
       _notesSubscription = _firestore
           .collection('notes')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .timeout(timeout)
           .listen(
             _onNotesChanged,
             onError: (error) {
@@ -237,12 +234,10 @@ class CalendarDataService extends ChangeNotifier {
             },
           );
       
-      // Nueva suscripción para turnos
       _shiftsSubscription = _firestore
           .collection('shifts')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .timeout(timeout)
           .listen(
             _onShiftsChanged,
             onError: (error) {
@@ -255,7 +250,6 @@ class CalendarDataService extends ChangeNotifier {
           .collection('dayCategories')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .timeout(timeout)
           .listen(
             _onCategoriesChanged,
             onError: (error) {
@@ -269,7 +263,6 @@ class CalendarDataService extends ChangeNotifier {
           .collection('shift_templates')
           .where('familyId', isEqualTo: _userFamilyId)
           .snapshots()
-          .timeout(timeout)
           .listen(
             _onShiftTemplatesChanged,
             onError: (error) {
@@ -686,56 +679,120 @@ class CalendarDataService extends ChangeNotifier {
       return;
     }
     
-    print('🔍 DIAGNÓSTICO: Cargando plantillas de turnos iniciales...');
-    print('🔍 DIAGNÓSTICO: _userFamilyId = $_userFamilyId');
+    print('🔍 CARGANDO DATOS INICIALES: _userFamilyId = $_userFamilyId');
     
     try {
-      // Primero, verificar si hay datos en la colección
-      print('🔍 DIAGNÓSTICO: Consultando colección shift_templates...');
-      final allTemplatesQuery = await _firestore
-          .collection('shift_templates')
-          .get();
-      
-      print('🔍 DIAGNÓSTICO: Total documentos en shift_templates: ${allTemplatesQuery.docs.length}');
-      for (final doc in allTemplatesQuery.docs) {
-        final data = doc.data();
-        print('🔍 DIAGNÓSTICO: Documento ${doc.id}: name=${data['name']}, familyId=${data['familyId']}');
-      }
-      
-      // Ahora consultar con filtro de familyId
+      // Consultar plantillas con filtro de familyId
       final templatesQuery = await _firestore
           .collection('shift_templates')
           .where('familyId', isEqualTo: _userFamilyId)
           .get();
       
-      print('🔍 DIAGNÓSTICO: Plantillas con familyId $_userFamilyId: ${templatesQuery.docs.length}');
-      for (final doc in templatesQuery.docs) {
-        print('🔍 DIAGNÓSTICO: Plantilla encontrada: ${doc.id} - ${doc.data()['name']}');
-      }
+      print('🔍 CARGANDO DATOS: Encontradas ${templatesQuery.docs.length} plantillas');
       
       // Procesar plantillas iniciales
       _shiftTemplates.clear();
       for (final doc in templatesQuery.docs) {
         try {
           final data = doc.data();
-          print('🔍 DIAGNÓSTICO: Procesando ${doc.id}: ${data}');
           final template = ShiftTemplate.fromJson(data);
           _shiftTemplates.add(template);
-          print('✅ DIAGNÓSTICO: Plantilla agregada: ${template.name}');
+          print('✅ Plantilla cargada: ${template.name}');
         } catch (e) {
-          print('❌ Error procesando plantilla inicial ${doc.id}: $e');
-          print('❌ Datos problemáticos: ${doc.data()}');
+          print('❌ Error procesando plantilla ${doc.id}: $e');
         }
       }
       
       _shiftTemplates.sort((a, b) => a.name.compareTo(b.name));
       _notifyChangesOptimized();
       
-      print('✅ DIAGNÓSTICO: Datos iniciales cargados: ${_shiftTemplates.length} plantillas');
-      print('🔍 DIAGNÓSTICO: Lista final de plantillas: ${_shiftTemplates.map((t) => t.name).toList()}');
+      print('✅ DATOS INICIALES CARGADOS: ${_shiftTemplates.length} plantillas');
+      
+      // También cargar eventos, turnos y notas
+      await _loadInitialEvents();
+      await _loadInitialShifts();
+      await _loadInitialNotes();
+      
     } catch (e) {
       print('❌ Error cargando datos iniciales: $e');
-      print('❌ Stack trace: ${StackTrace.current}');
+    }
+  }
+
+  Future<void> _loadInitialEvents() async {
+    try {
+      final eventsQuery = await _firestore
+          .collection('events')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      _events.clear();
+      for (final doc in eventsQuery.docs) {
+        final data = doc.data();
+        final dateKey = data['date']?.toString() ?? '';
+        final title = data['title']?.toString() ?? '';
+        
+        if (dateKey.isNotEmpty && title.isNotEmpty) {
+          if (!_events.containsKey(dateKey)) {
+            _events[dateKey] = <String>[];
+          }
+          _events[dateKey]!.add(title);
+        }
+      }
+      print('✅ Eventos iniciales cargados: ${_events.length} fechas');
+    } catch (e) {
+      print('❌ Error cargando eventos iniciales: $e');
+    }
+  }
+
+  Future<void> _loadInitialShifts() async {
+    try {
+      final shiftsQuery = await _firestore
+          .collection('shifts')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      _shifts.clear();
+      for (final doc in shiftsQuery.docs) {
+        final data = doc.data();
+        final dateKey = data['date']?.toString() ?? '';
+        final title = data['title']?.toString() ?? '';
+        
+        if (dateKey.isNotEmpty && title.isNotEmpty) {
+          if (!_shifts.containsKey(dateKey)) {
+            _shifts[dateKey] = <String>[];
+          }
+          _shifts[dateKey]!.add(title);
+        }
+      }
+      print('✅ Turnos iniciales cargados: ${_shifts.length} fechas');
+    } catch (e) {
+      print('❌ Error cargando turnos iniciales: $e');
+    }
+  }
+
+  Future<void> _loadInitialNotes() async {
+    try {
+      final notesQuery = await _firestore
+          .collection('notes')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      _notes.clear();
+      for (final doc in notesQuery.docs) {
+        final data = doc.data();
+        final dateKey = data['date']?.toString() ?? '';
+        final title = data['title']?.toString() ?? '';
+        
+        if (dateKey.isNotEmpty && title.isNotEmpty) {
+          if (!_notes.containsKey(dateKey)) {
+            _notes[dateKey] = <String>[];
+          }
+          _notes[dateKey]!.add(title);
+        }
+      }
+      print('✅ Notas iniciales cargadas: ${_notes.length} fechas');
+    } catch (e) {
+      print('❌ Error cargando notas iniciales: $e');
     }
   }
 
