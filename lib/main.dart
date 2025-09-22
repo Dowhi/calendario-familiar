@@ -242,6 +242,10 @@ void main() async {
               sslEnabled: true,
             );
             print('✅ Firebase configurado para web con persistencia habilitada');
+            
+            // Configurar conexión optimizada
+            FirebaseFirestore.instance.enableNetwork();
+            print('✅ Red de Firebase habilitada');
           } catch (e) {
             // Fallback sin persistencia si hay problemas
             print('⚠️ Error con persistencia, usando fallback: $e');

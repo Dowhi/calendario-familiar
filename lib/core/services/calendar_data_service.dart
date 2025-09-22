@@ -166,20 +166,9 @@ class CalendarDataService extends ChangeNotifier {
     if (_userFamilyId != null && _isOnline) {
       print('🔧 FamilyId válido y online, inicializando sincronización...');
       
-              // Detectar iOS y usar modo híbrido
-              if (kIsWeb && _isLikelyIOS()) {
-                print('📱 iOS detectado, usando sincronización en tiempo real mejorada');
-                // Intentar sincronización normal primero
-                try {
-                  initialize();
-                } catch (e) {
-                  print('⚠️ Error en sincronización normal, usando fallback: $e');
-                  _loadFallbackDataForIOS();
-                }
-                return;
-              }
-      
-      initialize();
+              // Usar sincronización en tiempo real para todos los dispositivos
+              print('🌐 Inicializando sincronización en tiempo real universal');
+              initialize();
     } else {
       print('🔧 No hay familyId o está offline, limpiando datos locales...');
       _events.clear();
@@ -285,15 +274,9 @@ class CalendarDataService extends ChangeNotifier {
       
       print('✅ Sincronización en tiempo real activada para familyId: $_userFamilyId');
       
-      print('🔍 Verificando datos manualmente...');
-      final manualQuery = await _firestore
-          .collection('shift_templates')
-          .where('familyId', isEqualTo: _userFamilyId)
-          .get();
-      print('🔍 Consulta manual: ${manualQuery.docs.length} documentos encontrados');
-      for (final doc in manualQuery.docs) {
-        print('🔍 Documento: ${doc.id} - ${doc.data()}');
-      }
+      // Cargar datos iniciales inmediatamente
+      print('🔍 Cargando datos iniciales...');
+      await _loadInitialData();
       
     } catch (e) {
       print('❌ Error inicializando sincronización: $e');
@@ -690,6 +673,43 @@ class CalendarDataService extends ChangeNotifier {
     }
   }
 
+  // Cargar datos iniciales inmediatamente
+  Future<void> _loadInitialData() async {
+    if (_userFamilyId == null) return;
+    
+    try {
+      print('🔍 Cargando plantillas de turnos iniciales...');
+      final templatesQuery = await _firestore
+          .collection('shift_templates')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .get();
+      
+      print('🔍 Plantillas encontradas inicialmente: ${templatesQuery.docs.length}');
+      for (final doc in templatesQuery.docs) {
+        print('🔍 Plantilla inicial: ${doc.id} - ${doc.data()['name']}');
+      }
+      
+      // Procesar plantillas iniciales
+      _shiftTemplates.clear();
+      for (final doc in templatesQuery.docs) {
+        try {
+          final data = doc.data();
+          final template = ShiftTemplate.fromJson(data);
+          _shiftTemplates.add(template);
+        } catch (e) {
+          print('❌ Error procesando plantilla inicial ${doc.id}: $e');
+        }
+      }
+      
+      _shiftTemplates.sort((a, b) => a.name.compareTo(b.name));
+      _notifyChangesOptimized();
+      
+      print('✅ Datos iniciales cargados: ${_shiftTemplates.length} plantillas');
+    } catch (e) {
+      print('❌ Error cargando datos iniciales: $e');
+    }
+  }
+
   // Método público para forzar actualización manual
   Future<void> forceRefresh() async {
     print('🔄 Forzando actualización manual de datos...');
@@ -847,13 +867,22 @@ class CalendarDataService extends ChangeNotifier {
     print('🔄 Plantillas de turnos actualizadas desde Firebase: ${snapshot.docs.length} documentos');
     print('🔧 IDs de documentos recibidos: ${snapshot.docs.map((doc) => doc.id).toList()}');
     
+    // Limpiar lista actual
     _shiftTemplates.clear();
     print('🔧 Lista local limpiada, agregando ${snapshot.docs.length} plantillas...');
     
+    // Procesar cada documento
     for (final doc in snapshot.docs) {
       try {
         final data = doc.data() as Map<String, dynamic>;
         print('🔧 Procesando documento ${doc.id}: ${data['name']}');
+        
+        // Verificar que el familyId coincida
+        final docFamilyId = data['familyId']?.toString();
+        if (docFamilyId != _userFamilyId) {
+          print('⚠️ Saltando documento ${doc.id}: familyId no coincide ($docFamilyId vs $_userFamilyId)');
+          continue;
+        }
         
         final template = ShiftTemplate.fromJson(data);
         _shiftTemplates.add(template);
@@ -865,6 +894,10 @@ class CalendarDataService extends ChangeNotifier {
       }
     }
     
+    // Ordenar plantillas por nombre para consistencia
+    _shiftTemplates.sort((a, b) => a.name.compareTo(b.name));
+    
+    // Notificar cambios inmediatamente
     _notifyChangesOptimized();
     print('📊 Plantillas de turnos locales actualizadas: ${_shiftTemplates.length} plantillas');
     print('🔧 IDs finales en lista local: ${_shiftTemplates.map((t) => '${t.name}(${t.id})').toList()}');
