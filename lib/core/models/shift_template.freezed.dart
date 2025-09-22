@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-ShiftTemplate _$ShiftTemplateFromJson(Map<String, dynamic> json) {
-  return _ShiftTemplate.fromJson(json);
-}
-
 /// @nodoc
 mixin _$ShiftTemplate {
   String get id => throw _privateConstructorUsedError;
@@ -30,7 +26,6 @@ mixin _$ShiftTemplate {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $ShiftTemplateCopyWith<ShiftTemplate> get copyWith =>
       throw _privateConstructorUsedError;
@@ -189,7 +184,7 @@ class __$$ShiftTemplateImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$ShiftTemplateImpl implements _ShiftTemplate {
   const _$ShiftTemplateImpl(
       {required this.id,
@@ -200,9 +195,6 @@ class _$ShiftTemplateImpl implements _ShiftTemplate {
       this.description,
       this.createdAt,
       this.updatedAt});
-
-  factory _$ShiftTemplateImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ShiftTemplateImplFromJson(json);
 
   @override
   final String id;
@@ -250,7 +242,6 @@ class _$ShiftTemplateImpl implements _ShiftTemplate {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, name, colorHex, startTime,
       endTime, description, createdAt, updatedAt);
@@ -260,13 +251,6 @@ class _$ShiftTemplateImpl implements _ShiftTemplate {
   @pragma('vm:prefer-inline')
   _$$ShiftTemplateImplCopyWith<_$ShiftTemplateImpl> get copyWith =>
       __$$ShiftTemplateImplCopyWithImpl<_$ShiftTemplateImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ShiftTemplateImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _ShiftTemplate implements ShiftTemplate {
@@ -279,9 +263,6 @@ abstract class _ShiftTemplate implements ShiftTemplate {
       final String? description,
       final DateTime? createdAt,
       final DateTime? updatedAt}) = _$ShiftTemplateImpl;
-
-  factory _ShiftTemplate.fromJson(Map<String, dynamic> json) =
-      _$ShiftTemplateImpl.fromJson;
 
   @override
   String get id;
