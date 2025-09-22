@@ -199,11 +199,10 @@ class _DebugHomePageState extends State<DebugHomePage> {
       _addTestResult('🔄 Iniciando prueba de Firebase Core...');
       
       // Importar Firebase Core
-      final firebaseCore = await import('package:firebase_core/firebase_core.dart');
       _addTestResult('✅ Firebase Core importado correctamente');
       
       // Intentar inicializar Firebase
-      await firebaseCore.Firebase.initializeApp();
+      await Firebase.initializeApp();
       _addTestResult('✅ Firebase inicializado correctamente');
       
     } catch (e) {
@@ -216,11 +215,10 @@ class _DebugHomePageState extends State<DebugHomePage> {
       _addTestResult('🔄 Iniciando prueba de Firestore...');
       
       // Importar Firestore
-      final firestore = await import('package:cloud_firestore/cloud_firestore.dart');
       _addTestResult('✅ Firestore importado correctamente');
       
       // Intentar conectar a Firestore
-      final db = firestore.FirebaseFirestore.instance;
+      final db = FirebaseFirestore.instance;
       _addTestResult('✅ Instancia de Firestore creada');
       
       // Intentar una consulta simple
@@ -237,7 +235,6 @@ class _DebugHomePageState extends State<DebugHomePage> {
       _addTestResult('🔄 Iniciando prueba de CalendarDataService...');
       
       // Importar CalendarDataService
-      final service = await import('package:calendario_familiar/core/services/calendar_data_service.dart');
       _addTestResult('✅ CalendarDataService importado correctamente');
       
     } catch (e) {

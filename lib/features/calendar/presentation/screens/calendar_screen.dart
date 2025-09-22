@@ -162,7 +162,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       );
                       
                       // Forzar actualización
-                      final calendarService = ref.read(calendarServiceProvider);
+                      final calendarService = ref.read(calendarDataServiceProvider);
                       await calendarService.forceRefresh();
                       
                       ScaffoldMessenger.of(context).showSnackBar(

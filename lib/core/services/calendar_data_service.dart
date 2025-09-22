@@ -701,7 +701,7 @@ class CalendarDataService extends ChangeNotifier {
 
     try {
       // Reinicializar suscripciones
-      await dispose();
+      dispose();
       await initialize();
       
       print('✅ Actualización manual completada');
