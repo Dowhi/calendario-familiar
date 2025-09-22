@@ -231,24 +231,26 @@ void main() async {
           print('✅ Firebase ya estaba inicializado');
         }
         
-        // Configurar Firebase para iOS Safari
+        // Configurar Firebase para web optimizado para sincronización en tiempo real
         if (kIsWeb) {
-          print('🌐 Configurando Firebase para web/iOS...');
-          FirebaseFirestore.instance.settings = const Settings(
-            persistenceEnabled: false, // ⚠️ Desactivar para iOS - IndexedDB puede fallar
-            cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-            host: 'firestore.googleapis.com',
-            sslEnabled: true,
-          );
-          print('✅ Firebase configurado para iOS (persistence desactivado)');
-          
-          // Configurar Firebase Auth para iOS
+          print('🌐 Configurando Firebase para web con sincronización mejorada...');
           try {
-            // Nota: Persistence.NONE no está disponible en esta versión de Firebase Auth
-            // await FirebaseAuth.instance.setPersistence(Persistence.NONE);
-            print('✅ Firebase Auth configurado para iOS (persistence desactivado en Firestore)');
+            FirebaseFirestore.instance.settings = const Settings(
+              persistenceEnabled: true, // Habilitar persistencia para mejor sincronización
+              cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+              host: 'firestore.googleapis.com',
+              sslEnabled: true,
+            );
+            print('✅ Firebase configurado para web con persistencia habilitada');
           } catch (e) {
-            print('⚠️ Error configurando Firebase Auth: $e');
+            // Fallback sin persistencia si hay problemas
+            print('⚠️ Error con persistencia, usando fallback: $e');
+            FirebaseFirestore.instance.settings = const Settings(
+              persistenceEnabled: false,
+              cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+              host: 'firestore.googleapis.com',
+              sslEnabled: true,
+            );
           }
         }
       },

@@ -150,24 +150,39 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Indicador de estado para iOS
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
+                  // Botón de actualización manual
+                  InkWell(
+                    onTap: () async {
+                      // Mostrar feedback visual
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Actualizando datos...'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      
+                      // Forzar actualización
+                      final calendarService = ref.read(calendarServiceProvider);
+                      await calendarService.forceRefresh();
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Datos actualizados'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      child: const Icon(
+                        Icons.refresh,
+                        color: Colors.white70,
+                        size: 16,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    'iOS Sync',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const SizedBox(width: 8),
           const Spacer(),
           // Año clickeable para ir al resumen anual
           GestureDetector(

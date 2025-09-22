@@ -168,9 +168,14 @@ class CalendarDataService extends ChangeNotifier {
       
               // Detectar iOS y usar modo híbrido
               if (kIsWeb && _isLikelyIOS()) {
-                print('📱 iOS detectado, usando modo híbrido: fallback + sincronización limitada');
-                _loadFallbackDataForIOS();
-                _startLimitedSyncForIOS();
+                print('📱 iOS detectado, usando sincronización en tiempo real mejorada');
+                // Intentar sincronización normal primero
+                try {
+                  initialize();
+                } catch (e) {
+                  print('⚠️ Error en sincronización normal, usando fallback: $e');
+                  _loadFallbackDataForIOS();
+                }
                 return;
               }
       
@@ -206,8 +211,8 @@ class CalendarDataService extends ChangeNotifier {
     print('🚀 Inicializando sincronización en tiempo real para familyId: $_userFamilyId');
     
     try {
-      // Configurar timeout para las suscripciones
-      final timeout = const Duration(seconds: 10); // Reducir timeout para iOS
+      // Configurar timeout para las suscripciones (aumentado para mejor estabilidad)
+      final timeout = const Duration(seconds: 30);
       
       // Suscripción legacy para compatibilidad
       _eventsSubscription = _firestore
@@ -685,6 +690,43 @@ class CalendarDataService extends ChangeNotifier {
     }
   }
 
+  // Método público para forzar actualización manual
+  Future<void> forceRefresh() async {
+    print('🔄 Forzando actualización manual de datos...');
+    
+    if (_userFamilyId == null) {
+      print('⚠️ No hay familyId, no se puede actualizar');
+      return;
+    }
+
+    try {
+      // Reinicializar suscripciones
+      await dispose();
+      await initialize();
+      
+      print('✅ Actualización manual completada');
+    } catch (e) {
+      print('❌ Error en actualización manual: $e');
+      // Intentar cargar datos estáticos como fallback
+      if (kIsWeb && _isLikelyIOS()) {
+        _loadFallbackDataForIOS();
+      }
+    }
+  }
+
+  // Método helper para notificar cambios de manera optimizada
+  void _notifyChangesOptimized() {
+    if (kIsWeb) {
+      // En web, usar addPostFrameCallback para evitar bloqueos
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    } else {
+      // En móvil, notificar directamente
+      notifyListeners();
+    }
+  }
+
   void _onEventsChanged(QuerySnapshot snapshot) {
     ErrorTracker.trackExecution(
       'on_events_changed',
@@ -718,7 +760,7 @@ class CalendarDataService extends ChangeNotifier {
       _events[entry.key] = entry.value.map((e) => e.toString()).toList();
     }
     
-        notifyListeners();
+        _notifyChangesOptimized();
         print('📊 Datos locales actualizados: $_events');
       },
     );
@@ -749,7 +791,7 @@ class CalendarDataService extends ChangeNotifier {
       _notes[entry.key] = entry.value.map((e) => e.toString()).toList();
     }
     
-    notifyListeners();
+    _notifyChangesOptimized();
     print('📊 Notas locales actualizadas: $_notes');
   }
 
@@ -778,7 +820,7 @@ class CalendarDataService extends ChangeNotifier {
       _shifts[entry.key] = entry.value.map((e) => e.toString()).toList();
     }
     
-    notifyListeners();
+    _notifyChangesOptimized();
     print('📊 Turnos locales actualizados: $_shifts');
   }
 
@@ -797,7 +839,7 @@ class CalendarDataService extends ChangeNotifier {
       }
     }
     
-    notifyListeners();
+    _notifyChangesOptimized();
     print('📊 Categorías locales actualizadas: $_dayCategories');
   }
 
@@ -823,7 +865,7 @@ class CalendarDataService extends ChangeNotifier {
       }
     }
     
-    notifyListeners();
+    _notifyChangesOptimized();
     print('📊 Plantillas de turnos locales actualizadas: ${_shiftTemplates.length} plantillas');
     print('🔧 IDs finales en lista local: ${_shiftTemplates.map((t) => '${t.name}(${t.id})').toList()}');
   }
