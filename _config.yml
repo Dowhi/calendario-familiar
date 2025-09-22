@@ -1,0 +1,27 @@
+# Configuración para GitHub Pages
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Configuración específica para Flutter Web
+baseurl: "/calendario-familiar"
+url: "https://dowhi.github.io"
+
+# Excluir archivos que no deben ser procesados por Jekyll
+exclude:
+  - README.md
+  - .gitignore
+  - .github/
+  - lib/
+  - pubspec.yaml
+  - analysis_options.yaml
+  - .dart_tool/
+  - .packages
+  - build/
+  - test/
+
+# Incluir solo los archivos necesarios para GitHub Pages
+include:
+  - index.html
+  - 404.html
