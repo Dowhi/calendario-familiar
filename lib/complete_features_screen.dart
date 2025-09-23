@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:calendario_familiar/main.dart';
+import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 
 class CompleteFeaturesScreen extends ConsumerStatefulWidget {
   const CompleteFeaturesScreen({super.key});
@@ -53,22 +54,11 @@ class _CompleteFeaturesScreenState extends ConsumerState<CompleteFeaturesScreen>
     });
 
     try {
-      final googleSignIn = ref.read(googleSignInProvider);
-      final auth = ref.read(firebaseAuthProvider);
-      
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
+      final user = await ref.read(authControllerProvider.notifier).signInWithGoogle();
+      if (user == null) {
         ref.read(googleSignInStatusProvider.notifier).state = '❌ Cancelado por el usuario';
         return;
       }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await auth.signInWithCredential(credential);
       
       ref.read(googleSignInStatusProvider.notifier).state = '✅ Google Sign In exitoso';
       ScaffoldMessenger.of(context).showSnackBar(

@@ -139,28 +139,45 @@ class AuthRepository {
   Future<AppUser?> signInWithGoogle() async {
     try {
       print('🔐 Iniciando Google Sign-In...');
+
+      User? firebaseUser;
       
-      // Usar signIn() que funciona tanto en web como en otras plataformas
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        print('❌ Usuario canceló el inicio de sesión');
-        return null;
+      if (kIsWeb) {
+        // Web/iOS Safari/PWA: usar popup con fallback a redirect
+        print('🌐 Web detectado: usando FirebaseAuth signInWithPopup/Redirect');
+        final provider = GoogleAuthProvider()
+          ..addScope('email')
+          ..addScope('profile');
+        provider.setCustomParameters({
+          'prompt': 'select_account',
+        });
+
+        try {
+          final UserCredential cred = await _auth.signInWithPopup(provider);
+          firebaseUser = cred.user;
+        } catch (e) {
+          print('⚠️ Popup falló, intentando signInWithRedirect: $e');
+          await _auth.signInWithRedirect(provider);
+          final UserCredential cred = await _auth.getRedirectResult();
+          firebaseUser = cred.user;
+        }
+      } else {
+        // Plataformas no web: usar google_sign_in
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          print('❌ Usuario canceló el inicio de sesión');
+          return null;
+        }
+        print('✅ Usuario de Google seleccionado: ${googleUser.email}');
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        firebaseUser = userCredential.user;
       }
 
-      print('✅ Usuario de Google seleccionado: ${googleUser.email}');
-      
-      // Obtener credenciales de autenticación
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Iniciar sesión en Firebase Auth
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
-      final User? firebaseUser = userCredential.user;
-      
       if (firebaseUser == null) {
         print('❌ No se pudo obtener usuario de Firebase');
         return null;
