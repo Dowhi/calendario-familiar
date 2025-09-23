@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:calendario_familiar/core/firebase/firebase_options.dart';
+import 'package:calendario_familiar/calendar_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,6 +81,17 @@ final testDocumentsProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
   return firestore.collection('test_documents').snapshots().map((snapshot) => snapshot.docs);
 });
 
+// Provider para el calendario
+final selectedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
+final focusedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
+final calendarFormatProvider = StateProvider<CalendarFormat>((ref) => CalendarFormat.month);
+
+// Provider para eventos del calendario
+final calendarEventsProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore.collection('calendar_events').snapshots().map((snapshot) => snapshot.docs);
+});
+
 // Configuración de rutas básica
 final GoRouter _router = GoRouter(
   initialLocation: '/',
@@ -99,6 +112,10 @@ final GoRouter _router = GoRouter(
       path: '/firestore',
       builder: (context, state) => const FirestoreScreen(),
     ),
+    GoRoute(
+      path: '/calendar',
+      builder: (context, state) => const CalendarScreen(),
+    ),
   ],
 );
 
@@ -115,7 +132,7 @@ class HomeScreen extends ConsumerWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendario Familiar - Fase 6'),
+        title: const Text('Calendario Familiar - Fase 7'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(
@@ -132,7 +149,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Fase 6: Firestore + Scroll',
+              'Fase 7: Calendario',
             ),
             const SizedBox(height: 20),
             Text(
@@ -196,6 +213,11 @@ class HomeScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => context.go('/firestore'),
               child: const Text('Ir a Firestore'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => context.go('/calendar'),
+              child: const Text('Ir a Calendario'),
             ),
             const SizedBox(height: 40),
                 const Text(
