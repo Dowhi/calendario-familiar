@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:calendario_familiar/core/firebase/firebase_options.dart';
 
 void main() async {
@@ -66,6 +67,18 @@ final currentUserProvider = StreamProvider<User?>((ref) {
 // Provider para el estado de autenticación
 final authStatusProvider = StateProvider<String>((ref) => 'Verificando...');
 
+// Provider para Firestore
+final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
+
+// Provider para el estado de Firestore
+final firestoreStatusProvider = StateProvider<String>((ref) => 'Verificando...');
+
+// Provider para documentos de prueba
+final testDocumentsProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore.collection('test_documents').snapshots().map((snapshot) => snapshot.docs);
+});
+
 // Configuración de rutas básica
 final GoRouter _router = GoRouter(
   initialLocation: '/',
@@ -82,6 +95,10 @@ final GoRouter _router = GoRouter(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
     ),
+    GoRoute(
+      path: '/firestore',
+      builder: (context, state) => const FirestoreScreen(),
+    ),
   ],
 );
 
@@ -93,24 +110,29 @@ class HomeScreen extends ConsumerWidget {
     final counter = ref.watch(counterProvider);
     final firebaseStatus = ref.watch(firebaseStatusProvider);
     final authStatus = ref.watch(authStatusProvider);
+    final firestoreStatus = ref.watch(firestoreStatusProvider);
     final currentUser = ref.watch(currentUserProvider);
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendario Familiar - Fase 5'),
+        title: const Text('Calendario Familiar - Fase 6'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
             const Text(
               '¡Hola desde iPhone!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             const Text(
-              'Fase 5: Firebase Auth',
+              'Fase 6: Firestore + Scroll',
             ),
             const SizedBox(height: 20),
             Text(
@@ -126,6 +148,14 @@ class HomeScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 16,
                 color: authStatus.contains('✅') ? Colors.green : Colors.orange,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Estado Firestore: $firestoreStatus',
+              style: TextStyle(
+                fontSize: 16,
+                color: firestoreStatus.contains('✅') ? Colors.green : Colors.orange,
               ),
             ),
             const SizedBox(height: 10),
@@ -162,13 +192,20 @@ class HomeScreen extends ConsumerWidget {
               onPressed: () => context.go('/login'),
               child: const Text('Ir a Login'),
             ),
-            const SizedBox(height: 40),
-            const Text(
-              'Si ves esto, Firebase Auth funciona en iPhone',
-              style: TextStyle(fontSize: 16, color: Colors.green),
-              textAlign: TextAlign.center,
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => context.go('/firestore'),
+              child: const Text('Ir a Firestore'),
             ),
-          ],
+            const SizedBox(height: 40),
+                const Text(
+                  'Si ves esto, Firestore funciona en iPhone',
+                  style: TextStyle(fontSize: 16, color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -190,10 +227,14 @@ class SecondScreen extends ConsumerWidget {
         title: const Text('Segunda Pantalla'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
             const Text(
               'Segunda Pantalla',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -248,12 +289,14 @@ class SecondScreen extends ConsumerWidget {
               child: const Text('Ir a Login'),
             ),
             const SizedBox(height: 40),
-            const Text(
-              'Si ves esto, Firebase Auth funciona entre pantallas en iPhone',
-              style: TextStyle(fontSize: 16, color: Colors.green),
-              textAlign: TextAlign.center,
+                const Text(
+                  'Si ves esto, Firebase Auth funciona entre pantallas en iPhone',
+                  style: TextStyle(fontSize: 16, color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -381,12 +424,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         title: const Text('Login - Fase 5'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
               const Text(
                 'Firebase Auth Test',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -443,12 +488,167 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: const Text('Volver al Inicio'),
               ),
               const SizedBox(height: 40),
-              const Text(
-                'Si ves esto, Firebase Auth funciona en iPhone',
-                style: TextStyle(fontSize: 16, color: Colors.green),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                const Text(
+                  'Si ves esto, Firebase Auth funciona en iPhone',
+                  style: TextStyle(fontSize: 16, color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FirestoreScreen extends ConsumerStatefulWidget {
+  const FirestoreScreen({super.key});
+
+  @override
+  ConsumerState<FirestoreScreen> createState() => _FirestoreScreenState();
+}
+
+class _FirestoreScreenState extends ConsumerState<FirestoreScreen> {
+  final _textController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addDocument() async {
+    if (_textController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor ingresa un texto')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final firestore = ref.read(firestoreProvider);
+      await firestore.collection('test_documents').add({
+        'text': _textController.text,
+        'timestamp': FieldValue.serverTimestamp(),
+        'user': ref.read(currentUserProvider).value?.uid ?? 'anonymous',
+      });
+      
+      ref.read(firestoreStatusProvider.notifier).state = '✅ Documento agregado';
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Documento agregado exitosamente')),
+      );
+      
+      _textController.clear();
+    } catch (e) {
+      ref.read(firestoreStatusProvider.notifier).state = '❌ Error: $e';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final testDocuments = ref.watch(testDocumentsProvider);
+    final firestoreStatus = ref.watch(firestoreStatusProvider);
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Firestore - Fase 6'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'Firestore Test',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Estado Firestore: $firestoreStatus',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: firestoreStatus.contains('✅') ? Colors.green : Colors.orange,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: _textController,
+                  decoration: const InputDecoration(
+                    labelText: 'Texto del documento',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 20),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  ElevatedButton(
+                    onPressed: _addDocument,
+                    child: const Text('Agregar Documento'),
+                  ),
+                const SizedBox(height: 30),
+                const Text(
+                  'Documentos existentes:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                testDocuments.when(
+                  data: (docs) => docs.isEmpty
+                      ? const Text('No hay documentos')
+                      : Column(
+                          children: docs.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>?;
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              child: ListTile(
+                                title: Text(data?['text'] ?? 'Sin texto'),
+                                subtitle: Text(
+                                  'Usuario: ${data?['user'] ?? 'Desconocido'}',
+                                ),
+                                trailing: Text(
+                                  data?['timestamp'] != null
+                                      ? 'Hace un momento'
+                                      : 'Sin fecha',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                  loading: () => const CircularProgressIndicator(),
+                  error: (error, stack) => Text('Error: $error'),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () => context.go('/'),
+                  child: const Text('Volver al Inicio'),
+                ),
+                const SizedBox(height: 40),
+                const Text(
+                  'Si ves esto, Firestore funciona en iPhone',
+                  style: TextStyle(fontSize: 16, color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       ),
