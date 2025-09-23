@@ -34,10 +34,10 @@
   <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/calendario-familiar/favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>Calendario Familiar</title>
-  <link rel="manifest" href="/calendario-familiar/manifest.json">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <!-- ELEMENTO ESTÁNDAR DE FLUTTER -->
@@ -115,33 +115,9 @@
   
   <!-- CONFIGURACIÓN DE FIREBASE PARA WEB -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: 'AIzaSyCGE9TrLvHAIwuXn0o6jqFSw5RhS0HDtg8',
-      authDomain: 'apptaxi-f2190.firebaseapp.com',
-      projectId: 'apptaxi-f2190',
-      storageBucket: 'apptaxi-f2190.firebasestorage.app',
-      messagingSenderId: '804273724178',
-      appId: '1:804273724178:web:c5955a1f657884c0e7f1cb',
-      measurementId: 'G-3D8R30TYTM'
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const storage = getStorage(app);
-
-    // Conectar a emuladores en desarrollo (SOLO para Firestore y Storage)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      try {
-        // Solo conectar Firestore y Storage a emuladores (puertos correctos)
+    // Configuración de Firebase temporalmente deshabilitada
+    console.log('Firebase temporalmente deshabilitado para desarrollo local');
+    // TODO: Agregar configuración correcta de Firebase para el proyecto de calendario familiar
         connectFirestoreEmulator(db, 'localhost', 8081);
         connectStorageEmulator(storage, 'localhost', 9199);
         console.log('🌐 Conectado a emuladores de Firestore y Storage');
