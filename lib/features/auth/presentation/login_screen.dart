@@ -434,11 +434,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: double.infinity,
                               height: 50,
                               child: OutlinedButton.icon(
-                                icon: Image.asset(
-                                  'assets/icons/google_logo.png', // Asegúrate de tener un logo de Google en assets/icons
-                                  height: 24,
-                                  width: 24,
-                                ),
+                                icon: const Icon(Icons.login, size: 24, color: Colors.red),
                                 label: const Text(
                                   'Iniciar Sesión con Google',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
