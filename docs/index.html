@@ -4,7 +4,7 @@
   <base href="/calendario-familiar/">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Calendario familiar - Versión mínima para test iOS">
+  <meta name="description" content="Calendario familiar - Versión funcional sin Firebase">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#2196F3">
 
@@ -102,5 +102,35 @@
   </script>
   
   <script src="flutter_bootstrap.js" async></script>
+  
+  <!-- Script para forzar actualización del service worker -->
+  <script>
+    // Forzar actualización del service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('flutter_service_worker.js?v=' + Date.now())
+          .then(function(registration) {
+            console.log('Service Worker registrado:', registration);
+            // Forzar actualización
+            registration.update();
+          })
+          .catch(function(error) {
+            console.log('Error al registrar Service Worker:', error);
+          });
+      });
+    }
+    
+    // Limpiar caché si hay parámetro ?clear-cache
+    if (window.location.search.includes('clear-cache')) {
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) {
+            caches.delete(name);
+          }
+          console.log('Caché limpiado');
+        });
+      }
+    }
+  </script>
 </body>
 </html>
