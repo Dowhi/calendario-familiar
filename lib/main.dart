@@ -5,8 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:calendario_familiar/core/firebase/firebase_options.dart';
 import 'package:calendario_familiar/calendar_screen.dart';
+import 'package:calendario_familiar/complete_features_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +96,18 @@ final calendarEventsProvider = StreamProvider<List<DocumentSnapshot>>((ref) {
   return firestore.collection('calendar_events').snapshots().map((snapshot) => snapshot.docs);
 });
 
+// Provider para Google Sign In
+final googleSignInProvider = Provider<GoogleSignIn>((ref) => GoogleSignIn());
+
+// Provider para notificaciones locales
+final notificationsProvider = Provider<FlutterLocalNotificationsPlugin>((ref) => FlutterLocalNotificationsPlugin());
+
+// Provider para el estado de notificaciones
+final notificationsStatusProvider = StateProvider<String>((ref) => 'Verificando...');
+
+// Provider para el estado de Google Sign In
+final googleSignInStatusProvider = StateProvider<String>((ref) => 'Verificando...');
+
 // Configuración de rutas básica
 final GoRouter _router = GoRouter(
   initialLocation: '/',
@@ -116,6 +132,10 @@ final GoRouter _router = GoRouter(
       path: '/calendar',
       builder: (context, state) => const CalendarScreen(),
     ),
+    GoRoute(
+      path: '/complete',
+      builder: (context, state) => const CompleteFeaturesScreen(),
+    ),
   ],
 );
 
@@ -132,7 +152,7 @@ class HomeScreen extends ConsumerWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendario Familiar - Fase 7'),
+        title: const Text('Calendario Familiar - Fase 8'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(
@@ -149,7 +169,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Fase 7: Calendario',
+              'Fase 8: Funcionalidades Completas',
             ),
             const SizedBox(height: 20),
             Text(
@@ -218,6 +238,11 @@ class HomeScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => context.go('/calendar'),
               child: const Text('Ir a Calendario'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => context.go('/complete'),
+              child: const Text('Funcionalidades Completas'),
             ),
             const SizedBox(height: 40),
                 const Text(
