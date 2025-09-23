@@ -26,8 +26,12 @@ mixin _$Recurrence {
   int? get byMonthDay => throw _privateConstructorUsedError;
   DateTime? get until => throw _privateConstructorUsedError;
 
+  /// Serializes this Recurrence to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Recurrence
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $RecurrenceCopyWith<Recurrence> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -56,6 +60,8 @@ class _$RecurrenceCopyWithImpl<$Res, $Val extends Recurrence>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Recurrence
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -114,6 +120,8 @@ class __$$RecurrenceImplCopyWithImpl<$Res>
       _$RecurrenceImpl _value, $Res Function(_$RecurrenceImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of Recurrence
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -202,12 +210,14 @@ class _$RecurrenceImpl implements _Recurrence {
             (identical(other.until, until) || other.until == until));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, rule, interval,
       const DeepCollectionEquality().hash(_byWeekdays), byMonthDay, until);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Recurrence
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$RecurrenceImplCopyWith<_$RecurrenceImpl> get copyWith =>
@@ -242,8 +252,11 @@ abstract class _Recurrence implements Recurrence {
   int? get byMonthDay;
   @override
   DateTime? get until;
+
+  /// Create a copy of Recurrence
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$RecurrenceImplCopyWith<_$RecurrenceImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
