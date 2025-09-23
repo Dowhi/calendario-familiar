@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MinimalApp());
+  runApp(const ProviderScope(child: MinimalApp()));
 }
 
 class MinimalApp extends StatelessWidget {
@@ -11,7 +12,7 @@ class MinimalApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Calendario Familiar - Fase 2',
+      title: 'Calendario Familiar - Fase 3',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -21,6 +22,9 @@ class MinimalApp extends StatelessWidget {
     );
   }
 }
+
+// Provider simple para el contador
+final counterProvider = StateProvider<int>((ref) => 0);
 
 // Configuración de rutas básica
 final GoRouter _router = GoRouter(
@@ -37,27 +41,16 @@ final GoRouter _router = GoRouter(
   ],
 );
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.watch(counterProvider);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendario Familiar - Fase 2'),
+        title: const Text('Calendario Familiar - Fase 3'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
@@ -70,17 +63,22 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Fase 2: Navegación básica con go_router',
+              'Fase 3: Gestión de estado con Riverpod',
             ),
             const SizedBox(height: 20),
             Text(
-              '$_counter',
+              '$counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _incrementCounter,
+              onPressed: () => ref.read(counterProvider.notifier).state++,
               child: const Text('Incrementar'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => ref.read(counterProvider.notifier).state = 0,
+              child: const Text('Resetear'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -89,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 40),
             const Text(
-              'Si ves esto, la navegación básica funciona en iPhone',
+              'Si ves esto, Riverpod funciona en iPhone',
               style: TextStyle(fontSize: 16, color: Colors.green),
               textAlign: TextAlign.center,
             ),
@@ -100,11 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class SecondScreen extends StatelessWidget {
+class SecondScreen extends ConsumerWidget {
   const SecondScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.watch(counterProvider);
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Segunda Pantalla'),
@@ -120,16 +120,26 @@ class SecondScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Esta es la segunda pantalla para probar navegación',
+              'Esta pantalla también usa Riverpod',
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
+            Text(
+              'Contador compartido: $counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => ref.read(counterProvider.notifier).state++,
+              child: const Text('Incrementar desde aquí'),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => context.go('/'),
               child: const Text('Volver al Inicio'),
             ),
             const SizedBox(height: 40),
             const Text(
-              'Si ves esto, go_router funciona en iPhone',
+              'Si ves esto, Riverpod funciona entre pantallas en iPhone',
               style: TextStyle(fontSize: 16, color: Colors.green),
               textAlign: TextAlign.center,
             ),
