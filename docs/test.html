@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Calendario Familiar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid #28a745;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .button {
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 ¡GitHub Pages Funciona!</h1>
+        
+        <div class="success">
+            <h2>✅ Test Exitoso</h2>
+            <p>Si ves esta página, GitHub Pages está funcionando correctamente.</p>
+            <p><strong>Fecha:</strong> <span id="fecha"></span></p>
+            <p><strong>Hora:</strong> <span id="hora"></span></p>
+        </div>
+        
+        <p>Esta es una página de prueba para verificar que el despliegue funciona.</p>
+        
+        <a href="/calendario-familiar/" class="button">🏠 Ir a la Aplicación Principal</a>
+        <a href="/calendario-familiar/force-update.html" class="button">🔄 Forzar Actualización</a>
+        
+        <div style="margin-top: 30px; font-size: 14px; opacity: 0.8;">
+            <p>Calendario Familiar - Versión de Prueba</p>
+            <p>Desplegado en GitHub Pages</p>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar fecha y hora actual
+        const ahora = new Date();
+        document.getElementById('fecha').textContent = ahora.toLocaleDateString('es-ES');
+        document.getElementById('hora').textContent = ahora.toLocaleTimeString('es-ES');
+        
+        // Log para verificar que JavaScript funciona
+        console.log('✅ Página de test cargada correctamente');
+        console.log('📅 Fecha:', ahora.toLocaleDateString('es-ES'));
+        console.log('🕐 Hora:', ahora.toLocaleTimeString('es-ES'));
+    </script>
+</body>
+</html>
