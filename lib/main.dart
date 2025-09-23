@@ -1,18 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:calendario_familiar/core/firebase/firebase_options.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MinimalApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar Firebase
+  String firebaseStatus = 'Inicializando...';
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseStatus = '✅ Firebase inicializado correctamente';
+    print('✅ Firebase inicializado correctamente');
+  } catch (e) {
+    firebaseStatus = '❌ Error inicializando Firebase: $e';
+    print('❌ Error inicializando Firebase: $e');
+  }
+  
+  runApp(ProviderScope(
+    child: MinimalApp(initialFirebaseStatus: firebaseStatus),
+  ));
 }
 
-class MinimalApp extends StatelessWidget {
-  const MinimalApp({super.key});
+class MinimalApp extends ConsumerWidget {
+  final String initialFirebaseStatus;
+  
+  const MinimalApp({super.key, required this.initialFirebaseStatus});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Establecer el estado inicial de Firebase
+    ref.read(firebaseStatusProvider.notifier).state = initialFirebaseStatus;
+    
     return MaterialApp.router(
-      title: 'Calendario Familiar - Fase 3',
+      title: 'Calendario Familiar - Fase 4',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -25,6 +49,9 @@ class MinimalApp extends StatelessWidget {
 
 // Provider simple para el contador
 final counterProvider = StateProvider<int>((ref) => 0);
+
+// Provider para verificar estado de Firebase
+final firebaseStatusProvider = StateProvider<String>((ref) => 'Inicializando...');
 
 // Configuración de rutas básica
 final GoRouter _router = GoRouter(
@@ -47,10 +74,11 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final counter = ref.watch(counterProvider);
+    final firebaseStatus = ref.watch(firebaseStatusProvider);
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendario Familiar - Fase 3'),
+        title: const Text('Calendario Familiar - Fase 4'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
@@ -63,11 +91,19 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Fase 3: Gestión de estado con Riverpod',
+              'Fase 4: Firebase Core',
             ),
             const SizedBox(height: 20),
             Text(
-              '$counter',
+              'Estado Firebase: $firebaseStatus',
+              style: TextStyle(
+                fontSize: 16,
+                color: firebaseStatus.contains('✅') ? Colors.green : Colors.orange,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Contador: $counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 20),
@@ -87,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 40),
             const Text(
-              'Si ves esto, Riverpod funciona en iPhone',
+              'Si ves esto, Firebase Core funciona en iPhone',
               style: TextStyle(fontSize: 16, color: Colors.green),
               textAlign: TextAlign.center,
             ),
@@ -104,6 +140,7 @@ class SecondScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final counter = ref.watch(counterProvider);
+    final firebaseStatus = ref.watch(firebaseStatusProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -120,7 +157,15 @@ class SecondScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Esta pantalla también usa Riverpod',
+              'Esta pantalla también usa Riverpod y Firebase',
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Estado Firebase: $firebaseStatus',
+              style: TextStyle(
+                fontSize: 16,
+                color: firebaseStatus.contains('✅') ? Colors.green : Colors.orange,
+              ),
             ),
             const SizedBox(height: 20),
             Text(
@@ -139,7 +184,7 @@ class SecondScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 40),
             const Text(
-              'Si ves esto, Riverpod funciona entre pantallas en iPhone',
+              'Si ves esto, Firebase Core funciona entre pantallas en iPhone',
               style: TextStyle(fontSize: 16, color: Colors.green),
               textAlign: TextAlign.center,
             ),
