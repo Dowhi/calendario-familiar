@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/models/shift_template.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:calendario_familiar/core/services/firestore_service.dart';
+import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 
 class AvailableShiftsScreen extends ConsumerStatefulWidget {
   const AvailableShiftsScreen({super.key});
@@ -31,34 +31,43 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
 
   Future<void> _loadShiftTemplates() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final shiftsJson = prefs.getStringList('shift_templates') ?? [];
+      final firestoreService = ref.read(firestoreServiceProvider);
+      final currentUser = ref.read(authControllerProvider);
+      final familyId = currentUser?.familyId;
+
+      final shiftsData = await firestoreService.getShiftTemplates(familyId: familyId);
       
-      List<ShiftTemplate> savedShifts = [];
-      if (shiftsJson.isNotEmpty) {
-        savedShifts = shiftsJson
-            .map((json) => ShiftTemplate.fromJson(jsonDecode(json)))
+      List<ShiftTemplate> firebaseShifts = [];
+      if (shiftsData.isNotEmpty) {
+        firebaseShifts = shiftsData
+            .map((data) => ShiftTemplate.fromJson(data))
             .toList();
       }
       
-      // Si no hay turnos guardados, usar los de ejemplo
-      if (savedShifts.isEmpty) {
-        savedShifts = _getExampleShiftTemplates();
+      // Si no hay turnos en Firebase, usar los de ejemplo
+      if (firebaseShifts.isEmpty) {
+        firebaseShifts = _getExampleShiftTemplates();
       }
       
       if (mounted) {
         setState(() {
-          _shiftTemplates = savedShifts;
+          _shiftTemplates = firebaseShifts;
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('❌ Error cargando turnos: $e');
+      print('❌ Error cargando turnos de Firebase: $e');
       if (mounted) {
         setState(() {
           _shiftTemplates = _getExampleShiftTemplates();
           _isLoading = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error cargando turnos de Firebase: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
     }
   }
@@ -489,21 +498,8 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
 
   Future<void> _deleteShift(ShiftTemplate template) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final shiftsJson = prefs.getStringList('shift_templates') ?? [];
-      
-      List<ShiftTemplate> shifts = shiftsJson
-          .map((json) => ShiftTemplate.fromJson(jsonDecode(json)))
-          .toList();
-      
-      // Eliminar el turno
-      shifts.removeWhere((s) => s.id == template.id);
-      
-      // Guardar la lista actualizada
-      final updatedShiftsJson = shifts
-          .map((shift) => jsonEncode(shift.toJson()))
-          .toList();
-      await prefs.setStringList('shift_templates', updatedShiftsJson);
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.deleteShiftTemplate(template.id);
       
       setState(() {
         _shiftTemplates.removeWhere((t) => t.id == template.id);
@@ -512,17 +508,17 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Turno "${template.name}" eliminado'),
+            content: Text('Turno "${template.name}" eliminado de Firebase'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      print('❌ Error eliminando turno: $e');
+      print('❌ Error eliminando turno de Firebase: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error eliminando turno: $e'),
+            content: Text('Error eliminando turno de Firebase: $e'),
             backgroundColor: Colors.red,
           ),
         );

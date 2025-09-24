@@ -14,6 +14,7 @@ class FirestoreService extends ChangeNotifier {
   static const String _categoriesCollection = 'categories';
   static const String _familiesCollection = 'families';
   static const String _usersCollection = 'users';
+  static const String _shiftTemplatesCollection = 'shift_templates';
 
   // Convertir Timestamp a DateTime
   DateTime _timestampToDateTime(Timestamp timestamp) {
@@ -698,6 +699,149 @@ class FirestoreService extends ChangeNotifier {
       
     } catch (e) {
       print('❌ Error removiendo usuario de familia: $e');
+      rethrow;
+    }
+  }
+
+  // ===== PLANTILLAS DE TURNOS =====
+
+  // Agregar plantilla de turno
+  Future<void> addShiftTemplate({
+    required String name,
+    required String colorHex,
+    required String startTime,
+    required String endTime,
+    String? description,
+    String? familyId,
+  }) async {
+    try {
+      final userId = _currentUserId;
+      if (userId == null) {
+        throw Exception('Usuario no autenticado');
+      }
+
+      final shiftData = {
+        'name': name,
+        'colorHex': colorHex,
+        'startTime': startTime,
+        'endTime': endTime,
+        'description': description ?? '',
+        'familyId': familyId ?? _currentUserId,
+        'userId': userId,
+        'createdAt': _dateTimeToTimestamp(DateTime.now()),
+        'updatedAt': _dateTimeToTimestamp(DateTime.now()),
+      };
+
+      await _firestore
+          .collection(_shiftTemplatesCollection)
+          .add(shiftData);
+
+      print('✅ Plantilla de turno agregada exitosamente');
+    } catch (e) {
+      print('❌ Error agregando plantilla de turno: $e');
+      rethrow;
+    }
+  }
+
+  // Obtener plantillas de turnos de la familia
+  Stream<List<Map<String, dynamic>>> getShiftTemplatesStream({String? familyId}) {
+    try {
+      final query = _firestore
+          .collection(_shiftTemplatesCollection)
+          .where('familyId', isEqualTo: familyId ?? _currentUserId);
+
+      return query.snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          final data = doc.data();
+          data['id'] = doc.id;
+          return data;
+        }).toList();
+      });
+    } catch (e) {
+      print('❌ Error obteniendo plantillas de turnos: $e');
+      rethrow;
+    }
+  }
+
+  // Obtener plantillas de turnos (una sola vez)
+  Future<List<Map<String, dynamic>>> getShiftTemplates({String? familyId}) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_shiftTemplatesCollection)
+          .where('familyId', isEqualTo: familyId ?? _currentUserId)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('❌ Error obteniendo plantillas de turnos: $e');
+      rethrow;
+    }
+  }
+
+  // Actualizar plantilla de turno
+  Future<void> updateShiftTemplate({
+    required String id,
+    required String name,
+    required String colorHex,
+    required String startTime,
+    required String endTime,
+    String? description,
+  }) async {
+    try {
+      await _firestore
+          .collection(_shiftTemplatesCollection)
+          .doc(id)
+          .update({
+        'name': name,
+        'colorHex': colorHex,
+        'startTime': startTime,
+        'endTime': endTime,
+        'description': description ?? '',
+        'updatedAt': _dateTimeToTimestamp(DateTime.now()),
+      });
+
+      print('✅ Plantilla de turno actualizada exitosamente');
+    } catch (e) {
+      print('❌ Error actualizando plantilla de turno: $e');
+      rethrow;
+    }
+  }
+
+  // Eliminar plantilla de turno
+  Future<void> deleteShiftTemplate(String id) async {
+    try {
+      await _firestore
+          .collection(_shiftTemplatesCollection)
+          .doc(id)
+          .delete();
+
+      print('✅ Plantilla de turno eliminada exitosamente');
+    } catch (e) {
+      print('❌ Error eliminando plantilla de turno: $e');
+      rethrow;
+    }
+  }
+
+  // Obtener plantilla de turno por ID
+  Future<Map<String, dynamic>?> getShiftTemplateById(String id) async {
+    try {
+      final docSnapshot = await _firestore
+          .collection(_shiftTemplatesCollection)
+          .doc(id)
+          .get();
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data()!;
+        data['id'] = docSnapshot.id;
+        return data;
+      }
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo plantilla de turno: $e');
       rethrow;
     }
   }

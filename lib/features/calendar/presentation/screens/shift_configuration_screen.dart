@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/models/shift_template.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:calendario_familiar/core/services/firestore_service.dart';
+import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 
 class ShiftConfigurationScreen extends ConsumerStatefulWidget {
   final ShiftTemplate? shiftTemplate; // null para crear nuevo, no null para editar
@@ -608,47 +608,39 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
     }
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final existingShiftsJson = prefs.getStringList('shift_templates') ?? [];
-      List<ShiftTemplate> existingShifts = existingShiftsJson
-          .map((json) => ShiftTemplate.fromJson(jsonDecode(json)))
-          .toList();
-
-      final newShift = ShiftTemplate(
-        id: widget.shiftTemplate?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text.trim(),
-        colorHex: _selectedBackgroundColor,
-        startTime: widget.shiftTemplate?.startTime ?? '08:00',
-        endTime: widget.shiftTemplate?.endTime ?? '16:00',
-        description: widget.shiftTemplate?.description,
-        createdAt: widget.shiftTemplate?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      final firestoreService = ref.read(firestoreServiceProvider);
+      final currentUser = ref.read(authControllerProvider);
+      final familyId = currentUser?.familyId;
 
       if (widget.shiftTemplate != null) {
         // Actualizar turno existente
-        final index = existingShifts.indexWhere((s) => s.id == widget.shiftTemplate!.id);
-        if (index != -1) {
-          existingShifts[index] = newShift;
-        }
+        await firestoreService.updateShiftTemplate(
+          id: widget.shiftTemplate!.id,
+          name: _nameController.text.trim(),
+          colorHex: _selectedBackgroundColor,
+          startTime: widget.shiftTemplate!.startTime,
+          endTime: widget.shiftTemplate!.endTime,
+          description: widget.shiftTemplate!.description,
+        );
       } else {
         // Crear nuevo turno
-        existingShifts.add(newShift);
+        await firestoreService.addShiftTemplate(
+          name: _nameController.text.trim(),
+          colorHex: _selectedBackgroundColor,
+          startTime: '08:00',
+          endTime: '16:00',
+          description: 'Turno creado desde la app',
+          familyId: familyId,
+        );
       }
-
-      // Guardar en SharedPreferences
-      final shiftsJson = existingShifts
-          .map((shift) => jsonEncode(shift.toJson()))
-          .toList();
-      await prefs.setStringList('shift_templates', shiftsJson);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               widget.shiftTemplate != null 
-                  ? 'Turno "${_nameController.text}" actualizado' 
-                  : 'Turno "${_nameController.text}" creado',
+                  ? 'Turno "${_nameController.text}" actualizado en Firebase' 
+                  : 'Turno "${_nameController.text}" creado en Firebase',
             ),
             backgroundColor: Colors.green,
           ),
@@ -662,11 +654,11 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         });
       }
     } catch (e) {
-      print('❌ Error guardando turno: $e');
+      print('❌ Error guardando turno en Firebase: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error guardando turno: $e'),
+            content: Text('Error guardando turno en Firebase: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -704,20 +696,38 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
     );
   }
 
-  void _deleteShift() {
-    // TODO: Implementar eliminación real cuando esté disponible el backend
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Turno "${_nameController.text}" eliminado'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  Future<void> _deleteShift() async {
+    if (widget.shiftTemplate == null) return;
 
-    Future.delayed(const Duration(milliseconds: 500), () {
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.deleteShiftTemplate(widget.shiftTemplate!.id);
+
       if (mounted) {
-        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Turno "${_nameController.text}" eliminado de Firebase'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            context.pop();
+          }
+        });
       }
-    });
+    } catch (e) {
+      print('❌ Error eliminando turno de Firebase: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error eliminando turno de Firebase: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showColorPickerDialog(Function(String) onColorSelected) {
