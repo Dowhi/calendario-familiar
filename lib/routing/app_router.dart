@@ -135,7 +135,10 @@ final appRouter = GoRouter(
     // Nueva ruta para la gestión familiar
     GoRoute(
       path: '/family-management',
-      builder: (context, state) => const FamilyManagementScreen(),
+      builder: (context, state) {
+        print('🔧 Router: Construyendo FamilyManagementScreen para /family-management');
+        return const FamilyManagementScreen();
+      },
     ),
     
     // Nueva ruta para la configuración de familia

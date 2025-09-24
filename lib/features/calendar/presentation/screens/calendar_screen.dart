@@ -105,7 +105,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             IconButton(
               icon: const Icon(Icons.group),
               onPressed: () {
-                context.push('/family-management');
+                print('🔧 Botón Familia presionado - intentando navegar a /family-management');
+                try {
+                  context.push('/family-management');
+                  print('✅ Navegación a /family-management exitosa');
+                } catch (e) {
+                  print('❌ Error en navegación a /family-management: $e');
+                }
               },
             ),
           ],
