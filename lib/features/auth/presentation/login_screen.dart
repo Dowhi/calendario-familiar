@@ -53,8 +53,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         print('✅ Inicio de sesión exitoso: ${user.displayName}');
         
         if (mounted) {
-          // Navegar directamente a la ruta raíz (calendario)
-          context.go('/');
+          // Navegar directamente al calendario principal
+          context.go('/calendar');
           
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -163,7 +163,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (user != null) {
         print('✅ Google Sign-In exitoso: ${user.displayName}');
         if (mounted) {
-          context.go('/');
+          // Redirigir al calendario principal después del login exitoso
+          context.go('/calendar');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('✅ Bienvenido con Google, ${user.displayName ?? 'Usuario'}'),

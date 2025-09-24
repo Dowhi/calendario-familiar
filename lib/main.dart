@@ -403,7 +403,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SnackBar(content: Text('Login exitoso')),
       );
       
-      context.go('/');
+      // Redirigir al calendario principal después del login exitoso
+      context.go('/calendar');
     } catch (e) {
       ref.read(authStatusProvider.notifier).state = '❌ Error de autenticación: $e';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -440,7 +441,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SnackBar(content: Text('Registro exitoso')),
       );
       
-      context.go('/');
+      // Redirigir al calendario principal después del registro exitoso
+      context.go('/calendar');
     } catch (e) {
       ref.read(authStatusProvider.notifier).state = '❌ Error de registro: $e';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -583,7 +585,7 @@ class _FirestoreScreenState extends ConsumerState<FirestoreScreen> {
       );
       return;
     }
-
+    
     setState(() {
       _isLoading = true;
     });
