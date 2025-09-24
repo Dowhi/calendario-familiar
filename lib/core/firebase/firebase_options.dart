@@ -44,7 +44,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCGE9TrLvHAIwuXn0o6jqFSw5RhS0HDtg8',
+    apiKey: 'AIzaSyB5vvp7IQOZLO7LlsUY_Wq-H8M_5PH3ZQE',
     appId: '1:804273724178:web:c5955a1f657884c0e7f1cb',
     messagingSenderId: '804273724178',
     projectId: 'apptaxi-f2190',
