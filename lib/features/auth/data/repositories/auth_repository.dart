@@ -143,23 +143,36 @@ class AuthRepository {
       User? firebaseUser;
       
       if (kIsWeb) {
-        // Web/iOS Safari/PWA: usar popup con fallback a redirect
-        print('🌐 Web detectado: usando FirebaseAuth signInWithPopup/Redirect');
+        // Web/iOS Safari/PWA: usar Google Identity Services
+        print('🌐 Web detectado: usando Google Identity Services');
+        
+        // Crear provider con configuración específica para web
         final provider = GoogleAuthProvider()
           ..addScope('email')
           ..addScope('profile');
+        
+        // Configuración específica para evitar problemas de API key
         provider.setCustomParameters({
           'prompt': 'select_account',
+          'ux_mode': 'popup',
         });
 
         try {
+          print('🔄 Intentando signInWithPopup...');
           final UserCredential cred = await _auth.signInWithPopup(provider);
           firebaseUser = cred.user;
+          print('✅ Popup exitoso');
         } catch (e) {
           print('⚠️ Popup falló, intentando signInWithRedirect: $e');
-          await _auth.signInWithRedirect(provider);
-          final UserCredential cred = await _auth.getRedirectResult();
-          firebaseUser = cred.user;
+          try {
+            await _auth.signInWithRedirect(provider);
+            final UserCredential cred = await _auth.getRedirectResult();
+            firebaseUser = cred.user;
+            print('✅ Redirect exitoso');
+          } catch (redirectError) {
+            print('❌ Redirect también falló: $redirectError');
+            rethrow;
+          }
         }
       } else {
         // Plataformas no web: usar google_sign_in
