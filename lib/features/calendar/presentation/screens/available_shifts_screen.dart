@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/models/shift_template.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AvailableShiftsScreen extends ConsumerStatefulWidget {
   const AvailableShiftsScreen({super.key});
@@ -20,15 +22,44 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
     _loadShiftTemplates();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Recargar turnos cuando se regrese de otra pantalla
+    _loadShiftTemplates();
+  }
+
   Future<void> _loadShiftTemplates() async {
-    // Datos de ejemplo mientras implementamos la funcionalidad completa
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    if (mounted) {
-      setState(() {
-        _shiftTemplates = _getExampleShiftTemplates();
-        _isLoading = false;
-      });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final shiftsJson = prefs.getStringList('shift_templates') ?? [];
+      
+      List<ShiftTemplate> savedShifts = [];
+      if (shiftsJson.isNotEmpty) {
+        savedShifts = shiftsJson
+            .map((json) => ShiftTemplate.fromJson(jsonDecode(json)))
+            .toList();
+      }
+      
+      // Si no hay turnos guardados, usar los de ejemplo
+      if (savedShifts.isEmpty) {
+        savedShifts = _getExampleShiftTemplates();
+      }
+      
+      if (mounted) {
+        setState(() {
+          _shiftTemplates = savedShifts;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('❌ Error cargando turnos: $e');
+      if (mounted) {
+        setState(() {
+          _shiftTemplates = _getExampleShiftTemplates();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -458,8 +489,21 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
 
   Future<void> _deleteShift(ShiftTemplate template) async {
     try {
-      // TODO: Implementar eliminación real cuando esté disponible el método
-      await Future.delayed(const Duration(milliseconds: 300));
+      final prefs = await SharedPreferences.getInstance();
+      final shiftsJson = prefs.getStringList('shift_templates') ?? [];
+      
+      List<ShiftTemplate> shifts = shiftsJson
+          .map((json) => ShiftTemplate.fromJson(jsonDecode(json)))
+          .toList();
+      
+      // Eliminar el turno
+      shifts.removeWhere((s) => s.id == template.id);
+      
+      // Guardar la lista actualizada
+      final updatedShiftsJson = shifts
+          .map((shift) => jsonEncode(shift.toJson()))
+          .toList();
+      await prefs.setStringList('shift_templates', updatedShiftsJson);
       
       setState(() {
         _shiftTemplates.removeWhere((t) => t.id == template.id);
