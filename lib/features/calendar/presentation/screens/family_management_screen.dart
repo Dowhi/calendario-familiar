@@ -441,6 +441,8 @@ class _FamilyManagementScreenState extends ConsumerState<FamilyManagementScreen>
 
   @override
   Widget build(BuildContext context) {
+    print('🔧 FamilyManagementScreen: Iniciando build...');
+    
     final currentUser = ref.watch(authControllerProvider);
     final firestoreService = ref.watch(firestoreServiceProvider);
     final currentFamilyId = currentUser?.familyId;
@@ -448,6 +450,7 @@ class _FamilyManagementScreenState extends ConsumerState<FamilyManagementScreen>
     print('🔧 build - currentUser: $currentUser');
     print('🔧 build - currentFamilyId: $currentFamilyId');
 
+    print('🔧 FamilyManagementScreen: Construyendo Scaffold...');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestión Familiar'),

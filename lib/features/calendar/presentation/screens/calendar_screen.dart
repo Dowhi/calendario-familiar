@@ -94,13 +94,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 context.push('/settings');
               },
             ),
-            // Botón para gestionar plantillas de turnos
-            IconButton(
-              icon: const Icon(Icons.calendar_view_day),
-              onPressed: () {
-                context.push('/shift-templates');
-              },
-            ),
+            // Botón para gestionar plantillas de turnos - REMOVIDO (funcionalidad movida a botón TURNOS inferior)
             // Nuevo botón para gestionar la familia
             IconButton(
               icon: const Icon(Icons.group),
@@ -713,9 +707,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               height: 24, // Reducir altura
               child: ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Función TURNOS')),
-                  );
+                  context.push('/shift-templates');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
