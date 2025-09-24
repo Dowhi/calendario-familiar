@@ -902,9 +902,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
     // Si hay un turno, color completo ocupando toda la celda con texto centrado
     if (shifts.length == 1) {
+      final backgroundColor = shifts.first['color'] as Color;
+      final textColor = _getHighContrastTextColor(backgroundColor);
+      
       return Container(
         decoration: BoxDecoration(
-          color: shifts.first['color'],
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Center(
@@ -913,10 +916,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             child: Text(
               shifts.first['name'],
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
+              style: TextStyle(
+                fontSize: 12, // Aumentado de 10 a 12
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: textColor, // Color dinámico según el fondo
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -950,10 +953,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: Text(
                     shifts.first['name'],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 8,
+                    style: TextStyle(
+                      fontSize: 10, // Aumentado de 8 a 10
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: _getHighContrastTextColor(shifts.first['color'] as Color),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -979,10 +982,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: Text(
                     shifts[1]['name'],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 8,
+                    style: TextStyle(
+                      fontSize: 10, // Aumentado de 8 a 10
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: _getHighContrastTextColor(shifts[1]['color'] as Color),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1008,6 +1011,37 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     }
 
     return Colors.black; // Número negro por defecto
+  }
+
+  // Función para calcular el color de texto apropiado según el color de fondo
+  Color _getContrastTextColor(Color backgroundColor) {
+    // Calcular el brillo del color de fondo
+    final luminance = backgroundColor.computeLuminance();
+    
+    // Si el fondo es claro, usar texto oscuro; si es oscuro, usar texto claro
+    return luminance > 0.5 ? Colors.black : Colors.white;
+  }
+
+  // Función para obtener un color de texto que contraste bien con el fondo
+  Color _getHighContrastTextColor(Color backgroundColor) {
+    // Calcular el brillo del color de fondo
+    final luminance = backgroundColor.computeLuminance();
+    
+    // Si el fondo es muy claro, usar negro
+    if (luminance > 0.7) {
+      return Colors.black;
+    }
+    // Si el fondo es muy oscuro, usar blanco
+    else if (luminance < 0.3) {
+      return Colors.white;
+    }
+    // Para colores intermedios, usar un color que contraste bien
+    else {
+      // Usar un color que sea opuesto en el círculo cromático
+      final hsl = HSLColor.fromColor(backgroundColor);
+      final oppositeHue = (hsl.hue + 180) % 360;
+      return HSLColor.fromAHSL(1.0, oppositeHue, 1.0, 0.2).toColor();
+    }
   }
 
   // Verifica si hay turnos en los eventos
@@ -1071,6 +1105,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       Widget turnoWidget;
       if (shifts.length == 1) {
         // Un solo turno - mostrar el nombre centrado
+        final backgroundColor = shifts.first['color'] as Color;
+        final textColor = _getHighContrastTextColor(backgroundColor);
+        
         turnoWidget = Container(
           width: double.infinity,
           height: double.infinity,
@@ -1080,10 +1117,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: Text(
                 shifts.first['text'],
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
+                style: TextStyle(
+                  fontSize: 12, // Aumentado de 10 a 12
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: textColor, // Color dinámico según el fondo
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -1105,10 +1142,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     child: Text(
                       shifts.first['text'],
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 8,
+                      style: TextStyle(
+                        fontSize: 10, // Aumentado de 8 a 10
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: _getHighContrastTextColor(shifts.first['color'] as Color),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1127,10 +1164,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     child: Text(
                       shifts[1]['text'],
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 8,
+                      style: TextStyle(
+                        fontSize: 10, // Aumentado de 8 a 10
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: _getHighContrastTextColor(shifts[1]['color'] as Color),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
