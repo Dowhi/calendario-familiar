@@ -10,7 +10,7 @@ import 'package:calendario_familiar/features/calendar/presentation/screens/shift
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_management_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_settings_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/advanced_reports_screen.dart';
-// import 'package:calendario_familiar/features/auth/presentation/login_screen.dart'; // Comentado para evitar conflicto
+import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart';
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
@@ -153,7 +153,7 @@ final appRouter = GoRouter(
     // Ruta de login para la pantalla de inicio de sesión
     GoRoute(
       path: '/login',
-      builder: (context, state) => const OriginalAuth.LoginScreen(), // Usar el del main.dart
+      builder: (context, state) => const LoginScreen(),
     ),
     
     // Nueva ruta para el registro por email
