@@ -45,11 +45,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCGE9TrLvHAIwuXn0o6jqFSw5RhS0HDtg8',
-    appId: '1:884273724178:web:c595511657884c8e7f1cb',
-    messagingSenderId: '884273724178',
+    appId: '1:804273724178:web:c5955a1f657884c0e7f1cb',
+    messagingSenderId: '804273724178',
     projectId: 'apptaxi-f2190',
     authDomain: 'apptaxi-f2190.firebaseapp.com',
-    storageBucket: 'apptaxi-f2190.appspot.com',
+    storageBucket: 'apptaxi-f2190.firebasestorage.app',
     measurementId: 'G-3D8R30TYTM',
   );
 
