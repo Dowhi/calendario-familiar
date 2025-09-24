@@ -1,0 +1,491 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:calendario_familiar/core/models/shift_template.dart';
+
+class AvailableShiftsScreen extends ConsumerStatefulWidget {
+  const AvailableShiftsScreen({super.key});
+
+  @override
+  ConsumerState<AvailableShiftsScreen> createState() => _AvailableShiftsScreenState();
+}
+
+class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
+  List<ShiftTemplate> _shiftTemplates = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShiftTemplates();
+  }
+
+  Future<void> _loadShiftTemplates() async {
+    // Datos de ejemplo mientras implementamos la funcionalidad completa
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    if (mounted) {
+      setState(() {
+        _shiftTemplates = _getExampleShiftTemplates();
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<ShiftTemplate> _getExampleShiftTemplates() {
+    return [
+      const ShiftTemplate(
+        id: '1',
+        name: 'Nuevo',
+        colorHex: '#B71C1C',
+        startTime: '08:00',
+        endTime: '16:00',
+        description: 'Turno nuevo para implementar',
+      ),
+      const ShiftTemplate(
+        id: '2',
+        name: 'S. Santa',
+        colorHex: '#1976D2',
+        startTime: '06:00',
+        endTime: '14:00',
+        description: 'Turno de Semana Santa',
+      ),
+      const ShiftTemplate(
+        id: '3',
+        name: 'Feria',
+        colorHex: '#2196F3',
+        startTime: '10:00',
+        endTime: '18:00',
+        description: 'Turno de feria',
+      ),
+      const ShiftTemplate(
+        id: '4',
+        name: 'Descanso',
+        colorHex: '#388E3C',
+        startTime: '00:00',
+        endTime: '00:00',
+        description: 'Día de descanso',
+      ),
+      const ShiftTemplate(
+        id: '5',
+        name: 'D1',
+        colorHex: '#1976D2',
+        startTime: '08:00',
+        endTime: '20:00',
+        description: 'Día 1 - Turno diurno',
+      ),
+      const ShiftTemplate(
+        id: '6',
+        name: 'D2',
+        colorHex: '#D32F2F',
+        startTime: '20:00',
+        endTime: '08:00',
+        description: 'Día 2 - Turno nocturno',
+      ),
+      const ShiftTemplate(
+        id: '7',
+        name: 'Tarde',
+        colorHex: '#FF9800',
+        startTime: '14:00',
+        endTime: '22:00',
+        description: 'Turno de tarde',
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[900],
+      appBar: AppBar(
+        backgroundColor: Colors.grey[900],
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_downward, color: Colors.white),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text(
+          'TURNOS DISPONIBLES',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          // Botones de acción
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    'CREAR TURNO NUEVO',
+                    Icons.add,
+                    () {
+                      // TODO: Implementar creación de turno
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Función en desarrollo')),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildActionButton(
+                    'IMPORTAR TURNOS...',
+                    Icons.upload,
+                    () {
+                      // TODO: Implementar importación de turnos
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Función en desarrollo')),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Lista de turnos
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                : _shiftTemplates.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.work_off,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay turnos disponibles',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Crea tu primer turno',
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _shiftTemplates.length,
+                        itemBuilder: (context, index) {
+                          final template = _shiftTemplates[index];
+                          return _buildShiftItem(template);
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String text, IconData icon, VoidCallback onPressed) {
+    return SizedBox(
+      height: 48,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[700],
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                text,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShiftItem(ShiftTemplate template) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[800],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _getShiftColor(template),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              _getShiftAbbreviation(template),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        title: Text(
+          template.name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Text(
+          '${template.startTime} - ${template.endTime}',
+          style: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+          ),
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.more_vert, color: Colors.grey[400]),
+          onPressed: () {
+            _showShiftOptions(template);
+          },
+        ),
+        onTap: () {
+          _showShiftDetails(template);
+        },
+      ),
+    );
+  }
+
+  Color _getShiftColor(ShiftTemplate template) {
+    // Colores basados en el nombre del turno
+    final name = template.name.toLowerCase();
+    if (name.contains('d1') || name.contains('día 1')) return Colors.blue;
+    if (name.contains('d2') || name.contains('día 2')) return Colors.red;
+    if (name.contains('l') || name.contains('libre')) return Colors.green;
+    if (name.contains('feria')) return Colors.blue[300]!;
+    if (name.contains('santa') || name.contains('santa')) return Colors.blue[200]!;
+    if (name.contains('descanso')) return Colors.green[700]!;
+    if (name.contains('tarde')) return Colors.orange;
+    if (name.contains('nuevo')) return Colors.red[800]!;
+    
+    // Color por defecto
+    return Colors.grey;
+  }
+
+  String _getShiftAbbreviation(ShiftTemplate template) {
+    final name = template.name.toLowerCase();
+    if (name.contains('d1') || name.contains('día 1')) return 'D1';
+    if (name.contains('d2') || name.contains('día 2')) return 'D2';
+    if (name.contains('libre')) return 'L';
+    if (name.contains('feria')) return 'Feria';
+    if (name.contains('santa')) return 'S.Santa';
+    if (name.contains('descanso')) return 'Descanso';
+    if (name.contains('tarde')) return 'T';
+    if (name.contains('nuevo')) return 'F.A.';
+    
+    // Abreviación por defecto (primeras letras)
+    return template.name.length > 8 
+        ? template.name.substring(0, 8).toUpperCase()
+        : template.name.toUpperCase();
+  }
+
+  String _formatTime(DateTime time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showShiftOptions(ShiftTemplate template) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[800],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.white),
+              title: const Text('Editar', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Implementar edición
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Función en desarrollo')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy, color: Colors.white),
+              title: const Text('Duplicar', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Implementar duplicación
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Función en desarrollo')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDelete(template);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showShiftDetails(ShiftTemplate template) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: Text(
+          template.name,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (template.description != null && template.description!.isNotEmpty)
+              Text(
+                template.description!,
+                style: TextStyle(color: Colors.grey[300]),
+              ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.access_time, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '${template.startTime} - ${template.endTime}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.palette, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: _getShiftColor(template),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Color: ${_getShiftColor(template).toString()}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(ShiftTemplate template) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: const Text(
+          'Eliminar Turno',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          '¿Estás seguro de que quieres eliminar el turno "${template.name}"?',
+          style: TextStyle(color: Colors.grey[300]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteShift(template);
+            },
+            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteShift(ShiftTemplate template) async {
+    try {
+      // TODO: Implementar eliminación real cuando esté disponible el método
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      setState(() {
+        _shiftTemplates.removeWhere((t) => t.id == template.id);
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Turno "${template.name}" eliminado'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Error eliminando turno: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error eliminando turno: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+}

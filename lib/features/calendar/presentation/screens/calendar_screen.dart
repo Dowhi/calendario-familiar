@@ -95,6 +95,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               },
             ),
             // Botón para gestionar plantillas de turnos - REMOVIDO (funcionalidad movida a botón TURNOS inferior)
+            // Botón Turno2 - Lista de turnos disponibles
+            IconButton(
+              icon: const Icon(Icons.work),
+              onPressed: () {
+                context.push('/available-shifts');
+              },
+            ),
             // Nuevo botón para gestionar la familia
             IconButton(
               icon: const Icon(Icons.group),

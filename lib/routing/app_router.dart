@@ -10,6 +10,7 @@ import 'package:calendario_familiar/features/calendar/presentation/screens/shift
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_management_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_settings_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/advanced_reports_screen.dart';
+import 'package:calendario_familiar/features/calendar/presentation/screens/available_shifts_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart';
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
@@ -63,8 +64,9 @@ final appRouter = GoRouter(
       return '/family-management';
     }
 
-    // Si está autenticado y tiene familia, y está en una ruta de autenticación o gestión familiar, ir al calendario
-    if (isAuthenticated && hasFamily && (isAuthRoute || state.matchedLocation == '/family-management')) {
+    // Si está autenticado y tiene familia, y está en una ruta de autenticación, ir al calendario
+    // PERO NO redirigir desde /family-management (permitir acceso a gestión familiar)
+    if (isAuthenticated && hasFamily && isAuthRoute && state.matchedLocation != '/family-management') {
       print('➡️ Usuario autenticado con familia, redirigiendo a /');
       return '/';
     }
@@ -130,6 +132,12 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/shift-templates',
       builder: (context, state) => const ShiftTemplateManagementScreen(),
+    ),
+    
+    // Nueva ruta para turnos disponibles
+    GoRoute(
+      path: '/available-shifts',
+      builder: (context, state) => const AvailableShiftsScreen(),
     ),
     
     // Nueva ruta para la gestión familiar
