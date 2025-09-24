@@ -10,7 +10,7 @@ import 'package:calendario_familiar/features/calendar/presentation/screens/shift
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_management_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_settings_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/advanced_reports_screen.dart';
-import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
+// import 'package:calendario_familiar/features/auth/presentation/login_screen.dart'; // Comentado para evitar conflicto
 import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart';
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
@@ -25,11 +25,11 @@ final appRouter = GoRouter(
   initialLocation: '/', // Cambiado para que inicie en la ruta principal por defecto
   redirect: (context, state) async {
     // Primero, manejar la redirección por notificaciones si aplica
-    if (openedFromNotification && state.fullPath != '/notification-screen') {
-      openedFromNotification = false;
-      print('➡️ Redirigiendo por notificación a /notification-screen');
-      return '/notification-screen';
-    }
+    // if (openedFromNotification && state.fullPath != '/notification-screen') {
+    //   openedFromNotification = false;
+    //   print('➡️ Redirigiendo por notificación a /notification-screen');
+    //   return '/notification-screen';
+    // }
 
     // Obtener el proveedor de Riverpod para AuthController
     final container = ProviderScope.containerOf(context);
@@ -153,7 +153,7 @@ final appRouter = GoRouter(
     // Ruta de login para la pantalla de inicio de sesión
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const OriginalAuth.LoginScreen(), // Usar el del main.dart
     ),
     
     // Nueva ruta para el registro por email
