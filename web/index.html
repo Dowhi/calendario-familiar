@@ -68,11 +68,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  
   <script>
-    // Firebase configuration
+    // Firebase configuration - SOLO lo esencial
     const firebaseConfig = {
       apiKey: "AIzaSyCGE9TrLvHAIwuXn0o6jqFSw5RhS0HDtg8",
       authDomain: "apptaxi-f2190.firebaseapp.com",
@@ -82,36 +79,11 @@
       appId: "1:804273724178:web:c5955a1f657884c0e7f1cb",
       measurementId: "G-3D8R30TYTM"
     };
-    
-    // Configuración adicional para Google Auth
-    const googleAuthConfig = {
-      clientId: "804273724178-178kk554sq0i1m2hr7vebf64c5qga7b1.apps.googleusercontent.com",
-      scope: "email profile"
-    };
 
-    // Initialize Firebase
+    // Initialize Firebase - MÍNIMO
     try {
       firebase.initializeApp(firebaseConfig);
       console.log('✅ Firebase initialized successfully in web');
-      console.log('Firebase config:', firebaseConfig);
-      
-      // Configurar Google Auth para web
-      if (firebase.auth) {
-        firebase.auth().useDeviceLanguage();
-        console.log('✅ Google Auth configured for web');
-      }
-      
-      // Configurar Google Identity Services
-      if (typeof google !== 'undefined' && google.accounts) {
-        google.accounts.id.initialize({
-          client_id: googleAuthConfig.clientId,
-          callback: function(response) {
-            console.log('✅ Google Identity Services callback received');
-            // El token se procesará en Flutter
-          }
-        });
-        console.log('✅ Google Identity Services initialized');
-      }
     } catch (error) {
       console.error('❌ Error initializing Firebase:', error);
     }

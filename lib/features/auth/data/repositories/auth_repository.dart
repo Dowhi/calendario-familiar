@@ -143,22 +143,15 @@ class AuthRepository {
       User? firebaseUser;
       
       if (kIsWeb) {
-        // Web/iOS Safari/PWA: usar Google Identity Services
-        print('🌐 Web detectado: usando Google Identity Services');
+        // Web/iOS Safari/PWA: usar Google Identity Services directamente
+        print('🌐 Web detectado: usando Google Identity Services directamente');
         
-        // Crear provider con configuración específica para web
-        final provider = GoogleAuthProvider()
-          ..addScope('email')
-          ..addScope('profile');
+        // Crear provider con configuración mínima
+        final provider = GoogleAuthProvider();
         
-        // Configuración específica para evitar problemas de API key
-        provider.setCustomParameters({
-          'prompt': 'select_account',
-          'ux_mode': 'popup',
-        });
-
+        // NO usar scopes ni custom parameters que puedan causar problemas
         try {
-          print('🔄 Intentando signInWithPopup...');
+          print('🔄 Intentando signInWithPopup (método directo)...');
           final UserCredential cred = await _auth.signInWithPopup(provider);
           firebaseUser = cred.user;
           print('✅ Popup exitoso');
@@ -171,7 +164,16 @@ class AuthRepository {
             print('✅ Redirect exitoso');
           } catch (redirectError) {
             print('❌ Redirect también falló: $redirectError');
-            rethrow;
+            // Último recurso: intentar sin provider
+            try {
+              print('🔄 Último intento: signInWithPopup sin provider...');
+              final UserCredential cred = await _auth.signInWithPopup(GoogleAuthProvider());
+              firebaseUser = cred.user;
+              print('✅ Último intento exitoso');
+            } catch (finalError) {
+              print('❌ Todos los métodos fallaron: $finalError');
+              rethrow;
+            }
           }
         }
       } else {
