@@ -890,6 +890,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
     }
 
+    // Obtener las notas para esta fecha
+    final dateKey = _formatDate(date);
+    final notes = _dataService.getNotes()[dateKey] ?? [];
+
     // Si no hay turnos, fondo blanco
     if (shifts.isEmpty) {
       return Container(
@@ -905,6 +909,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       final backgroundColor = shifts.first['color'] as Color;
       final textColor = _getHighContrastTextColor(backgroundColor);
       
+      // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
+      String displayText;
+      if (notes.isNotEmpty) {
+        displayText = notes.first; // Mostrar la primera nota
+      } else {
+        displayText = shifts.first['name']; // Mostrar el nombre del turno
+      }
+      
       return Container(
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -914,7 +926,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: Text(
-              shifts.first['name'],
+              displayText,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12, // Aumentado de 10 a 12
@@ -951,7 +963,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    shifts.first['name'],
+                    // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
+                    notes.isNotEmpty ? notes.first : shifts.first['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10, // Aumentado de 8 a 10
@@ -980,7 +993,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    shifts[1]['name'],
+                    // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
+                    notes.isNotEmpty ? notes.first : shifts[1]['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10, // Aumentado de 8 a 10
@@ -1066,7 +1080,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return const SizedBox.shrink(); // No hay notas que mostrar
     }
 
-    // Mostrar solo la primera nota
+    // Verificar si hay turnos - si los hay, las notas ya se muestran en el fondo
+    bool hasShifts = false;
+    for (final eventTitle in events) {
+      final template = _dataService.getShiftTemplateByName(eventTitle);
+      if (template != null) {
+        hasShifts = true;
+        break;
+      }
+    }
+
+    // Si hay turnos, no mostrar las notas aquí porque ya se muestran en el fondo
+    if (hasShifts) {
+      return const SizedBox.shrink();
+    }
+
+    // Solo mostrar las notas si no hay turnos
     return Text(
       notes.first,
       style: const TextStyle(
@@ -1100,6 +1129,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
     }
 
+    // Obtener las notas para esta fecha desde el servicio
+    final dateKey = _formatDate(date);
+    final dateNotes = _dataService.getNotes()[dateKey] ?? [];
+    if (dateNotes.isNotEmpty) {
+      notes = dateNotes; // Usar las notas del servicio en lugar de las de events
+    }
+
     // Si hay turnos, mostrar los nombres de los turnos
     if (shifts.isNotEmpty) {
       Widget turnoWidget;
@@ -1115,7 +1151,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             child: Padding(
               padding: const EdgeInsets.all(2.0),
               child: Text(
-                shifts.first['text'],
+                // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
+                notes.isNotEmpty ? notes.first : shifts.first['text'],
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12, // Aumentado de 10 a 12
@@ -1140,7 +1177,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 1.0),
                     child: Text(
-                      shifts.first['text'],
+                      // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
+                      notes.isNotEmpty ? notes.first : shifts.first['text'],
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10, // Aumentado de 8 a 10
@@ -1162,7 +1200,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 1.0),
                     child: Text(
-                      shifts[1]['text'],
+                      // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
+                      notes.isNotEmpty ? notes.first : shifts[1]['text'],
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10, // Aumentado de 8 a 10
