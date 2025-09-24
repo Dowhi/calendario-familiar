@@ -126,10 +126,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
                     'CREAR TURNO NUEVO',
                     Icons.add,
                     () {
-                      // TODO: Implementar creación de turno
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Función en desarrollo')),
-                      );
+                      context.push('/shift-configuration');
                     },
                   ),
                 ),
@@ -277,7 +274,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
           },
         ),
         onTap: () {
-          _showShiftDetails(template);
+          context.push('/shift-configuration', extra: template);
         },
       ),
     );

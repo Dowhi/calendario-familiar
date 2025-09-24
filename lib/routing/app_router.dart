@@ -11,12 +11,14 @@ import 'package:calendario_familiar/features/calendar/presentation/screens/famil
 import 'package:calendario_familiar/features/calendar/presentation/screens/family_settings_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/advanced_reports_screen.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/available_shifts_screen.dart';
+import 'package:calendario_familiar/features/calendar/presentation/screens/shift_configuration_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart';
 import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
 import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart'; // Importar AuthController
+import 'package:calendario_familiar/core/models/shift_template.dart'; // Importar ShiftTemplate
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -138,6 +140,15 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/available-shifts',
       builder: (context, state) => const AvailableShiftsScreen(),
+    ),
+    
+    // Nueva ruta para configuración de turnos
+    GoRoute(
+      path: '/shift-configuration',
+      builder: (context, state) {
+        final extraData = state.extra as ShiftTemplate?;
+        return ShiftConfigurationScreen(shiftTemplate: extraData);
+      },
     ),
     
     // Nueva ruta para la gestión familiar
