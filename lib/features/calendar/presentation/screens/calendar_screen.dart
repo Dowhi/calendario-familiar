@@ -624,7 +624,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            template.name,
+                            template.abbreviation.isNotEmpty ? template.abbreviation : template.name,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -883,7 +883,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       final template = _dataService.getShiftTemplateByName(eventTitle);
       if (template != null) {
         shifts.add({
-          'name': template.name,
+          'name': template.abbreviation.isNotEmpty ? template.abbreviation : template.name,
           'color': Color(int.parse(template.colorHex.substring(1, 7), radix: 16) + 0xFF000000),
           'textColor': Color(int.parse(template.textColorHex.substring(1, 7), radix: 16) + 0xFF000000),
           'textSize': template.textSize,
@@ -1120,7 +1120,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         final template = _dataService.getShiftTemplateByName(eventTitle);
         if (template != null) {
           shifts.add({
-            'text': template.name,
+            'text': template.abbreviation.isNotEmpty ? template.abbreviation : template.name,
             'color': Color(int.parse(template.colorHex.substring(1, 7), radix: 16) + 0xFF000000),
             'textColor': Colors.white,
           });

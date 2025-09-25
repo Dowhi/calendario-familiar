@@ -342,19 +342,14 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
   }
 
   Color _getShiftColor(ShiftTemplate template) {
-    // Colores basados en el nombre del turno
-    final name = template.name.toLowerCase();
-    if (name.contains('d1') || name.contains('día 1')) return Colors.blue;
-    if (name.contains('d2') || name.contains('día 2')) return Colors.red;
-    if (name.contains('l') || name.contains('libre')) return Colors.green;
-    if (name.contains('feria')) return Colors.blue[300]!;
-    if (name.contains('santa') || name.contains('santa')) return Colors.blue[200]!;
-    if (name.contains('descanso')) return Colors.green[700]!;
-    if (name.contains('tarde')) return Colors.orange;
-    if (name.contains('nuevo')) return Colors.red[800]!;
-    
-    // Color por defecto
-    return Colors.grey;
+    // Usar el color real del template en lugar de generar uno automáticamente
+    try {
+      return Color(int.parse(template.colorHex.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      // Si hay error al parsear el color, usar color por defecto
+      print('❌ Error parseando color ${template.colorHex}: $e');
+      return Colors.grey;
+    }
   }
 
   String _getShiftAbbreviation(ShiftTemplate template) {
