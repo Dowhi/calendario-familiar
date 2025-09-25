@@ -435,6 +435,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                 setState(() {
                   _startTime = value;
                 });
+                _calculateDurationFromTimes();
               }),
             ),
             const SizedBox(width: 8),
@@ -452,6 +453,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                 setState(() {
                   _endTime = value;
                 });
+                _calculateDurationFromTimes();
               }),
             ),
           ],
@@ -467,6 +469,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                 setState(() {
                   _isSplitShift = value ?? false;
                 });
+                _calculateDurationFromTimes();
               },
               activeColor: Colors.teal,
             ),
@@ -490,6 +493,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                   setState(() {
                     _secondStartTime = value;
                   });
+                  _calculateDurationFromTimes();
                 }),
               ),
               const SizedBox(width: 8),
@@ -507,6 +511,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                   setState(() {
                     _secondEndTime = value;
                   });
+                  _calculateDurationFromTimes();
                 }),
               ),
             ],
@@ -1460,6 +1465,73 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
     );
   }
 
+  // Calcular duración automáticamente basada en los horarios
+  void _calculateDurationFromTimes() {
+    if (!_calculateDuration) return;
+    
+    try {
+      // Calcular duración del primer turno
+      final firstDuration = _calculateTimeDifference(_startTime, _endTime);
+      
+      int totalMinutes = firstDuration;
+      
+      // Si es turno partido, agregar duración del segundo turno
+      if (_isSplitShift) {
+        final secondDuration = _calculateTimeDifference(_secondStartTime, _secondEndTime);
+        totalMinutes += secondDuration;
+        
+        // Restar tiempo de descanso
+        totalMinutes -= _breakTimeMinutes;
+      }
+      
+      // Convertir a horas y minutos
+      _calculatedHours = totalMinutes ~/ 60;
+      _calculatedMinutes = totalMinutes % 60;
+      
+      // Asegurar que no sea negativo
+      if (_calculatedHours < 0) _calculatedHours = 0;
+      if (_calculatedMinutes < 0) _calculatedMinutes = 0;
+      
+      setState(() {});
+    } catch (e) {
+      print('Error calculando duración: $e');
+    }
+  }
+
+  // Calcular diferencia entre dos tiempos en minutos
+  int _calculateTimeDifference(String startTime, String endTime) {
+    final startParts = startTime.split(':');
+    final endParts = endTime.split(':');
+    
+    if (startParts.length != 2 || endParts.length != 2) {
+      return 0;
+    }
+    
+    final startHour = int.parse(startParts[0]);
+    final startMinute = int.parse(startParts[1]);
+    final endHour = int.parse(endParts[0]);
+    final endMinute = int.parse(endParts[1]);
+    
+    // Convertir a minutos desde medianoche
+    final startTotalMinutes = startHour * 60 + startMinute;
+    final endTotalMinutes = endHour * 60 + endMinute;
+    
+    // Calcular diferencia
+    int difference = endTotalMinutes - startTotalMinutes;
+    
+    // Si el turno cruza la medianoche (endTime < startTime) o es 24:00
+    if (difference < 0) {
+      difference += 24 * 60; // Agregar 24 horas en minutos
+    }
+    
+    // Manejar turnos de 24 horas (24:00 = 1440 minutos)
+    if (endTime == '24:00') {
+      difference = (24 * 60) - startTotalMinutes;
+    }
+    
+    return difference;
+  }
+
   void _showBreakTimeDialog() {
     final TextEditingController customController = TextEditingController();
     
@@ -1539,6 +1611,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                       setState(() {
                         _breakTimeMinutes = customValue;
                       });
+                      _calculateDurationFromTimes();
                       Navigator.pop(context);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -1576,6 +1649,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         setState(() {
           _breakTimeMinutes = minutes;
         });
+        _calculateDurationFromTimes();
         Navigator.pop(context);
       },
       child: Container(
@@ -1725,7 +1799,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                         ),
                         child: Center(
                           child: Text(
-                            (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour).toString(),
+                            currentHour == 24 ? '24' : (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour).toString(),
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -1862,7 +1936,14 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                           hour24 = 0;
                         }
                         
-                        final timeString = '${hour24.toString().padLeft(2, '0')}:${currentMinute.toString().padLeft(2, '0')}';
+                        // Manejar turnos de 24 horas (24:00)
+                        String timeString;
+                        if (hour24 == 24) {
+                          timeString = '24:00';
+                        } else {
+                          timeString = '${hour24.toString().padLeft(2, '0')}:${currentMinute.toString().padLeft(2, '0')}';
+                        }
+                        
                         onChanged(timeString);
                         Navigator.pop(context);
                       },
@@ -1901,9 +1982,10 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
-            itemCount: 12,
+            itemCount: 13, // 12 horas + 24 horas
             itemBuilder: (context, index) {
-              final hour = index + 1;
+              final hour = index == 12 ? 24 : index + 1; // 1-12, luego 24
+              final displayHour = index == 12 ? 24 : index + 1;
               final isSelected = (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour) == hour;
               
               return GestureDetector(
@@ -1918,7 +2000,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                   ),
                   child: Center(
                     child: Text(
-                      hour.toString(),
+                      displayHour.toString(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,

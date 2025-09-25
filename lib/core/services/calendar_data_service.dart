@@ -1523,10 +1523,66 @@ class CalendarDataService extends ChangeNotifier {
       return;
     }
     try {
+      // Obtener el nombre de la plantilla antes de eliminarla
+      final template = getShiftTemplateById(templateId);
+      final templateName = template?.name;
+      
+      // Eliminar la plantilla de Firestore
       await _firestore.collection('shift_templates').doc(templateId).delete();
       print('✅ Plantilla de turno eliminada: $templateId');
+      
+      // Si tenemos el nombre de la plantilla, limpiar turnos huérfanos
+      if (templateName != null) {
+        await _cleanupOrphanedShifts(templateName);
+      }
     } catch (e) {
       print('❌ Error eliminando plantilla de turno: $e');
+    }
+  }
+
+  // Limpiar turnos huérfanos cuando se elimina una plantilla
+  Future<void> _cleanupOrphanedShifts(String templateName) async {
+    try {
+      print('🧹 Limpiando turnos huérfanos para: $templateName');
+      
+      // Buscar todos los turnos de esta plantilla en Firestore
+      final shiftsSnapshot = await _firestore
+          .collection('shifts')
+          .where('familyId', isEqualTo: _userFamilyId)
+          .where('title', isEqualTo: templateName)
+          .get();
+      
+      if (shiftsSnapshot.docs.isNotEmpty) {
+        print('🗑️ Encontrados ${shiftsSnapshot.docs.length} turnos huérfanos para eliminar');
+        
+        // Eliminar en lotes
+        final batch = _firestore.batch();
+        for (final doc in shiftsSnapshot.docs) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+        
+        // Limpiar caché local
+        final keysToUpdate = <String>[];
+        for (final entry in _shifts.entries) {
+          if (entry.value.contains(templateName)) {
+            entry.value.remove(templateName);
+            keysToUpdate.add(entry.key);
+          }
+        }
+        
+        // Notificar cambios
+        if (keysToUpdate.isNotEmpty) {
+          notifyListeners();
+          print('✅ Caché local limpiado para ${keysToUpdate.length} fechas');
+        }
+        
+        print('✅ Turnos huérfanos eliminados exitosamente');
+      } else {
+        print('ℹ️ No se encontraron turnos huérfanos para limpiar');
+      }
+    } catch (e) {
+      print('❌ Error limpiando turnos huérfanos: $e');
     }
   }
 
