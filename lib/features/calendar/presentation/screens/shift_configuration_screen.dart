@@ -30,6 +30,22 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
   String _selectedBackgroundColor = '#B71C1C';
   String _selectedTextColor = '#FFFFFF';
   double _textSize = 12.0;
+
+  // Variables para horarios
+  String _startTime = '12:00';
+  String _endTime = '14:00';
+  bool _isSplitShift = true;
+  String _secondStartTime = '15:00';
+  String _secondEndTime = '15:00';
+  int _breakTimeMinutes = 25;
+  bool _calculateDuration = true;
+  int _calculatedHours = 1;
+  int _calculatedMinutes = 35;
+  
+  // Variables para alarmas
+  bool _alarm1Enabled = true;
+  bool _previousDayAlarm = false;
+  String _alarmTime = '08:00';
   
   // Lista de colores predefinidos
   final List<String> _backgroundColors = [
@@ -362,33 +378,360 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
   }
 
   Widget _buildHorariosTab() {
-    return Center(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.access_time,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Pestaña de Horarios',
+          // Título HORARIOS
+          const Text(
+            'HORARIOS',
             style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 18,
+              color: Colors.grey,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Funcionalidad en desarrollo',
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 14,
+          const SizedBox(height: 16),
+
+          // Configuración de horarios del turno
+          _buildShiftTimeConfiguration(),
+          const SizedBox(height: 24),
+
+          // Tiempo de descanso y duración
+          _buildBreakTimeAndDuration(),
+          const SizedBox(height: 24),
+
+          // Alarmas del turno
+          _buildShiftAlarms(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShiftTimeConfiguration() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Horarios principales
+        Row(
+          children: [
+            Expanded(
+              child: _buildTimeInput('Inicio', _startTime, (value) {
+                setState(() {
+                  _startTime = value;
+                });
+              }),
             ),
+            const SizedBox(width: 8),
+            const Text(
+              '-',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeInput('Final', _endTime, (value) {
+                setState(() {
+                  _endTime = value;
+                });
+              }),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Checkbox Turno partido
+        Row(
+          children: [
+            Checkbox(
+              value: _isSplitShift,
+              onChanged: (value) {
+                setState(() {
+                  _isSplitShift = value ?? false;
+                });
+              },
+              activeColor: Colors.teal,
+            ),
+            const Text(
+              'Turno partido',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+
+        // Horarios del segundo turno (si está habilitado)
+        if (_isSplitShift) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTimeInput('Inicio', _secondStartTime, (value) {
+                  setState(() {
+                    _secondStartTime = value;
+                  });
+                }),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                '-',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildTimeInput('Final', _secondEndTime, (value) {
+                  setState(() {
+                    _secondEndTime = value;
+                  });
+                }),
+              ),
+            ],
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildBreakTimeAndDuration() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Tiempo de descanso
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () => _showBreakTimeDialog(),
+              child: Container(
+                width: 60,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.grey[800],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[600]!),
+                ),
+                child: Center(
+                  child: Text(
+                    _breakTimeMinutes.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Tiempo de descanso (minutos)',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Calcular duración
+        Row(
+          children: [
+            Checkbox(
+              value: _calculateDuration,
+              onChanged: (value) {
+                setState(() {
+                  _calculateDuration = value ?? false;
+                });
+              },
+              activeColor: Colors.teal,
+            ),
+            const Text(
+              'Calcular duración',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+            const Spacer(),
+            if (_calculateDuration) ...[
+              GestureDetector(
+                onTap: () => _showDurationDialog(true),
+                child: Container(
+                  width: 50,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[600]!),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${_calculatedHours} h',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showDurationDialog(false),
+                child: Container(
+                  width: 50,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[600]!),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${_calculatedMinutes} m',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShiftAlarms() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'ALARMAS DEL TURNO',
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Alarma 1
+        Row(
+          children: [
+            Checkbox(
+              value: _alarm1Enabled,
+              onChanged: (value) {
+                setState(() {
+                  _alarm1Enabled = value ?? false;
+                });
+              },
+              activeColor: Colors.teal,
+            ),
+            const Text(
+              'Alarma 1',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+
+        if (_alarm1Enabled) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const SizedBox(width: 40), // Espacio para alineación
+              Checkbox(
+                value: _previousDayAlarm,
+                onChanged: (value) {
+                  setState(() {
+                    _previousDayAlarm = value ?? false;
+                  });
+                },
+                activeColor: Colors.teal,
+              ),
+              const Text(
+                'Del día anterior',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildTimeInput('', _alarmTime, (value) {
+                setState(() {
+                  _alarmTime = value;
+                });
+              }),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const SizedBox(width: 40), // Espacio para alineación
+              const Text(
+                'Sonido por defecto',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.music_note,
+                color: Colors.grey[400],
+                size: 20,
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTimeInput(String label, String value, Function(String) onChanged) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.grey[800],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[600]!),
+      ),
+      child: TextFormField(
+        initialValue: value,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        onChanged: onChanged,
+        keyboardType: TextInputType.datetime,
       ),
     );
   }
@@ -1061,6 +1404,146 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
       const SnackBar(
         content: Text('Navegación de colores en desarrollo'),
         duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _showBreakTimeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: const Text(
+          'Tiempo de Descanso',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Selecciona los minutos de descanso:',
+              style: TextStyle(color: Colors.grey[300]),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildTimeButton(15),
+                _buildTimeButton(25),
+                _buildTimeButton(30),
+                _buildTimeButton(45),
+                _buildTimeButton(60),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeButton(int minutes) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _breakTimeMinutes = minutes;
+        });
+        Navigator.pop(context);
+      },
+      child: Container(
+        width: 50,
+        height: 40,
+        decoration: BoxDecoration(
+          color: _breakTimeMinutes == minutes ? Colors.teal : Colors.grey[700],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            minutes.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDurationDialog(bool isHours) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: Text(
+          isHours ? 'Horas' : 'Minutos',
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isHours ? 'Selecciona las horas:' : 'Selecciona los minutos:',
+              style: TextStyle(color: Colors.grey[300]),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(
+                isHours ? 12 : 60,
+                (index) => _buildDurationButton(index, isHours),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDurationButton(int value, bool isHours) {
+    final currentValue = isHours ? _calculatedHours : _calculatedMinutes;
+    final isSelected = currentValue == value;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isHours) {
+            _calculatedHours = value;
+          } else {
+            _calculatedMinutes = value;
+          }
+        });
+        Navigator.pop(context);
+      },
+      child: Container(
+        width: 40,
+        height: 35,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.teal : Colors.grey[700],
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Center(
+          child: Text(
+            value.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
