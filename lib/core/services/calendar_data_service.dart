@@ -1523,17 +1523,29 @@ class CalendarDataService extends ChangeNotifier {
       return;
     }
     try {
+      print('🗑️ Iniciando eliminación de plantilla: $templateId');
+      
       // Obtener el nombre de la plantilla antes de eliminarla
       final template = getShiftTemplateById(templateId);
       final templateName = template?.name;
       
+      print('📝 Nombre de plantilla a eliminar: $templateName');
+      
       // Eliminar la plantilla de Firestore
       await _firestore.collection('shift_templates').doc(templateId).delete();
-      print('✅ Plantilla de turno eliminada: $templateId');
+      print('✅ Plantilla de turno eliminada de Firestore: $templateId');
       
-      // Si tenemos el nombre de la plantilla, limpiar turnos huérfanos
+      // Actualizar caché local - remover la plantilla
+      _shiftTemplates.removeWhere((template) => template.id == templateId);
+      notifyListeners();
+      print('✅ Plantilla removida del caché local');
+      
+      // Si tenemos el nombre de la plantilla, limpiar turnos huérfanos AUTOMÁTICAMENTE
       if (templateName != null) {
+        print('🧹 Iniciando limpieza automática de turnos huérfanos para: $templateName');
         await _cleanupOrphanedShifts(templateName);
+      } else {
+        print('⚠️ No se pudo obtener el nombre de la plantilla para limpieza');
       }
     } catch (e) {
       print('❌ Error eliminando plantilla de turno: $e');
@@ -1544,6 +1556,7 @@ class CalendarDataService extends ChangeNotifier {
   Future<void> _cleanupOrphanedShifts(String templateName) async {
     try {
       print('🧹 Limpiando turnos huérfanos para: $templateName');
+      print('👥 FamilyId actual: $_userFamilyId');
       
       // Buscar todos los turnos de esta plantilla en Firestore
       final shiftsSnapshot = await _firestore
@@ -1552,8 +1565,15 @@ class CalendarDataService extends ChangeNotifier {
           .where('title', isEqualTo: templateName)
           .get();
       
+      print('🔍 Consulta realizada. Documentos encontrados: ${shiftsSnapshot.docs.length}');
+      
       if (shiftsSnapshot.docs.isNotEmpty) {
         print('🗑️ Encontrados ${shiftsSnapshot.docs.length} turnos huérfanos para eliminar');
+        
+        // Mostrar detalles de los turnos que se van a eliminar
+        for (final doc in shiftsSnapshot.docs) {
+          print('   - Eliminando turno: ${doc.id} (${doc.data()['title']})');
+        }
         
         // Eliminar en lotes
         final batch = _firestore.batch();
@@ -1561,11 +1581,13 @@ class CalendarDataService extends ChangeNotifier {
           batch.delete(doc.reference);
         }
         await batch.commit();
+        print('✅ Turnos eliminados de Firestore exitosamente');
         
         // Limpiar caché local
         final keysToUpdate = <String>[];
         for (final entry in _shifts.entries) {
           if (entry.value.contains(templateName)) {
+            print('   - Limpiando fecha local: ${entry.key}');
             entry.value.remove(templateName);
             keysToUpdate.add(entry.key);
           }
@@ -1575,14 +1597,16 @@ class CalendarDataService extends ChangeNotifier {
         if (keysToUpdate.isNotEmpty) {
           notifyListeners();
           print('✅ Caché local limpiado para ${keysToUpdate.length} fechas');
+          print('📱 UI actualizada - notificando listeners');
         }
         
-        print('✅ Turnos huérfanos eliminados exitosamente');
+        print('✅ Limpieza automática de turnos huérfanos completada');
       } else {
         print('ℹ️ No se encontraron turnos huérfanos para limpiar');
       }
     } catch (e) {
       print('❌ Error limpiando turnos huérfanos: $e');
+      print('❌ Stack trace: ${StackTrace.current}');
     }
   }
 
