@@ -177,41 +177,18 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 );
                 
                 if (shiftTemplate != null) {
-                  // Calcular horas basadas en la plantilla real
-                  final startTime = shiftTemplate.startTime;
-                  final endTime = shiftTemplate.endTime;
-                  
-                  try {
-                    final startParts = startTime.split(':');
-                    final endParts = endTime.split(':');
-                    
-                    if (startParts.length == 2 && endParts.length == 2) {
-                      final startHour = int.parse(startParts[0]);
-                      final startMinute = int.parse(startParts[1]);
-                      final endHour = int.parse(endParts[0]);
-                      final endMinute = int.parse(endParts[1]);
-                      
-                      int hours = endHour - startHour;
-                      int minutes = endMinute - startMinute;
-                      
-                      if (minutes < 0) {
-                        hours -= 1;
-                        minutes += 60;
-                      }
-                      
-                      // Si el turno cruza la medianoche
-                      if (hours < 0) {
-                        hours += 24;
-                      }
-                      
-                      totalHours += hours;
-                      print('DEBUG: Turno $shiftName: ${startTime}-${endTime} = ${hours}h');
-                    }
-                  } catch (e) {
-                    print('Error calculando horas para turno $shiftName: $e');
-                    // Fallback a 8 horas si hay error
-                    totalHours += 8;
+                  // Usar el mismo método de cálculo que en la tabla
+                  if (shiftTemplate.calculateDuration && 
+                      shiftTemplate.calculatedHours != null && 
+                      shiftTemplate.calculatedMinutes != null) {
+                    totalHours += shiftTemplate.calculatedHours!;
+                    // Los minutos se ignoran en el total para simplificar
+                  } else {
+                    // Fallback: calcular duración desde los horarios
+                    final duration = _calculateDurationFromTemplate(shiftTemplate);
+                    totalHours += duration['hours']!;
                   }
+                  print('DEBUG: Turno $shiftName: ${totalHours}h (desde plantilla)');
                 } else {
                   // Fallback para turnos sin plantilla
                   switch (shiftName) {
@@ -256,6 +233,75 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year.toString().substring(2)}';
+  }
+
+  // Calcular duración desde los horarios de una plantilla
+  Map<String, int> _calculateDurationFromTemplate(shiftTemplate) {
+    try {
+      // Calcular duración del primer turno
+      final firstDuration = _calculateTimeDifference(shiftTemplate.startTime, shiftTemplate.endTime);
+      
+      num totalMinutes = firstDuration;
+      
+      // Si es turno partido, agregar duración del segundo turno
+      if (shiftTemplate.isSplitShift && 
+          shiftTemplate.secondStartTime != null && 
+          shiftTemplate.secondEndTime != null) {
+        final secondDuration = _calculateTimeDifference(shiftTemplate.secondStartTime!, shiftTemplate.secondEndTime!);
+        totalMinutes += secondDuration;
+        
+        // Restar tiempo de descanso
+        totalMinutes -= shiftTemplate.breakTimeMinutes;
+      }
+      
+      // Convertir a horas y minutos
+      final hours = (totalMinutes ~/ 60).toInt();
+      final minutes = (totalMinutes % 60).toInt();
+      
+      return {'hours': hours, 'minutes': minutes};
+    } catch (e) {
+      print('Error calculando duración desde plantilla: $e');
+      return {'hours': 8, 'minutes': 0}; // Fallback a 8 horas
+    }
+  }
+
+  // Calcular diferencia entre dos tiempos en minutos (mismo método que en shift_configuration_screen)
+  int _calculateTimeDifference(String startTime, String endTime) {
+    final startParts = startTime.split(':');
+    final endParts = endTime.split(':');
+    
+    if (startParts.length != 2 || endParts.length != 2) {
+      return 0;
+    }
+    
+    final startHour = int.parse(startParts[0]);
+    final startMinute = int.parse(startParts[1]);
+    final endHour = int.parse(endParts[0]);
+    final endMinute = int.parse(endParts[1]);
+    
+    // Convertir a minutos desde medianoche
+    final startTotalMinutes = startHour * 60 + startMinute;
+    final endTotalMinutes = endHour * 60 + endMinute;
+    
+    // Manejar turnos de 24 horas (24:00 = 1440 minutos)
+    if (endTime == '24:00') {
+      return (24 * 60) - startTotalMinutes;
+    }
+    
+    // Calcular diferencia
+    int difference = endTotalMinutes - startTotalMinutes;
+    
+    // Si el turno cruza la medianoche (endTime < startTime)
+    if (difference < 0) {
+      difference += 24 * 60; // Agregar 24 horas en minutos
+    }
+    
+    // Manejar caso especial: 00:00 a 23:59 = 23h 59m (casi 24h)
+    if (startTime == '00:00' && endTime == '23:59') {
+      return 23 * 60 + 59; // 23 horas y 59 minutos
+    }
+    
+    return difference;
   }
 
   // Limpiar turnos huérfanos manualmente
@@ -953,20 +999,51 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           final count = entry.value;
           final color = _getShiftColor(shiftName);
           
-          // Calcular horas según el tipo de turno
-          int hours;
-          switch (shiftName) {
-            case 'D1':
-            case 'D2':
-              hours = count * 12;
-              break;
-            case 'Libre':
-            case 'Descanso':
-              hours = 0;
-              break;
-            default:
-              hours = count * 8;
-              break;
+          // Calcular horas usando la duración real de la plantilla
+          int hours = 0;
+          int minutes = 0;
+          
+          // Buscar la plantilla correspondiente
+          final shiftTemplate = _dataService.shiftTemplates.firstWhereOrNull(
+            (template) => template.name == shiftName
+          );
+          
+          if (shiftTemplate != null) {
+            // Usar las horas calculadas de la plantilla
+            if (shiftTemplate.calculateDuration && 
+                shiftTemplate.calculatedHours != null && 
+                shiftTemplate.calculatedMinutes != null) {
+              hours = count * shiftTemplate.calculatedHours!;
+              minutes = count * shiftTemplate.calculatedMinutes!;
+              
+              // Convertir minutos extra a horas
+              hours += minutes ~/ 60;
+              minutes = minutes % 60;
+            } else {
+              // Fallback: calcular duración desde los horarios
+              final duration = _calculateDurationFromTemplate(shiftTemplate);
+              hours = count * duration['hours']!;
+              minutes = count * duration['minutes']!;
+              
+              // Convertir minutos extra a horas
+              hours += minutes ~/ 60;
+              minutes = minutes % 60;
+            }
+          } else {
+            // Fallback para turnos sin plantilla
+            switch (shiftName) {
+              case 'D1':
+              case 'D2':
+                hours = count * 12;
+                break;
+              case 'Libre':
+              case 'Descanso':
+                hours = 0;
+                break;
+              default:
+                hours = count * 8;
+                break;
+            }
           }
           
           return Column(
@@ -974,7 +1051,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               _buildTableRow(
                 shiftName: shiftName,
                 quantity: count.toString(),
-                time: '${hours}h,0m',
+                time: '${hours}h,${minutes}m',
                 color: color,
               ),
               const SizedBox(height: 4), // Reducido de 8 a 6
