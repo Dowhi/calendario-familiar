@@ -1978,44 +1978,65 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         backgroundColor: Colors.grey[800],
         title: const Text('Seleccionar Hora', style: TextStyle(color: Colors.white)),
         content: Container(
-          width: 200,
-          height: 300,
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 1,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: 13, // 12 horas + 24 horas
-            itemBuilder: (context, index) {
-              final hour = index == 12 ? 24 : index + 1; // 1-12, luego 24
-              final displayHour = index == 12 ? 24 : index + 1;
-              final isSelected = (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour) == hour;
-              
-              return GestureDetector(
-                onTap: () {
-                  onChanged(hour);
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.teal : Colors.grey[700],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      displayHour.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+          width: 280,
+          height: 400,
+          child: Column(
+            children: [
+              // Botones especiales para 00:00 y 24:00
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildSpecialHourButton('00:00', 0, currentHour, onChanged),
+                    _buildSpecialHourButton('24:00', 24, currentHour, onChanged),
+                  ],
                 ),
-              );
-            },
+              ),
+              
+              const Divider(color: Colors.grey, thickness: 1),
+              const SizedBox(height: 8),
+              
+              // Horas normales en grid
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: 12,
+                  itemBuilder: (context, index) {
+                    final hour = index + 1; // 1-12
+                    final isSelected = (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour) == hour;
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        onChanged(hour);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.teal : Colors.grey[700],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            hour.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -2028,6 +2049,51 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
     );
   }
 
+  Widget _buildSpecialHourButton(String label, int hour, int currentHour, Function(int) onChanged) {
+    final isSelected = currentHour == hour;
+    
+    return GestureDetector(
+      onTap: () {
+        onChanged(hour);
+        Navigator.pop(context);
+      },
+      child: Container(
+        width: 100,
+        height: 50,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.orange : Colors.blue[700],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.orange[300]! : Colors.blue[400]!,
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                hour == 0 ? 'Medianoche' : '24 horas',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showMinutePicker(StateSetter setDialogState, int currentMinute, Function(int) onChanged) {
     showDialog(
       context: context,
@@ -2035,43 +2101,79 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         backgroundColor: Colors.grey[800],
         title: const Text('Seleccionar Minutos', style: TextStyle(color: Colors.white)),
         content: Container(
-          width: 200,
-          height: 300,
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 6,
-              childAspectRatio: 1,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
-            ),
-            itemCount: 60,
-            itemBuilder: (context, index) {
-              final minute = index;
-              final isSelected = currentMinute == minute;
-              
-              return GestureDetector(
-                onTap: () {
-                  onChanged(minute);
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.teal : Colors.grey[700],
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Center(
-                    child: Text(
-                      minute.toString().padLeft(2, '0'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+          width: 280,
+          height: 400,
+          child: Column(
+            children: [
+              // Botones especiales para minutos comunes
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _buildSpecialMinuteButton('00', 0, currentMinute, onChanged),
+                    _buildSpecialMinuteButton('15', 15, currentMinute, onChanged),
+                    _buildSpecialMinuteButton('30', 30, currentMinute, onChanged),
+                    _buildSpecialMinuteButton('45', 45, currentMinute, onChanged),
+                  ],
                 ),
-              );
-            },
+              ),
+              
+              const Divider(color: Colors.grey, thickness: 1),
+              const SizedBox(height: 8),
+              
+              // Minutos en grid
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 6,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                  ),
+                  itemCount: 60,
+                  itemBuilder: (context, index) {
+                    final minute = index;
+                    final isSelected = currentMinute == minute;
+                    final isSpecialMinute = [0, 15, 30, 45].contains(minute);
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        onChanged(minute);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? Colors.teal 
+                              : isSpecialMinute 
+                                  ? Colors.grey[600] 
+                                  : Colors.grey[700],
+                          borderRadius: BorderRadius.circular(6),
+                          border: isSpecialMinute 
+                              ? Border.all(color: Colors.grey[500]!, width: 1)
+                              : null,
+                        ),
+                        child: Center(
+                          child: Text(
+                            minute.toString().padLeft(2, '0'),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: isSpecialMinute ? 14 : 12,
+                              fontWeight: isSpecialMinute 
+                                  ? FontWeight.bold 
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -2080,6 +2182,39 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
             child: const Text('CANCELAR', style: TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSpecialMinuteButton(String label, int minute, int currentMinute, Function(int) onChanged) {
+    final isSelected = currentMinute == minute;
+    
+    return GestureDetector(
+      onTap: () {
+        onChanged(minute);
+        Navigator.pop(context);
+      },
+      child: Container(
+        width: 60,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.green : Colors.blue[700],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? Colors.green[300]! : Colors.blue[400]!,
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
