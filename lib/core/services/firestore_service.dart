@@ -723,6 +723,8 @@ class FirestoreService extends ChangeNotifier {
       final shiftData = {
         'name': name,
         'colorHex': colorHex,
+        'textColorHex': '#FFFFFF', // Color de texto por defecto
+        'textSize': 16.0, // Tamaño de texto por defecto
         'startTime': startTime,
         'endTime': endTime,
         'description': description ?? '',
@@ -787,6 +789,8 @@ class FirestoreService extends ChangeNotifier {
     required String id,
     required String name,
     required String colorHex,
+    required String textColorHex,
+    required double textSize,
     required String startTime,
     required String endTime,
     String? description,
@@ -798,6 +802,8 @@ class FirestoreService extends ChangeNotifier {
           .update({
         'name': name,
         'colorHex': colorHex,
+        'textColorHex': textColorHex,
+        'textSize': textSize,
         'startTime': startTime,
         'endTime': endTime,
         'description': description ?? '',

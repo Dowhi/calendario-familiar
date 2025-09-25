@@ -76,12 +76,12 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
       setState(() {}); // Forzar actualización del preview
     });
     
-    // Cargar colores del turno existente
-    if (widget.shiftTemplate != null) {
-      _selectedBackgroundColor = widget.shiftTemplate!.colorHex;
-      // Por defecto, texto blanco para contraste
-      _selectedTextColor = '#FFFFFF';
-    }
+          // Cargar colores del turno existente
+          if (widget.shiftTemplate != null) {
+            _selectedBackgroundColor = widget.shiftTemplate!.colorHex;
+            _selectedTextColor = widget.shiftTemplate!.textColorHex;
+            _textSize = widget.shiftTemplate!.textSize;
+          }
   }
 
   String _getInitialAbbreviation() {
@@ -193,29 +193,6 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (widget.shiftTemplate == null)
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Container(
-                                  width: 16,
-                                  height: 16,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.green,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      '1',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                       ),
@@ -308,7 +285,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
             ),
           ),
           const SizedBox(height: 8),
-          _buildColorPicker(_backgroundColors, _selectedBackgroundColor, (color) {
+          _buildBackgroundColorPicker(_backgroundColors, _selectedBackgroundColor, (color) {
             setState(() {
               _selectedBackgroundColor = color;
             });
@@ -326,7 +303,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
             ),
           ),
           const SizedBox(height: 8),
-          _buildColorPicker(_textColors, _selectedTextColor, (color) {
+          _buildTextColorPicker(_textColors, _selectedTextColor, (color) {
             setState(() {
               _selectedTextColor = color;
             });
@@ -448,7 +425,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
     );
   }
 
-  Widget _buildColorPicker(List<String> colors, String selectedColor, Function(String) onColorSelected) {
+  Widget _buildBackgroundColorPicker(List<String> colors, String selectedColor, Function(String) onColorSelected) {
     return Container(
       height: 60,
       child: ListView.builder(
@@ -477,17 +454,20 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
           
           if (index == colors.length + 1) {
             // Icono de navegación derecha
-            return Container(
-              width: 48,
-              margin: const EdgeInsets.only(left: 8),
-              decoration: BoxDecoration(
-                color: Colors.grey[700],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 16,
+            return GestureDetector(
+              onTap: () => _scrollColorPicker(0), // Scroll para colores de fondo
+              child: Container(
+                width: 48,
+                margin: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[700],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 16,
+                ),
               ),
             );
           }
@@ -513,6 +493,91 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                       size: 20,
                     )
                   : null,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTextColorPicker(List<String> colors, String selectedColor, Function(String) onColorSelected) {
+    return Container(
+      height: 60,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: colors.length + 2, // +2 para los iconos de color picker y navegación
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            // Icono de color picker - abre popup RGB para texto
+            return GestureDetector(
+              onTap: () => _showTextColorPickerDialog(onColorSelected),
+              child: Container(
+                width: 48,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[700],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.palette,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            );
+          }
+          
+          if (index == colors.length + 1) {
+            // Icono de navegación derecha
+            return GestureDetector(
+              onTap: () => _scrollColorPicker(1), // Scroll para colores de texto
+              child: Container(
+                width: 48,
+                margin: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[700],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            );
+          }
+          
+          final color = colors[index - 1];
+          final isSelected = color == selectedColor;
+          
+          return GestureDetector(
+            onTap: () => onColorSelected(color),
+            child: Container(
+              width: 48,
+              height: 48,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey[800], // Fondo gris para mostrar el color del texto
+                borderRadius: BorderRadius.circular(8),
+                border: isSelected ? Border.all(color: Colors.green, width: 2) : null,
+              ),
+              child: Center(
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Color(int.parse(color.substring(1, 7), radix: 16) + 0xFF000000),
+                    shape: BoxShape.circle,
+                  ),
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 16,
+                        )
+                      : null,
+                ),
+              ),
             ),
           );
         },
@@ -618,6 +683,8 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
           id: widget.shiftTemplate!.id,
           name: _nameController.text.trim(),
           colorHex: _selectedBackgroundColor,
+          textColorHex: _selectedTextColor,
+          textSize: _textSize,
           startTime: widget.shiftTemplate!.startTime,
           endTime: widget.shiftTemplate!.endTime,
           description: widget.shiftTemplate!.description,
@@ -728,6 +795,274 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         );
       }
     }
+  }
+
+  void _showTextColorPickerDialog(Function(String) onColorSelected) {
+    // Convertir color hexadecimal actual a RGB
+    Color currentColor = Color(int.parse(_selectedTextColor.substring(1, 7), radix: 16) + 0xFF000000);
+
+    // Variables para los sliders RGB
+    double red = currentColor.red.toDouble();
+    double green = currentColor.green.toDouble();
+    double blue = currentColor.blue.toDouble();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: Colors.white,
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header rojo
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFB71C1C),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'SELECCIONE COLOR DE TEXTO',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              // Contenido del diálogo
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Preview del color seleccionado
+                    Container(
+                      width: double.infinity,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800], // Fondo gris para mostrar el color del texto
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _abbreviationController.text,
+                          style: TextStyle(
+                            color: Color.fromRGBO(red.round(), green.round(), blue.round(), 1.0),
+                            fontSize: _textSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Slider Rojo
+                    Row(
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Slider(
+                            value: red,
+                            min: 0,
+                            max: 255,
+                            divisions: 255,
+                            activeColor: Colors.teal,
+                            inactiveColor: Colors.grey[300],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                red = value;
+                              });
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: 40,
+                          child: Text(
+                            red.round().toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Slider Verde
+                    Row(
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Slider(
+                            value: green,
+                            min: 0,
+                            max: 255,
+                            divisions: 255,
+                            activeColor: Colors.teal,
+                            inactiveColor: Colors.grey[300],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                green = value;
+                              });
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: 40,
+                          child: Text(
+                            green.round().toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Slider Azul
+                    Row(
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Slider(
+                            value: blue,
+                            min: 0,
+                            max: 255,
+                            divisions: 255,
+                            activeColor: Colors.teal,
+                            inactiveColor: Colors.grey[300],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                blue = value;
+                              });
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: 40,
+                          child: Text(
+                            blue.round().toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Botones
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.red),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: const Text(
+                              'CANCELAR',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Convertir RGB a hexadecimal
+                              String hexColor = '#${red.round().toRadixString(16).padLeft(2, '0')}${green.round().toRadixString(16).padLeft(2, '0')}${blue.round().toRadixString(16).padLeft(2, '0')}';
+                              onColorSelected(hexColor.toUpperCase());
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: const Text(
+                              'ACEPTAR',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _scrollColorPicker(int pickerType) {
+    // TODO: Implementar scroll horizontal para mostrar más colores
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Navegación de colores en desarrollo'),
+        duration: Duration(seconds: 1),
+      ),
+    );
   }
 
   void _showColorPickerDialog(Function(String) onColorSelected) {

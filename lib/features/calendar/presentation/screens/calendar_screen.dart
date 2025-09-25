@@ -891,6 +891,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         shifts.add({
           'name': template.name,
           'color': Color(int.parse(template.colorHex.substring(1, 7), radix: 16) + 0xFF000000),
+          'textColor': Color(int.parse(template.textColorHex.substring(1, 7), radix: 16) + 0xFF000000),
+          'textSize': template.textSize,
         });
       }
     }
@@ -912,7 +914,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     // Si hay un turno, color completo ocupando toda la celda con texto centrado
     if (shifts.length == 1) {
       final backgroundColor = shifts.first['color'] as Color;
-      final textColor = _getHighContrastTextColor(backgroundColor);
+      final textColor = shifts.first['textColor'] as Color;
+      final textSize = shifts.first['textSize'] as double;
       
       // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
       String displayText;
@@ -934,9 +937,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               displayText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12, // Aumentado de 10 a 12
+                fontSize: textSize, // Usar el tamaño del template
                 fontWeight: FontWeight.bold,
-                color: textColor, // Color dinámico según el fondo
+                color: textColor, // Usar el color del template
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -972,9 +975,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     notes.isNotEmpty ? notes.first : shifts.first['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 10, // Aumentado de 8 a 10
+                      fontSize: (shifts.first['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos
                       fontWeight: FontWeight.bold,
-                      color: _getHighContrastTextColor(shifts.first['color'] as Color),
+                      color: shifts.first['textColor'] as Color,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1002,9 +1005,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     notes.isNotEmpty ? notes.first : shifts[1]['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 10, // Aumentado de 8 a 10
+                      fontSize: (shifts[1]['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos
                       fontWeight: FontWeight.bold,
-                      color: _getHighContrastTextColor(shifts[1]['color'] as Color),
+                      color: shifts[1]['textColor'] as Color,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

@@ -4,6 +4,8 @@ class ShiftTemplate {
   final String id;
   final String name;
   final String colorHex;
+  final String textColorHex;
+  final double textSize;
   final String startTime;
   final String endTime;
   final String? description;
@@ -14,6 +16,8 @@ class ShiftTemplate {
     required this.id,
     required this.name,
     this.colorHex = '#3B82F6',
+    this.textColorHex = '#FFFFFF',
+    this.textSize = 16.0,
     required this.startTime,
     required this.endTime,
     this.description,
@@ -38,6 +42,8 @@ class ShiftTemplate {
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       colorHex: json['colorHex']?.toString() ?? '#3B82F6',
+      textColorHex: json['textColorHex']?.toString() ?? '#FFFFFF',
+      textSize: (json['textSize'] ?? 16.0).toDouble(),
       startTime: json['startTime']?.toString() ?? '08:00',
       endTime: json['endTime']?.toString() ?? '16:00',
       description: json['description']?.toString(),
@@ -51,6 +57,8 @@ class ShiftTemplate {
       'id': id,
       'name': name,
       'colorHex': colorHex,
+      'textColorHex': textColorHex,
+      'textSize': textSize,
       'startTime': startTime,
       'endTime': endTime,
       'description': description,
@@ -63,6 +71,8 @@ class ShiftTemplate {
     String? id,
     String? name,
     String? colorHex,
+    String? textColorHex,
+    double? textSize,
     String? startTime,
     String? endTime,
     String? description,
@@ -73,6 +83,8 @@ class ShiftTemplate {
       id: id ?? this.id,
       name: name ?? this.name,
       colorHex: colorHex ?? this.colorHex,
+      textColorHex: textColorHex ?? this.textColorHex,
+      textSize: textSize ?? this.textSize,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       description: description ?? this.description,
