@@ -1142,6 +1142,8 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
   }
 
   void _confirmDelete() {
+    if (widget.shiftTemplate == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1150,9 +1152,25 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
           'Eliminar Turno',
           style: TextStyle(color: Colors.white),
         ),
-        content: Text(
-          '¿Estás seguro de que quieres eliminar el turno "${_nameController.text}"?',
-          style: TextStyle(color: Colors.grey[300]),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '¿Qué quieres eliminar del turno "${_nameController.text}"?',
+              style: TextStyle(color: Colors.grey[300]),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '• Solo la plantilla: Elimina únicamente la plantilla del turno',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '• Plantilla y turnos asignados: Elimina la plantilla y todos los turnos ya asignados en el calendario',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -1162,36 +1180,59 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _deleteShift();
+              _deleteShift(deleteAssignedShifts: false);
             },
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            child: const Text('Solo plantilla', style: TextStyle(color: Colors.orange)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteShift(deleteAssignedShifts: true);
+            },
+            child: const Text('Plantilla y turnos', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteShift() async {
+  Future<void> _deleteShift({required bool deleteAssignedShifts}) async {
     if (widget.shiftTemplate == null) return;
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
-      await firestoreService.deleteShiftTemplate(widget.shiftTemplate!.id);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Turno "${_nameController.text}" eliminado de Firebase'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            context.pop();
-          }
-        });
+      
+      if (deleteAssignedShifts) {
+        // Eliminar plantilla y limpiar turnos asignados
+        await firestoreService.deleteShiftTemplate(widget.shiftTemplate!.id);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Turno "${_nameController.text}" y todos los turnos asignados eliminados'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Eliminar solo la plantilla (sin limpiar turnos asignados)
+        await firestoreService.deleteShiftTemplateOnly(widget.shiftTemplate!.id);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Plantilla "${_nameController.text}" eliminada (turnos asignados conservados)'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
       }
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          context.pop();
+        }
+      });
     } catch (e) {
       print('❌ Error eliminando turno de Firebase: $e');
       if (mounted) {

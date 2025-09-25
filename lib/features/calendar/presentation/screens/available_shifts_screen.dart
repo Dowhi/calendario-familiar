@@ -519,22 +519,89 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
   }
 
   Future<void> _deleteShift(ShiftTemplate template) async {
+    // Mostrar diálogo de opciones de eliminación
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: const Text(
+          'Eliminar Turno',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '¿Qué quieres eliminar del turno "${template.name}"?',
+              style: TextStyle(color: Colors.grey[300]),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '• Solo la plantilla: Elimina únicamente la plantilla del turno',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '• Plantilla y turnos asignados: Elimina la plantilla y todos los turnos ya asignados en el calendario',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'cancel'),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'template_only'),
+            child: const Text('Solo plantilla', style: TextStyle(color: Colors.orange)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'template_and_shifts'),
+            child: const Text('Plantilla y turnos', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null || result == 'cancel') {
+      return;
+    }
+
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
-      await firestoreService.deleteShiftTemplate(template.id);
+      
+      if (result == 'template_only') {
+        // Eliminar solo la plantilla (sin limpiar turnos asignados)
+        await firestoreService.deleteShiftTemplateOnly(template.id);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Plantilla "${template.name}" eliminada (turnos asignados conservados)'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      } else if (result == 'template_and_shifts') {
+        // Eliminar plantilla y limpiar turnos asignados
+        await firestoreService.deleteShiftTemplate(template.id);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Plantilla "${template.name}" y todos los turnos asignados eliminados'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
       
       setState(() {
         _shiftTemplates.removeWhere((t) => t.id == template.id);
       });
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Turno "${template.name}" eliminado de Firebase'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     } catch (e) {
       print('❌ Error eliminando turno de Firebase: $e');
       if (mounted) {

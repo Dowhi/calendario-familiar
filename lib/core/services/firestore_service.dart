@@ -863,15 +863,64 @@ class FirestoreService extends ChangeNotifier {
     }
   }
 
-  // Eliminar plantilla de turno
-  Future<void> deleteShiftTemplate(String id) async {
+  // Eliminar plantilla de turno (sin limpiar turnos asignados)
+  Future<void> deleteShiftTemplateOnly(String id) async {
     try {
       await _firestore
           .collection(_shiftTemplatesCollection)
           .doc(id)
           .delete();
 
-      print('✅ Plantilla de turno eliminada exitosamente');
+      print('✅ Plantilla de turno eliminada (sin limpiar turnos asignados)');
+    } catch (e) {
+      print('❌ Error eliminando plantilla de turno: $e');
+      rethrow;
+    }
+  }
+
+  // Eliminar plantilla de turno (con limpieza automática de turnos asignados)
+  Future<void> deleteShiftTemplate(String id) async {
+    try {
+      // Primero obtener el nombre de la plantilla antes de eliminarla
+      final templateDoc = await _firestore
+          .collection(_shiftTemplatesCollection)
+          .doc(id)
+          .get();
+      
+      if (!templateDoc.exists) {
+        throw Exception('Plantilla no encontrada');
+      }
+      
+      final templateName = templateDoc.data()?['name'] ?? '';
+      
+      // Eliminar la plantilla
+      await _firestore
+          .collection(_shiftTemplatesCollection)
+          .doc(id)
+          .delete();
+      
+      // Buscar y eliminar todos los turnos asignados con este nombre
+      if (templateName.isNotEmpty) {
+        final shiftsSnapshot = await _firestore
+            .collection('shifts')
+            .where('title', isEqualTo: templateName)
+            .get();
+        
+        if (shiftsSnapshot.docs.isNotEmpty) {
+          print('🗑️ Eliminando ${shiftsSnapshot.docs.length} turnos asignados para "$templateName"');
+          
+          // Eliminar en lotes
+          final batch = _firestore.batch();
+          for (final doc in shiftsSnapshot.docs) {
+            batch.delete(doc.reference);
+          }
+          await batch.commit();
+          
+          print('✅ Turnos asignados eliminados exitosamente');
+        }
+      }
+      
+      print('✅ Plantilla de turno eliminada con limpieza completa');
     } catch (e) {
       print('❌ Error eliminando plantilla de turno: $e');
       rethrow;
