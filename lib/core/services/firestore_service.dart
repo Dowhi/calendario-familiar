@@ -708,6 +708,7 @@ class FirestoreService extends ChangeNotifier {
   // Agregar plantilla de turno
   Future<void> addShiftTemplate({
     required String name,
+    required String abbreviation,
     required String colorHex,
     required String startTime,
     required String endTime,
@@ -734,6 +735,7 @@ class FirestoreService extends ChangeNotifier {
 
       final shiftData = {
         'name': name,
+        'abbreviation': abbreviation,
         'colorHex': colorHex,
         'textColorHex': textColorHex,
         'textSize': textSize,
@@ -810,6 +812,7 @@ class FirestoreService extends ChangeNotifier {
   Future<void> updateShiftTemplate({
     required String id,
     required String name,
+    required String abbreviation,
     required String colorHex,
     required String textColorHex,
     required double textSize,
@@ -833,6 +836,7 @@ class FirestoreService extends ChangeNotifier {
           .doc(id)
           .update({
         'name': name,
+        'abbreviation': abbreviation,
         'colorHex': colorHex,
         'textColorHex': textColorHex,
         'textSize': textSize,

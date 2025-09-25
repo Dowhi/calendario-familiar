@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ShiftTemplate {
   final String id;
   final String name;
+  final String abbreviation;
   final String colorHex;
   final String textColorHex;
   final double textSize;
@@ -25,6 +26,7 @@ class ShiftTemplate {
   const ShiftTemplate({
     required this.id,
     required this.name,
+    this.abbreviation = '',
     this.colorHex = '#3B82F6',
     this.textColorHex = '#FFFFFF',
     this.textSize = 16.0,
@@ -61,6 +63,7 @@ class ShiftTemplate {
     return ShiftTemplate(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
+      abbreviation: json['abbreviation']?.toString() ?? '',
       colorHex: json['colorHex']?.toString() ?? '#3B82F6',
       textColorHex: json['textColorHex']?.toString() ?? '#FFFFFF',
       textSize: (json['textSize'] ?? 16.0).toDouble(),
@@ -86,6 +89,7 @@ class ShiftTemplate {
     return {
       'id': id,
       'name': name,
+      'abbreviation': abbreviation,
       'colorHex': colorHex,
       'textColorHex': textColorHex,
       'textSize': textSize,
@@ -110,6 +114,7 @@ class ShiftTemplate {
   ShiftTemplate copyWith({
     String? id,
     String? name,
+    String? abbreviation,
     String? colorHex,
     String? textColorHex,
     double? textSize,
@@ -132,6 +137,7 @@ class ShiftTemplate {
     return ShiftTemplate(
       id: id ?? this.id,
       name: name ?? this.name,
+      abbreviation: abbreviation ?? this.abbreviation,
       colorHex: colorHex ?? this.colorHex,
       textColorHex: textColorHex ?? this.textColorHex,
       textSize: textSize ?? this.textSize,

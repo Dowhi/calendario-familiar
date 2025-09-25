@@ -77,6 +77,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '1',
         name: 'Nuevo',
+        abbreviation: 'F.A.',
         colorHex: '#B71C1C',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -87,6 +88,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '2',
         name: 'S. Santa',
+        abbreviation: 'S.Santa',
         colorHex: '#1976D2',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -97,6 +99,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '3',
         name: 'Feria',
+        abbreviation: 'Feria',
         colorHex: '#2196F3',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -107,6 +110,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '4',
         name: 'Descanso',
+        abbreviation: 'Descanso',
         colorHex: '#388E3C',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -117,6 +121,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '5',
         name: 'D1',
+        abbreviation: 'D1',
         colorHex: '#1976D2',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -127,6 +132,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '6',
         name: 'D2',
+        abbreviation: 'D2',
         colorHex: '#D32F2F',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -137,6 +143,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
       const ShiftTemplate(
         id: '7',
         name: 'Tarde',
+        abbreviation: 'T',
         colorHex: '#FF9800',
         textColorHex: '#FFFFFF',
         textSize: 16.0,
@@ -307,7 +314,7 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
           ),
         ),
         title: Text(
-          template.name,
+          template.abbreviation.isNotEmpty ? template.abbreviation : template.name,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
@@ -351,6 +358,12 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
   }
 
   String _getShiftAbbreviation(ShiftTemplate template) {
+    // Usar la abreviatura del template si existe
+    if (template.abbreviation.isNotEmpty) {
+      return template.abbreviation;
+    }
+    
+    // Fallback: generar abreviatura basada en el nombre
     final name = template.name.toLowerCase();
     if (name.contains('d1') || name.contains('día 1')) return 'D1';
     if (name.contains('d2') || name.contains('día 2')) return 'D2';

@@ -116,7 +116,13 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
 
   String _getInitialAbbreviation() {
     if (widget.shiftTemplate != null) {
-      return _getAbbreviationFromName(widget.shiftTemplate!.name);
+      // Si estamos editando, usar la abreviatura existente o generar una nueva
+      if (widget.shiftTemplate!.abbreviation.isNotEmpty) {
+        return widget.shiftTemplate!.abbreviation;
+      } else {
+        // Si no hay abreviatura, generar una basada en el nombre
+        return _getAbbreviationFromName(widget.shiftTemplate!.name);
+      }
     }
     return 'F.A.';
   }
@@ -1060,6 +1066,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         await firestoreService.updateShiftTemplate(
           id: widget.shiftTemplate!.id,
           name: _nameController.text.trim(),
+          abbreviation: _abbreviationController.text.trim(),
           colorHex: _selectedBackgroundColor,
           textColorHex: _selectedTextColor,
           textSize: _textSize,
@@ -1081,6 +1088,7 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         // Crear nuevo turno
         await firestoreService.addShiftTemplate(
           name: _nameController.text.trim(),
+          abbreviation: _abbreviationController.text.trim(),
           colorHex: _selectedBackgroundColor,
           startTime: _startTime,
           endTime: _endTime,
