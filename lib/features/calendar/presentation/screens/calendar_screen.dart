@@ -141,7 +141,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   Widget _buildTopBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), // Reducido de 8 a 4
       decoration: BoxDecoration(
         color: const Color(0xFF1B5E20),
         border: Border.all(color: Colors.transparent, width: 0), // Eliminar cualquier borde
@@ -193,7 +193,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   Widget _buildCalendarHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 1), // Reducido de 2 a 1
       decoration: BoxDecoration(
         color: Colors.blueAccent,
         border: Border.all(color: Colors.transparent, width: 0), // Eliminar cualquier borde
@@ -207,10 +207,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1, 1);
               });
             },
-            icon: const Icon(Icons.chevron_left, color: Colors.white),
+            icon: const Icon(Icons.chevron_left, color: Colors.white, size: 20), // Reducido de 24 a 20
+            padding: const EdgeInsets.all(4), // Reducir padding del botón
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32), // Reducir tamaño mínimo
           ),
           const Spacer(),
-          // Título del mes (clickeable para ir al mes actual)
+          // Título del mes y año (clickeable para ir al mes actual)
           GestureDetector(
             onTap: () {
               setState(() {
@@ -218,22 +220,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               });
             },
             child: Text(
-              _getMonthName(_focusedDay.month),
+              '${_getMonthName(_focusedDay.month)} ${_focusedDay.year}',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 14,
+                fontSize: 20, // Aumentado de 14 a 20
                 fontWeight: FontWeight.bold,
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Título del año (no clickeable)
-          Text(
-            '${_focusedDay.year}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
             ),
           ),
           const Spacer(),
@@ -244,7 +236,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1, 1);
               });
             },
-            icon: const Icon(Icons.chevron_right, color: Colors.white),
+            icon: const Icon(Icons.chevron_right, color: Colors.white, size: 20), // Reducido de 24 a 20
+            padding: const EdgeInsets.all(4), // Reducir padding del botón
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32), // Reducir tamaño mínimo
           ),
         ],
       ),
