@@ -15,7 +15,7 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       const ProviderScope(
-        child: MyApp(),
+        child: CalendarioFamiliarApp(),
       ),
     );
 
