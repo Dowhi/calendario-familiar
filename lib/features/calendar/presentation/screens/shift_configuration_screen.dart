@@ -1516,17 +1516,22 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
     final startTotalMinutes = startHour * 60 + startMinute;
     final endTotalMinutes = endHour * 60 + endMinute;
     
+    // Manejar turnos de 24 horas (24:00 = 1440 minutos)
+    if (endTime == '24:00') {
+      return (24 * 60) - startTotalMinutes;
+    }
+    
     // Calcular diferencia
     int difference = endTotalMinutes - startTotalMinutes;
     
-    // Si el turno cruza la medianoche (endTime < startTime) o es 24:00
+    // Si el turno cruza la medianoche (endTime < startTime)
     if (difference < 0) {
       difference += 24 * 60; // Agregar 24 horas en minutos
     }
     
-    // Manejar turnos de 24 horas (24:00 = 1440 minutos)
-    if (endTime == '24:00') {
-      difference = (24 * 60) - startTotalMinutes;
+    // Manejar caso especial: 00:00 a 23:59 = 23h 59m (casi 24h)
+    if (startTime == '00:00' && endTime == '23:59') {
+      return 23 * 60 + 59; // 23 horas y 59 minutos
     }
     
     return difference;

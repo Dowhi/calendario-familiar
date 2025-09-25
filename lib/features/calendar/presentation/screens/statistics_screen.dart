@@ -258,6 +258,108 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return '${date.day}/${date.month}/${date.year.toString().substring(2)}';
   }
 
+  // Limpiar turnos huérfanos manualmente
+  Future<void> _cleanupOrphanedShifts() async {
+    try {
+      // Mostrar diálogo de confirmación
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Limpiar Turnos Huérfanos'),
+          content: const Text(
+            '¿Estás seguro de que quieres limpiar todos los turnos huérfanos? '
+            'Esto eliminará los turnos que ya no tienen plantillas asociadas.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Limpiar', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      // Mostrar indicador de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Limpiando turnos huérfanos...'),
+            ],
+          ),
+        ),
+      );
+
+      // Obtener todas las plantillas de turnos existentes
+      final existingTemplates = _dataService.shiftTemplates.map((t) => t.name).toSet();
+      
+      // Buscar turnos huérfanos en el caché local
+      final orphanedShifts = <String>[];
+      for (final entry in _dataService.shifts.entries) {
+        for (final shiftName in entry.value) {
+          if (!existingTemplates.contains(shiftName) && !orphanedShifts.contains(shiftName)) {
+            orphanedShifts.add(shiftName);
+          }
+        }
+      }
+
+      if (orphanedShifts.isEmpty) {
+        Navigator.pop(context); // Cerrar diálogo de carga
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se encontraron turnos huérfanos'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        return;
+      }
+
+      // Limpiar turnos huérfanos del caché local
+      int cleanedCount = 0;
+      for (final entry in _dataService.shifts.entries) {
+        final originalLength = entry.value.length;
+        entry.value.removeWhere((shift) => orphanedShifts.contains(shift));
+        if (entry.value.length != originalLength) {
+          cleanedCount++;
+        }
+      }
+
+      // Notificar cambios
+      _dataService.notifyListeners();
+
+      Navigator.pop(context); // Cerrar diálogo de carga
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Se limpiaron $cleanedCount fechas con turnos huérfanos'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Forzar actualización de la pantalla
+      setState(() {});
+
+    } catch (e) {
+      Navigator.pop(context); // Cerrar diálogo de carga si está abierto
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error limpiando turnos huérfanos: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   // Método para buscar en notas
   void _searchInNotes() {
     final searchTerm = _searchController.text.trim().toLowerCase();
@@ -816,6 +918,23 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
     return Column(
       children: [
+        // Botón de limpieza de turnos huérfanos
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              onPressed: _cleanupOrphanedShifts,
+              icon: const Icon(Icons.cleaning_services, size: 16),
+              label: const Text('Limpiar turnos huérfanos', style: TextStyle(fontSize: 12)),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        
         // Encabezados de la tabla
         Row(
           children: [
