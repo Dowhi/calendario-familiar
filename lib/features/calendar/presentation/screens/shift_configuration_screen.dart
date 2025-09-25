@@ -92,11 +92,25 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
       setState(() {}); // Forzar actualización del preview
     });
     
-          // Cargar colores del turno existente
+          // Cargar datos del turno existente
           if (widget.shiftTemplate != null) {
             _selectedBackgroundColor = widget.shiftTemplate!.colorHex;
             _selectedTextColor = widget.shiftTemplate!.textColorHex;
             _textSize = widget.shiftTemplate!.textSize;
+            
+            // Cargar horarios
+            _startTime = widget.shiftTemplate!.startTime;
+            _endTime = widget.shiftTemplate!.endTime;
+            _isSplitShift = widget.shiftTemplate!.isSplitShift;
+            _secondStartTime = widget.shiftTemplate!.secondStartTime ?? '15:00';
+            _secondEndTime = widget.shiftTemplate!.secondEndTime ?? '15:00';
+            _breakTimeMinutes = widget.shiftTemplate!.breakTimeMinutes;
+            _calculateDuration = widget.shiftTemplate!.calculateDuration;
+            _calculatedHours = widget.shiftTemplate!.calculatedHours ?? 1;
+            _calculatedMinutes = widget.shiftTemplate!.calculatedMinutes ?? 35;
+            _alarm1Enabled = widget.shiftTemplate!.alarm1Enabled;
+            _previousDayAlarm = widget.shiftTemplate!.previousDayAlarm;
+            _alarmTime = widget.shiftTemplate!.alarmTime ?? '08:00';
           }
   }
 
@@ -708,30 +722,46 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
   }
 
   Widget _buildTimeInput(String label, String value, Function(String) onChanged) {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.grey[800],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[600]!),
-      ),
-      child: TextFormField(
-        initialValue: value,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
+    return GestureDetector(
+      onTap: () => _showTimePickerDialog(label, value, onChanged),
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.grey[800],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[600]!),
         ),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 14,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              if (label.isNotEmpty) ...[
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.access_time,
+                color: Colors.grey[400],
+                size: 20,
+              ),
+            ],
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
-        onChanged: onChanged,
-        keyboardType: TextInputType.datetime,
       ),
     );
   }
@@ -1028,19 +1058,41 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
           colorHex: _selectedBackgroundColor,
           textColorHex: _selectedTextColor,
           textSize: _textSize,
-          startTime: widget.shiftTemplate!.startTime,
-          endTime: widget.shiftTemplate!.endTime,
+          startTime: _startTime,
+          endTime: _endTime,
           description: widget.shiftTemplate!.description,
+          isSplitShift: _isSplitShift,
+          secondStartTime: _isSplitShift ? _secondStartTime : null,
+          secondEndTime: _isSplitShift ? _secondEndTime : null,
+          breakTimeMinutes: _breakTimeMinutes,
+          calculateDuration: _calculateDuration,
+          calculatedHours: _calculateDuration ? _calculatedHours : null,
+          calculatedMinutes: _calculateDuration ? _calculatedMinutes : null,
+          alarm1Enabled: _alarm1Enabled,
+          previousDayAlarm: _previousDayAlarm,
+          alarmTime: _alarm1Enabled ? _alarmTime : null,
         );
       } else {
         // Crear nuevo turno
         await firestoreService.addShiftTemplate(
           name: _nameController.text.trim(),
           colorHex: _selectedBackgroundColor,
-          startTime: '08:00',
-          endTime: '16:00',
+          startTime: _startTime,
+          endTime: _endTime,
           description: 'Turno creado desde la app',
           familyId: familyId,
+          textColorHex: _selectedTextColor,
+          textSize: _textSize,
+          isSplitShift: _isSplitShift,
+          secondStartTime: _isSplitShift ? _secondStartTime : null,
+          secondEndTime: _isSplitShift ? _secondEndTime : null,
+          breakTimeMinutes: _breakTimeMinutes,
+          calculateDuration: _calculateDuration,
+          calculatedHours: _calculateDuration ? _calculatedHours : null,
+          calculatedMinutes: _calculateDuration ? _calculatedMinutes : null,
+          alarm1Enabled: _alarm1Enabled,
+          previousDayAlarm: _previousDayAlarm,
+          alarmTime: _alarm1Enabled ? _alarmTime : null,
         );
       }
 
@@ -1409,6 +1461,8 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
   }
 
   void _showBreakTimeDialog() {
+    final TextEditingController customController = TextEditingController();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1425,14 +1479,83 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
               style: TextStyle(color: Colors.grey[300]),
             ),
             const SizedBox(height: 16),
+            // Opciones predefinidas
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                _buildTimeButton(0),
                 _buildTimeButton(15),
                 _buildTimeButton(25),
                 _buildTimeButton(30),
                 _buildTimeButton(45),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
                 _buildTimeButton(60),
+                _buildTimeButton(90),
+                _buildTimeButton(120),
+                _buildTimeButton(180),
+                _buildTimeButton(240),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Campo personalizable
+            Row(
+              children: [
+                const Text(
+                  'Personalizado:',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[700],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[600]!),
+                    ),
+                    child: TextFormField(
+                      controller: customController,
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Minutos',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    final customValue = int.tryParse(customController.text);
+                    if (customValue != null && customValue >= 0) {
+                      setState(() {
+                        _breakTimeMinutes = customValue;
+                      });
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Por favor ingresa un número válido'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(60, 40),
+                  ),
+                  child: const Text('OK'),
+                ),
               ],
             ),
           ],
@@ -1544,6 +1667,332 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showTimePickerDialog(String label, String currentTime, Function(String) onChanged) {
+    // Parsear el tiempo actual
+    final timeParts = currentTime.split(':');
+    int currentHour = int.tryParse(timeParts[0]) ?? 8;
+    int currentMinute = int.tryParse(timeParts[1]) ?? 0;
+    bool isAM = currentHour < 12;
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: Colors.white,
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Container(
+            width: 320,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Título
+                Text(
+                  'Select time',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Display digital del tiempo
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Hora
+                    GestureDetector(
+                      onTap: () => _showHourPicker(setDialogState, currentHour, (hour) {
+                        setDialogState(() {
+                          currentHour = hour;
+                        });
+                      }),
+                      child: Container(
+                        width: 60,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.blue[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue[300]!, width: 2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour).toString(),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[800],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 8),
+                    Text(
+                      ':',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    
+                    // Minutos
+                    GestureDetector(
+                      onTap: () => _showMinutePicker(setDialogState, currentMinute, (minute) {
+                        setDialogState(() {
+                          currentMinute = minute;
+                        });
+                      }),
+                      child: Container(
+                        width: 60,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!, width: 2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            currentMinute.toString().padLeft(2, '0'),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 16),
+                    
+                    // AM/PM
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setDialogState(() {
+                              isAM = true;
+                            });
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: isAM ? Colors.pink[300] : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'AM',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isAM ? Colors.white : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () {
+                            setDialogState(() {
+                              isAM = false;
+                            });
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: !isAM ? Colors.pink[300] : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'PM',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: !isAM ? Colors.white : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Botones
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.blue[600],
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Convertir a formato 24h
+                        int hour24 = currentHour;
+                        if (!isAM && currentHour != 12) {
+                          hour24 = currentHour + 12;
+                        } else if (isAM && currentHour == 12) {
+                          hour24 = 0;
+                        }
+                        
+                        final timeString = '${hour24.toString().padLeft(2, '0')}:${currentMinute.toString().padLeft(2, '0')}';
+                        onChanged(timeString);
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          color: Colors.blue[600],
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHourPicker(StateSetter setDialogState, int currentHour, Function(int) onChanged) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: const Text('Seleccionar Hora', style: TextStyle(color: Colors.white)),
+        content: Container(
+          width: 200,
+          height: 300,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 1,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: 12,
+            itemBuilder: (context, index) {
+              final hour = index + 1;
+              final isSelected = (currentHour > 12 ? currentHour - 12 : currentHour == 0 ? 12 : currentHour) == hour;
+              
+              return GestureDetector(
+                onTap: () {
+                  onChanged(hour);
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.teal : Colors.grey[700],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      hour.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMinutePicker(StateSetter setDialogState, int currentMinute, Function(int) onChanged) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[800],
+        title: const Text('Seleccionar Minutos', style: TextStyle(color: Colors.white)),
+        content: Container(
+          width: 200,
+          height: 300,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 6,
+              childAspectRatio: 1,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 4,
+            ),
+            itemCount: 60,
+            itemBuilder: (context, index) {
+              final minute = index;
+              final isSelected = currentMinute == minute;
+              
+              return GestureDetector(
+                onTap: () {
+                  onChanged(minute);
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.teal : Colors.grey[700],
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Center(
+                    child: Text(
+                      minute.toString().padLeft(2, '0'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

@@ -8,6 +8,16 @@ class ShiftTemplate {
   final double textSize;
   final String startTime;
   final String endTime;
+  final bool isSplitShift;
+  final String? secondStartTime;
+  final String? secondEndTime;
+  final int breakTimeMinutes;
+  final bool calculateDuration;
+  final int? calculatedHours;
+  final int? calculatedMinutes;
+  final bool alarm1Enabled;
+  final bool previousDayAlarm;
+  final String? alarmTime;
   final String? description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -20,6 +30,16 @@ class ShiftTemplate {
     this.textSize = 16.0,
     required this.startTime,
     required this.endTime,
+    this.isSplitShift = false,
+    this.secondStartTime,
+    this.secondEndTime,
+    this.breakTimeMinutes = 0,
+    this.calculateDuration = false,
+    this.calculatedHours,
+    this.calculatedMinutes,
+    this.alarm1Enabled = false,
+    this.previousDayAlarm = false,
+    this.alarmTime,
     this.description,
     this.createdAt,
     this.updatedAt,
@@ -46,6 +66,16 @@ class ShiftTemplate {
       textSize: (json['textSize'] ?? 16.0).toDouble(),
       startTime: json['startTime']?.toString() ?? '08:00',
       endTime: json['endTime']?.toString() ?? '16:00',
+      isSplitShift: json['isSplitShift'] ?? false,
+      secondStartTime: json['secondStartTime']?.toString(),
+      secondEndTime: json['secondEndTime']?.toString(),
+      breakTimeMinutes: json['breakTimeMinutes'] ?? 0,
+      calculateDuration: json['calculateDuration'] ?? false,
+      calculatedHours: json['calculatedHours'],
+      calculatedMinutes: json['calculatedMinutes'],
+      alarm1Enabled: json['alarm1Enabled'] ?? false,
+      previousDayAlarm: json['previousDayAlarm'] ?? false,
+      alarmTime: json['alarmTime']?.toString(),
       description: json['description']?.toString(),
       createdAt: parseDateTime(json['createdAt']),
       updatedAt: parseDateTime(json['updatedAt']),
@@ -61,6 +91,16 @@ class ShiftTemplate {
       'textSize': textSize,
       'startTime': startTime,
       'endTime': endTime,
+      'isSplitShift': isSplitShift,
+      'secondStartTime': secondStartTime,
+      'secondEndTime': secondEndTime,
+      'breakTimeMinutes': breakTimeMinutes,
+      'calculateDuration': calculateDuration,
+      'calculatedHours': calculatedHours,
+      'calculatedMinutes': calculatedMinutes,
+      'alarm1Enabled': alarm1Enabled,
+      'previousDayAlarm': previousDayAlarm,
+      'alarmTime': alarmTime,
       'description': description,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -75,6 +115,16 @@ class ShiftTemplate {
     double? textSize,
     String? startTime,
     String? endTime,
+    bool? isSplitShift,
+    String? secondStartTime,
+    String? secondEndTime,
+    int? breakTimeMinutes,
+    bool? calculateDuration,
+    int? calculatedHours,
+    int? calculatedMinutes,
+    bool? alarm1Enabled,
+    bool? previousDayAlarm,
+    String? alarmTime,
     String? description,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -87,6 +137,16 @@ class ShiftTemplate {
       textSize: textSize ?? this.textSize,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
+      isSplitShift: isSplitShift ?? this.isSplitShift,
+      secondStartTime: secondStartTime ?? this.secondStartTime,
+      secondEndTime: secondEndTime ?? this.secondEndTime,
+      breakTimeMinutes: breakTimeMinutes ?? this.breakTimeMinutes,
+      calculateDuration: calculateDuration ?? this.calculateDuration,
+      calculatedHours: calculatedHours ?? this.calculatedHours,
+      calculatedMinutes: calculatedMinutes ?? this.calculatedMinutes,
+      alarm1Enabled: alarm1Enabled ?? this.alarm1Enabled,
+      previousDayAlarm: previousDayAlarm ?? this.previousDayAlarm,
+      alarmTime: alarmTime ?? this.alarmTime,
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

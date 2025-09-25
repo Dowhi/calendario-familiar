@@ -714,7 +714,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               height: 24, // Reducir altura
               child: ElevatedButton(
                 onPressed: () {
-                  context.push('/shift-templates');
+                  context.push('/available-shifts');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
