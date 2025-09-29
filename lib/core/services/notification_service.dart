@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:io' show Platform;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:calendario_familiar/core/models/app_event.dart';
 
@@ -44,6 +45,15 @@ class NotificationService {
           ?.createNotificationChannel(androidChannel);
           
       print('Canal de notificaciones creado correctamente');
+      
+      // Solicitar permiso explícito en Android 13+
+      if (Platform.isAndroid) {
+        final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        if (androidImpl != null) {
+          final bool? granted = await androidImpl.requestNotificationsPermission();
+          print('Permiso POST_NOTIFICATIONS concedido: $granted');
+        }
+      }
     } catch (e) {
       print('Error inicializando notificaciones: $e');
       rethrow;
@@ -95,6 +105,8 @@ class NotificationService {
           channelDescription: _channelDescription,
           importance: Importance.high,
           priority: Priority.high,
+          category: AndroidNotificationCategory.alarm,
+          fullScreenIntent: true,
         ),
         iOS: DarwinNotificationDetails(),
       ),

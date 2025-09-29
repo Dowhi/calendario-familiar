@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:calendario_familiar/core/firebase/firebase_options.dart';
 import 'package:calendario_familiar/routing/app_router.dart';
 import 'package:calendario_familiar/theme/app_theme.dart';
+import 'package:calendario_familiar/core/services/time_service.dart';
+import 'package:calendario_familiar/core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +18,15 @@ void main() async {
     print('✅ Firebase inicializado correctamente');
   } catch (e) {
     print('❌ Error inicializando Firebase: $e');
+  }
+  
+  // Inicializar zona horaria y notificaciones locales
+  try {
+    await TimeService.initialize();
+    await NotificationService.initialize();
+    print('✅ TimeService y NotificationService inicializados');
+  } catch (e) {
+    print('❌ Error inicializando servicios base: $e');
   }
   
   runApp(const ProviderScope(child: CalendarioFamiliarApp()));

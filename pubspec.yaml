@@ -42,6 +42,11 @@ dev_dependencies:
   riverpod_annotation: ^2.3.5
   freezed: ^2.4.6
   json_serializable: ^6.7.1
+  # Dependencias para pruebas avanzadas
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+  patrol: ^3.19.0
 
 flutter:
   uses-material-design: true
