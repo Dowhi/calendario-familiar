@@ -250,6 +250,14 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         // Programar notificación local
         final alarmDateTime = _calculateAlarmDateTime(_alarm1Time, _alarm1DaysOffset, _alarm1CustomDate);
         print('🔔 Programando alarma 1 para: $alarmDateTime');
+        
+        // PRUEBA: Programar notificación inmediata para verificar que funciona
+        final now = DateTime.now();
+        final testTime = now.add(const Duration(seconds: 10)); // 10 segundos desde ahora
+        print('🧪 PRUEBA: Programando notificación de prueba para: $testTime');
+        await _scheduleNotification(1, testTime, 'PRUEBA: ${widget.eventText}');
+        
+        // También programar la alarma real
         await _scheduleNotification(1, alarmDateTime, widget.eventText);
       } else {
         // Eliminar alarma 1 si no está habilitada
@@ -339,10 +347,22 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
   Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate, String eventText) async {
     try {
+      print('🔔 _scheduleNotification iniciado para alarma $alarmId');
+      print('📅 Fecha programada: $scheduledDate');
+      print('📝 Texto del evento: $eventText');
+      
       // Verificar que la fecha no esté en el pasado
       final now = DateTime.now();
       if (scheduledDate.isBefore(now)) {
         print('⚠️ Fecha en el pasado, no se programará la alarma');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ La fecha seleccionada está en el pasado'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
         return;
       }
 
@@ -351,7 +371,6 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         print('🌐 En web - simulando notificación programada');
         
         // Para web, vamos a simular la programación y mostrar un mensaje
-        final now = DateTime.now();
         final timeUntilAlarm = scheduledDate.difference(now);
         
         if (mounted) {
@@ -375,11 +394,15 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         return;
       }
 
+      print('📱 Programando notificación local para móvil...');
+      
       // ID único para la alarma
       final notificationId = '${scheduledDate.millisecondsSinceEpoch}_$alarmId'.hashCode;
+      print('🆔 ID de notificación: $notificationId');
 
       // Cancelar alarmas anteriores con el mismo ID
       await _notifications.cancel(notificationId);
+      print('🗑️ Alarmas anteriores canceladas');
 
       // Configuración de la notificación
       final AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -406,6 +429,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       final NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidPlatformChannelSpecifics);
 
+      print('⚙️ Configuración de notificación creada');
+
       // Programar notificación
       await _notifications.zonedSchedule(
         notificationId,
@@ -418,14 +443,14 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      print('✅ Notificación programada para: $scheduledDate');
+      print('✅ Notificación programada exitosamente para: $scheduledDate');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✅ Recordatorio programado para ${scheduledDate.day}/${scheduledDate.month} a las ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}'),
             backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
