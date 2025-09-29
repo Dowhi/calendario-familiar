@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:calendario_familiar/core/models/app_event.dart';
@@ -21,7 +22,14 @@ class NotificationService {
     try {
       print('🔔 Inicializando servicio de notificaciones...');
       
-      // Configurar notificaciones locales para todas las plataformas
+      // Verificar si estamos en web
+      if (kIsWeb) {
+        print('🌐 Ejecutándose en web - notificaciones locales no disponibles');
+        _isInitialized = true;
+        return;
+      }
+      
+      // Configurar notificaciones locales para móviles
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
@@ -43,7 +51,7 @@ class NotificationService {
       print('✅ Notificaciones inicializadas: $initialized');
       
       // Crear canal de notificaciones para Android
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         const androidChannel = AndroidNotificationChannel(
           _channelId,
           _channelName,
@@ -72,7 +80,7 @@ class NotificationService {
       }
       
       // Configurar permisos para iOS
-      if (Platform.isIOS) {
+      if (!kIsWeb && Platform.isIOS) {
         final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>();
         
@@ -92,7 +100,10 @@ class NotificationService {
       
     } catch (e) {
       print('❌ Error inicializando notificaciones: $e');
-      rethrow;
+      // No rethrow en web para evitar errores
+      if (!kIsWeb) {
+        rethrow;
+      }
     }
   }
   
@@ -121,6 +132,11 @@ class NotificationService {
   
   static Future<void> scheduleEventNotification(AppEvent event) async {
     try {
+      if (kIsWeb) {
+        print('🌐 En web - notificaciones locales no disponibles');
+        return;
+      }
+      
       if (!_isInitialized) {
         print('❌ Servicio de notificaciones no inicializado');
         return;
@@ -218,6 +234,11 @@ class NotificationService {
   
   static Future<void> showTestNotification() async {
     try {
+      if (kIsWeb) {
+        print('🌐 En web - notificaciones locales no disponibles');
+        return;
+      }
+      
       if (!_isInitialized) {
         print('❌ Servicio de notificaciones no inicializado');
         return;
@@ -273,6 +294,11 @@ class NotificationService {
   // Método para programar notificación inmediata (para pruebas)
   static Future<void> scheduleImmediateNotification(String title, String body, {int minutesFromNow = 1}) async {
     try {
+      if (kIsWeb) {
+        print('🌐 En web - notificaciones locales no disponibles');
+        return;
+      }
+      
       if (!_isInitialized) {
         print('❌ Servicio de notificaciones no inicializado');
         return;
@@ -338,10 +364,16 @@ class NotificationService {
     try {
       final status = <String, dynamic>{
         'initialized': _isInitialized,
-        'platform': Platform.operatingSystem,
+        'platform': kIsWeb ? 'web' : Platform.operatingSystem,
         'notificationsEnabled': false,
         'exactAlarmsEnabled': false,
       };
+      
+      if (kIsWeb) {
+        status['notificationsEnabled'] = false;
+        status['message'] = 'Notificaciones locales no disponibles en web';
+        return status;
+      }
       
       if (Platform.isAndroid) {
         final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
@@ -369,7 +401,7 @@ class NotificationService {
       print('❌ Error obteniendo estado de notificaciones: $e');
       return {
         'initialized': _isInitialized,
-        'platform': Platform.operatingSystem,
+        'platform': kIsWeb ? 'web' : Platform.operatingSystem,
         'notificationsEnabled': false,
         'exactAlarmsEnabled': false,
         'error': e.toString(),

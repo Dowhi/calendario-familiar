@@ -4,6 +4,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:calendario_familiar/core/utils/responsive_layout.dart';
+import 'package:calendario_familiar/core/services/notification_service.dart';
+import 'package:flutter/foundation.dart';
 
 class AlarmSettingsDialog extends StatefulWidget {
   final DateTime selectedDate;
@@ -46,13 +48,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
   Future<void> _initializeNotifications() async {
     try {
-      const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-      const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
-
-      await _notifications.initialize(initializationSettings);
+      // Usar nuestro servicio de notificaciones corregido
+      await NotificationService.initialize();
 
       final AndroidNotificationChannel channel = AndroidNotificationChannel(
         'event_reminders',
@@ -332,6 +329,21 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         return;
       }
 
+      // Verificar si estamos en web
+      if (kIsWeb) {
+        print('🌐 En web - notificaciones locales no disponibles');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🌐 Las notificaciones no están disponibles en la versión web. Usa la app móvil para recibir recordatorios.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
       // ID único para la alarma
       final notificationId = '${scheduledDate.millisecondsSinceEpoch}_$alarmId'.hashCode;
 
@@ -376,8 +388,27 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       );
 
       print('✅ Notificación programada para: $scheduledDate');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Recordatorio programado para ${scheduledDate.day}/${scheduledDate.month} a las ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
       print('❌ Error programando notificación: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error programando recordatorio: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
