@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io' show Platform;
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:calendario_familiar/core/models/app_event.dart';
 
@@ -11,14 +13,21 @@ class NotificationService {
   static const String _channelName = 'Eventos del Calendario';
   static const String _channelDescription = 'Notificaciones de eventos del calendario familiar';
   
+  static bool _isInitialized = false;
+  
   static Future<void> initialize() async {
+    if (_isInitialized) return;
+    
     try {
-      // Configurar notificaciones locales
+      print('🔔 Inicializando servicio de notificaciones...');
+      
+      // Configurar notificaciones locales para todas las plataformas
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
+        requestCriticalPermission: true,
       );
       
       const initSettings = InitializationSettings(
@@ -26,38 +35,70 @@ class NotificationService {
         iOS: iosSettings,
       );
       
-      final bool? initialized = await _localNotifications.initialize(initSettings);
-      print('Notificaciones inicializadas: $initialized');
-      
-      // Crear canal de notificaciones para Android
-      const androidChannel = AndroidNotificationChannel(
-        _channelId,
-        _channelName,
-        description: _channelDescription,
-        importance: Importance.high,
-        playSound: true,
-        enableVibration: true,
+      final bool? initialized = await _localNotifications.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: _onNotificationTapped,
       );
       
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(androidChannel);
-          
-      print('Canal de notificaciones creado correctamente');
+      print('✅ Notificaciones inicializadas: $initialized');
       
-      // Solicitar permiso explícito en Android 13+
+      // Crear canal de notificaciones para Android
       if (Platform.isAndroid) {
-        final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        const androidChannel = AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: _channelDescription,
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+          showBadge: true,
+        );
+        
+        final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+        
         if (androidImpl != null) {
+          await androidImpl.createNotificationChannel(androidChannel);
+          print('✅ Canal de notificaciones Android creado');
+          
+          // Solicitar permisos en Android 13+
           final bool? granted = await androidImpl.requestNotificationsPermission();
-          print('Permiso POST_NOTIFICATIONS concedido: $granted');
+          print('🔐 Permiso POST_NOTIFICATIONS concedido: $granted');
+          
+          // Solicitar permiso para alarmas exactas
+          final bool? exactAlarmGranted = await androidImpl.requestExactAlarmsPermission();
+          print('⏰ Permiso USE_EXACT_ALARM concedido: $exactAlarmGranted');
         }
       }
+      
+      // Configurar permisos para iOS
+      if (Platform.isIOS) {
+        final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
+        
+        if (iosImpl != null) {
+          final bool? granted = await iosImpl.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+            critical: true,
+          );
+          print('🍎 Permisos iOS concedidos: $granted');
+        }
+      }
+      
+      _isInitialized = true;
+      print('✅ Servicio de notificaciones inicializado completamente');
+      
     } catch (e) {
-      print('Error inicializando notificaciones: $e');
+      print('❌ Error inicializando notificaciones: $e');
       rethrow;
     }
+  }
+  
+  static void _onNotificationTapped(NotificationResponse response) {
+    print('🔔 Notificación tocada: ${response.payload}');
+    // Aquí puedes manejar la navegación cuando se toca una notificación
   }
   
   static Future<String?> getFCMToken() async {
@@ -79,41 +120,91 @@ class NotificationService {
   }
   
   static Future<void> scheduleEventNotification(AppEvent event) async {
-    if (event.notifyMinutesBefore <= 0) return;
-    
-    // Verificar que startAt no sea null
-    if (event.startAt == null) return;
-    
-    final notificationTime = event.startAt!.subtract(
-      Duration(minutes: event.notifyMinutesBefore),
-    );
-    
-    // Solo programar si la notificación es en el futuro
-    if (notificationTime.isBefore(DateTime.now())) return;
-    
-    final notificationId = event.id.hashCode;
-    
-    await _localNotifications.zonedSchedule(
-      notificationId,
-      'Recordatorio: ${event.title}',
-      event.notes ?? 'Tienes un evento programado',
-      tz.TZDateTime.from(notificationTime, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDescription,
-          importance: Importance.high,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          fullScreenIntent: true,
+    try {
+      if (!_isInitialized) {
+        print('❌ Servicio de notificaciones no inicializado');
+        return;
+      }
+      
+      if (event.notifyMinutesBefore <= 0) {
+        print('❌ Minutos de notificación inválidos: ${event.notifyMinutesBefore}');
+        return;
+      }
+      
+      // Verificar que startAt no sea null
+      if (event.startAt == null) {
+        print('❌ Evento sin fecha de inicio: ${event.title}');
+        return;
+      }
+      
+      final notificationTime = event.startAt!.subtract(
+        Duration(minutes: event.notifyMinutesBefore),
+      );
+      
+      // Solo programar si la notificación es en el futuro
+      if (notificationTime.isBefore(DateTime.now())) {
+        print('❌ Tiempo de notificación en el pasado: $notificationTime');
+        return;
+      }
+      
+      final notificationId = event.id.hashCode;
+      
+      print('🔔 Programando notificación para: ${event.title}');
+      print('⏰ Tiempo de notificación: $notificationTime');
+      print('📅 Tiempo del evento: ${event.startAt}');
+      
+      await _localNotifications.zonedSchedule(
+        notificationId,
+        'Recordatorio: ${event.title}',
+        event.notes?.isNotEmpty == true ? event.notes! : 'Tienes un evento programado',
+        tz.TZDateTime.from(notificationTime, tz.local),
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            _channelName,
+            channelDescription: _channelDescription,
+            importance: Importance.high,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.alarm,
+            fullScreenIntent: true,
+            showWhen: true,
+            when: notificationTime.millisecondsSinceEpoch,
+            usesChronometer: false,
+            enableLights: true,
+            ledColor: const Color(0xFF2196F3),
+            ledOnMs: 1000,
+            ledOffMs: 500,
+            playSound: true,
+            sound: const RawResourceAndroidNotificationSound('notification'),
+            enableVibration: true,
+            vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+            autoCancel: true,
+            ongoing: false,
+            silent: false,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+            sound: 'notification.wav',
+            badgeNumber: 1,
+            threadIdentifier: 'calendar_events',
+            categoryIdentifier: 'EVENT_REMINDER',
+          ),
         ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'event_${event.id}',
+      );
+      
+      print('✅ Notificación programada exitosamente para: ${event.title}');
+      
+    } catch (e) {
+      print('❌ Error programando notificación para ${event.title}: $e');
+      rethrow;
+    }
   }
   
   static Future<void> cancelEventNotification(AppEvent event) async {
@@ -127,25 +218,162 @@ class NotificationService {
   
   static Future<void> showTestNotification() async {
     try {
+      if (!_isInitialized) {
+        print('❌ Servicio de notificaciones no inicializado');
+        return;
+      }
+      
+      print('🔔 Enviando notificación de prueba...');
+      
       await _localNotifications.show(
-        0,
-        'Notificación de prueba',
-        'Esta es una notificación de prueba del Calendario Familiar',
-        const NotificationDetails(
+        999, // ID único para notificación de prueba
+        '🔔 Notificación de Prueba',
+        'Esta es una notificación de prueba del Calendario Familiar. Si ves esto, las notificaciones están funcionando correctamente.',
+        NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
             _channelName,
             channelDescription: _channelDescription,
             importance: Importance.high,
             priority: Priority.high,
+            category: AndroidNotificationCategory.message,
+            showWhen: true,
+            when: DateTime.now().millisecondsSinceEpoch,
+            enableLights: true,
+            ledColor: const Color(0xFF4CAF50),
+            ledOnMs: 1000,
+            ledOffMs: 500,
+            playSound: true,
+            enableVibration: true,
+            vibrationPattern: Int64List.fromList([0, 500, 250, 500]),
+            autoCancel: true,
+            ongoing: false,
+            silent: false,
           ),
-          iOS: DarwinNotificationDetails(),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+            badgeNumber: 1,
+            threadIdentifier: 'test_notification',
+            categoryIdentifier: 'TEST_NOTIFICATION',
+          ),
         ),
+        payload: 'test_notification',
       );
-      print('Notificación de prueba enviada correctamente');
+      
+      print('✅ Notificación de prueba enviada correctamente');
+      
     } catch (e) {
-      print('Error enviando notificación de prueba: $e');
+      print('❌ Error enviando notificación de prueba: $e');
       rethrow;
+    }
+  }
+  
+  // Método para programar notificación inmediata (para pruebas)
+  static Future<void> scheduleImmediateNotification(String title, String body, {int minutesFromNow = 1}) async {
+    try {
+      if (!_isInitialized) {
+        print('❌ Servicio de notificaciones no inicializado');
+        return;
+      }
+      
+      final notificationTime = DateTime.now().add(Duration(minutes: minutesFromNow));
+      final notificationId = DateTime.now().millisecondsSinceEpoch;
+      
+      print('🔔 Programando notificación inmediata para: $title');
+      print('⏰ Tiempo: $notificationTime');
+      
+      await _localNotifications.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        tz.TZDateTime.from(notificationTime, tz.local),
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            _channelName,
+            channelDescription: _channelDescription,
+            importance: Importance.high,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.alarm,
+            showWhen: true,
+            when: notificationTime.millisecondsSinceEpoch,
+            enableLights: true,
+            ledColor: const Color(0xFFFF9800),
+            ledOnMs: 1000,
+            ledOffMs: 500,
+            playSound: true,
+            enableVibration: true,
+            vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+            autoCancel: true,
+            ongoing: false,
+            silent: false,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+            badgeNumber: 1,
+            threadIdentifier: 'immediate_notification',
+            categoryIdentifier: 'IMMEDIATE_REMINDER',
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: 'immediate_$notificationId',
+      );
+      
+      print('✅ Notificación inmediata programada exitosamente');
+      
+    } catch (e) {
+      print('❌ Error programando notificación inmediata: $e');
+      rethrow;
+    }
+  }
+  
+  // Método para verificar el estado de las notificaciones
+  static Future<Map<String, dynamic>> getNotificationStatus() async {
+    try {
+      final status = <String, dynamic>{
+        'initialized': _isInitialized,
+        'platform': Platform.operatingSystem,
+        'notificationsEnabled': false,
+        'exactAlarmsEnabled': false,
+      };
+      
+      if (Platform.isAndroid) {
+        final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+        
+        if (androidImpl != null) {
+          status['notificationsEnabled'] = await androidImpl.areNotificationsEnabled() ?? false;
+          status['exactAlarmsEnabled'] = await androidImpl.canScheduleExactNotifications() ?? false;
+        }
+      } else if (Platform.isIOS) {
+        final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
+        
+        if (iosImpl != null) {
+          status['notificationsEnabled'] = await iosImpl.checkPermissions() ?? false;
+        }
+      } else {
+        // Para Windows y otras plataformas
+        status['notificationsEnabled'] = true; // Asumir que están habilitadas
+      }
+      
+      return status;
+      
+    } catch (e) {
+      print('❌ Error obteniendo estado de notificaciones: $e');
+      return {
+        'initialized': _isInitialized,
+        'platform': Platform.operatingSystem,
+        'notificationsEnabled': false,
+        'exactAlarmsEnabled': false,
+        'error': e.toString(),
+      };
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/models/shift_template.dart';
 import 'package:calendario_familiar/core/services/firestore_service.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
+import 'package:calendario_familiar/core/services/notification_service.dart';
 
 class ShiftConfigurationScreen extends ConsumerStatefulWidget {
   final ShiftTemplate? shiftTemplate; // null para crear nuevo, no null para editar
@@ -172,6 +173,14 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
           ),
         ),
         centerTitle: true,
+        actions: [
+          // Botón de prueba de notificaciones
+          IconButton(
+            icon: const Icon(Icons.notifications_active, color: Colors.blue),
+            onPressed: _testNotifications,
+            tooltip: 'Probar Notificaciones',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -2524,5 +2533,145 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
         ),
       ),
     );
+  }
+
+  // Método para probar notificaciones
+  Future<void> _testNotifications() async {
+    try {
+      // Mostrar diálogo de opciones de prueba
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.grey[800],
+          title: const Text(
+            '🔔 Probar Notificaciones',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Selecciona el tipo de prueba:',
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '• Notificación inmediata: Se muestra ahora',
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '• Notificación programada: Se muestra en 1 minuto',
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '• Estado del sistema: Verifica permisos y configuración',
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'cancel'),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'immediate'),
+              child: const Text('Inmediata', style: TextStyle(color: Colors.green)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'scheduled'),
+              child: const Text('Programada', style: TextStyle(color: Colors.orange)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'status'),
+              child: const Text('Estado', style: TextStyle(color: Colors.blue)),
+            ),
+          ],
+        ),
+      );
+
+      if (result == null || result == 'cancel') {
+        return;
+      }
+
+      if (result == 'immediate') {
+        // Notificación inmediata
+        await NotificationService.showTestNotification();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🔔 Notificación de prueba enviada'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else if (result == 'scheduled') {
+        // Notificación programada
+        await NotificationService.scheduleImmediateNotification(
+          '⏰ Recordatorio Programado',
+          'Esta es una notificación programada de prueba del Calendario Familiar',
+          minutesFromNow: 1,
+        );
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⏰ Notificación programada para 1 minuto'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      } else if (result == 'status') {
+        // Estado del sistema
+        final status = await NotificationService.getNotificationStatus();
+        
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: Colors.grey[800],
+              title: const Text(
+                '📊 Estado de Notificaciones',
+                style: TextStyle(color: Colors.white),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Plataforma: ${status['platform']}', style: const TextStyle(color: Colors.white)),
+                  Text('Inicializado: ${status['initialized'] ? '✅' : '❌'}', style: const TextStyle(color: Colors.white)),
+                  Text('Notificaciones habilitadas: ${status['notificationsEnabled'] ? '✅' : '❌'}', style: const TextStyle(color: Colors.white)),
+                  if (status['exactAlarmsEnabled'] != null)
+                    Text('Alarmas exactas: ${status['exactAlarmsEnabled'] ? '✅' : '❌'}', style: const TextStyle(color: Colors.white)),
+                  if (status['error'] != null)
+                    Text('Error: ${status['error']}', style: const TextStyle(color: Colors.red)),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cerrar', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+      
+    } catch (e) {
+      print('❌ Error probando notificaciones: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error probando notificaciones: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
