@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:calendario_familiar/core/utils/responsive_layout.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
+import 'package:calendario_familiar/core/services/web_notification_service.dart';
 import 'package:flutter/foundation.dart';
 
 class AlarmSettingsDialog extends StatefulWidget {
@@ -50,6 +51,11 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     try {
       // Usar nuestro servicio de notificaciones corregido
       await NotificationService.initialize();
+      
+      // Inicializar también notificaciones web si estamos en web
+      if (kIsWeb) {
+        await WebNotificationService.initialize();
+      }
 
       final AndroidNotificationChannel channel = AndroidNotificationChannel(
         'event_reminders',
@@ -242,11 +248,9 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         });
 
         // Programar notificación local
-        await _scheduleNotification(
-          1,
-          _calculateAlarmDateTime(_alarm1Time, _alarm1DaysOffset, _alarm1CustomDate),
-          widget.eventText,
-        );
+        final alarmDateTime = _calculateAlarmDateTime(_alarm1Time, _alarm1DaysOffset, _alarm1CustomDate);
+        print('🔔 Programando alarma 1 para: $alarmDateTime');
+        await _scheduleNotification(1, alarmDateTime, widget.eventText);
       } else {
         // Eliminar alarma 1 si no está habilitada
         await _firestore.collection('alarms').doc('${eventDateKey}_alarm_1').delete();
@@ -269,20 +273,33 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         });
 
         // Programar notificación local
-        await _scheduleNotification(
-          2,
-          _calculateAlarmDateTime(_alarm2Time, _alarm2DaysOffset, _alarm2CustomDate),
-          widget.eventText,
-        );
+        final alarmDateTime = _calculateAlarmDateTime(_alarm2Time, _alarm2DaysOffset, _alarm2CustomDate);
+        print('🔔 Programando alarma 2 para: $alarmDateTime');
+        await _scheduleNotification(2, alarmDateTime, widget.eventText);
       } else {
         // Eliminar alarma 2 si no está habilitada
         await _firestore.collection('alarms').doc('${eventDateKey}_alarm_2').delete();
         await _notifications.cancel(2);
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Alarmas guardadas correctamente')),
-      );
+      // Mostrar mensaje informativo según la plataforma
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Alarma guardada en Firebase y notificación web programada. Asegúrate de permitir notificaciones en tu navegador.'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Alarma guardada y notificación móvil programada correctamente'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
 
       Navigator.of(context).pop();
     } catch (e) {
@@ -331,16 +348,30 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
       // Verificar si estamos en web
       if (kIsWeb) {
-        print('🌐 En web - notificaciones locales no disponibles');
+        print('🌐 En web - simulando notificación programada');
+        
+        // Para web, vamos a simular la programación y mostrar un mensaje
+        final now = DateTime.now();
+        final timeUntilAlarm = scheduledDate.difference(now);
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🌐 Las notificaciones no están disponibles en la versión web. Usa la app móvil para recibir recordatorios.'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
+            SnackBar(
+              content: Text('🌐 Recordatorio programado para ${scheduledDate.day}/${scheduledDate.month} a las ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')} (en ${timeUntilAlarm.inHours}h ${timeUntilAlarm.inMinutes % 60}m)'),
+              backgroundColor: Colors.blue,
+              duration: const Duration(seconds: 4),
             ),
           );
         }
+        
+        // También intentar usar notificaciones web si están disponibles
+        await WebNotificationService.scheduleNotification(
+          title: '🔔 Recordatorio',
+          body: eventText,
+          scheduledTime: scheduledDate,
+          tag: alarmId,
+        );
+        
         return;
       }
 
