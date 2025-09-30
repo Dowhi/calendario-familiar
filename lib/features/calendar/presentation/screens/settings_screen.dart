@@ -38,8 +38,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _loadNotificationSettings() async {
     try {
+      print('🔧 Cargando configuración de notificaciones...');
       final settings = await NotificationSettingsService.getAllSettings();
       final hasPermissions = await NotificationService.areNotificationsEnabled();
+      
+      print('🔧 Configuraciones cargadas: $settings');
+      print('🔧 Permisos disponibles: $hasPermissions');
       
       setState(() {
         _notificationsEnabled = settings['notificationsEnabled'] as bool;
@@ -52,7 +56,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error cargando configuración de notificaciones: $e');
+      print('❌ Error cargando configuración de notificaciones: $e');
       setState(() {
         _isLoading = false;
       });
@@ -105,25 +109,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _requestPermissions() async {
     try {
+      print('🔧 Usuario solicitando permisos...');
       final granted = await NotificationService.requestPermissions();
+      print('🔧 Resultado de solicitud de permisos: $granted');
+      
       setState(() {
         _hasPermissions = granted;
       });
+      
+      // Recargar configuración después de solicitar permisos
+      await _loadNotificationSettings();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(granted ? 'Permisos concedidos' : 'Permisos denegados'),
             backgroundColor: granted ? Colors.green : Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
     } catch (e) {
+      print('❌ Error en _requestPermissions: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error solicitando permisos: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }

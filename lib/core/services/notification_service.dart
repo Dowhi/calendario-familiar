@@ -127,24 +127,49 @@ class NotificationService {
   
   static Future<bool> areNotificationsEnabled() async {
     try {
-      if (kIsWeb) return false;
+      print('🔍 Verificando estado de permisos...');
+      
+      if (kIsWeb) {
+        print('🌐 En web - permisos no disponibles');
+        return false;
+      }
+      
+      if (!_isInitialized) {
+        print('⚠️ Servicio no inicializado');
+        return false;
+      }
+      
+      print('📱 Verificando permisos en: ${Platform.isAndroid ? "Android" : Platform.isIOS ? "iOS" : "Otro"}');
       
       if (Platform.isAndroid) {
         final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
-        final bool? result = await androidImpl?.areNotificationsEnabled();
-        return result ?? false;
+        
+        if (androidImpl != null) {
+          final bool? result = await androidImpl.areNotificationsEnabled();
+          print('🤖 Estado permisos Android: $result');
+          return result ?? false;
+        } else {
+          print('❌ Android implementation no encontrada para verificación');
+        }
       } else if (Platform.isIOS) {
         final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>();
-        final permissions = await iosImpl?.checkPermissions();
-        // checkPermissions() retorna NotificationsEnabledOptions, no bool
-        return permissions?.isEnabled ?? false;
+        
+        if (iosImpl != null) {
+          final permissions = await iosImpl.checkPermissions();
+          final result = permissions?.isEnabled ?? false;
+          print('🍎 Estado permisos iOS: $result');
+          return result;
+        } else {
+          print('❌ iOS implementation no encontrada para verificación');
+        }
       }
       
-      return true; // Para otras plataformas, asumir que están habilitadas
+      print('⚠️ Plataforma no soportada para verificación de permisos');
+      return false;
     } catch (e) {
-      print('Error verificando permisos de notificaciones: $e');
+      print('❌ Error verificando permisos de notificaciones: $e');
       return false;
     }
   }
@@ -152,17 +177,27 @@ class NotificationService {
   /// Solicitar permisos de notificaciones de manera robusta
   static Future<bool> requestPermissions() async {
     try {
-      if (kIsWeb) return false;
+      print('🔔 Iniciando solicitud de permisos...');
+      
+      if (kIsWeb) {
+        print('🌐 Ejecutándose en web - permisos no disponibles');
+        return false;
+      }
       
       if (!_isInitialized) {
+        print('⚠️ Servicio no inicializado, inicializando...');
         await initialize();
       }
+      
+      print('📱 Plataforma detectada: ${Platform.isAndroid ? "Android" : Platform.isIOS ? "iOS" : "Otro"}');
       
       if (Platform.isAndroid) {
         final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
         
         if (androidImpl != null) {
+          print('🤖 Android implementation encontrada, solicitando permisos...');
+          
           // Solicitar permiso básico de notificaciones
           final bool? notificationsGranted = await androidImpl.requestNotificationsPermission();
           print('🔐 Permiso de notificaciones: $notificationsGranted');
@@ -175,13 +210,18 @@ class NotificationService {
             print('⚠️ Error solicitando permiso de alarmas exactas: $e');
           }
           
-          return notificationsGranted ?? false;
+          final result = notificationsGranted ?? false;
+          print('✅ Resultado final de permisos Android: $result');
+          return result;
+        } else {
+          print('❌ Android implementation no encontrada');
         }
       } else if (Platform.isIOS) {
         final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>();
         
         if (iosImpl != null) {
+          print('🍎 iOS implementation encontrada, solicitando permisos...');
           final bool? granted = await iosImpl.requestPermissions(
             alert: true,
             badge: true,
@@ -190,10 +230,13 @@ class NotificationService {
           );
           print('🍎 Permisos iOS: $granted');
           return granted ?? false;
+        } else {
+          print('❌ iOS implementation no encontrada');
         }
       }
       
-      return true; // Para otras plataformas
+      print('⚠️ No se pudo determinar la plataforma o implementation');
+      return false;
     } catch (e) {
       print('❌ Error solicitando permisos: $e');
       return false;
