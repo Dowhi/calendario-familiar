@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Servicio para gestionar la configuración de notificaciones
@@ -91,6 +92,36 @@ class NotificationSettingsService {
       'soundEnabled': await isSoundEnabled(),
       'vibrationEnabled': await isVibrationEnabled(),
     };
+  }
+
+  /// Inicializar configuraciones por defecto si no existen
+  static Future<void> initializeDefaultSettings() async {
+    if (kIsWeb) {
+      print('🌐 Ejecutándose en web - usando configuraciones por defecto sin persistencia');
+      return;
+    }
+    
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Solo establecer valores por defecto si no existen
+    if (!prefs.containsKey(_notificationsEnabledKey)) {
+      await prefs.setBool(_notificationsEnabledKey, true);
+    }
+    if (!prefs.containsKey(_alarmRemindersEnabledKey)) {
+      await prefs.setBool(_alarmRemindersEnabledKey, true);
+    }
+    if (!prefs.containsKey(_eventRemindersEnabledKey)) {
+      await prefs.setBool(_eventRemindersEnabledKey, true);
+    }
+    if (!prefs.containsKey(_defaultReminderMinutesKey)) {
+      await prefs.setInt(_defaultReminderMinutesKey, 30);
+    }
+    if (!prefs.containsKey(_soundEnabledKey)) {
+      await prefs.setBool(_soundEnabledKey, true);
+    }
+    if (!prefs.containsKey(_vibrationEnabledKey)) {
+      await prefs.setBool(_vibrationEnabledKey, true);
+    }
   }
 
   /// Restablecer configuración por defecto

@@ -14,7 +14,7 @@ import 'package:calendario_familiar/features/calendar/presentation/screens/avail
 import 'package:calendario_familiar/features/calendar/presentation/screens/shift_configuration_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/login_screen.dart';
 import 'package:calendario_familiar/features/auth/presentation/email_signup_screen.dart';
-import 'package:calendario_familiar/features/settings/presentation/screens/settings_screen.dart';
+import 'package:calendario_familiar/features/calendar/presentation/screens/settings_screen.dart';
 import 'package:calendario_familiar/main.dart';
 import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart'; // Importar AuthController
