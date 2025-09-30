@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:calendario_familiar/core/utils/responsive_layout.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
 import 'package:calendario_familiar/core/services/web_notification_service.dart';
+import 'package:calendario_familiar/core/services/alarm_service.dart';
+import 'package:calendario_familiar/core/services/notification_settings_service.dart';
 import 'package:flutter/foundation.dart';
 
 class AlarmSettingsDialog extends StatefulWidget {

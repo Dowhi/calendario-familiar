@@ -70,12 +70,20 @@ class NotificationService {
           print('✅ Canal de notificaciones Android creado');
           
           // Solicitar permisos en Android 13+
-          final bool? granted = await androidImpl.requestNotificationsPermission();
-          print('🔐 Permiso POST_NOTIFICATIONS concedido: $granted');
+          try {
+            final bool? granted = await androidImpl.requestNotificationsPermission();
+            print('🔐 Permiso POST_NOTIFICATIONS concedido: $granted');
+          } catch (e) {
+            print('⚠️ Error solicitando permiso de notificaciones: $e');
+          }
           
           // Solicitar permiso para alarmas exactas
-          final bool? exactAlarmGranted = await androidImpl.requestExactAlarmsPermission();
-          print('⏰ Permiso USE_EXACT_ALARM concedido: $exactAlarmGranted');
+          try {
+            final bool? exactAlarmGranted = await androidImpl.requestExactAlarmsPermission();
+            print('⏰ Permiso USE_EXACT_ALARM concedido: $exactAlarmGranted');
+          } catch (e) {
+            print('⚠️ Error solicitando permiso de alarmas exactas: $e');
+          }
         }
       }
       
@@ -119,13 +127,74 @@ class NotificationService {
   
   static Future<bool> areNotificationsEnabled() async {
     try {
-      final bool? result = await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.areNotificationsEnabled();
-      return result ?? false;
+      if (kIsWeb) return false;
+      
+      if (Platform.isAndroid) {
+        final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+        final bool? result = await androidImpl?.areNotificationsEnabled();
+        return result ?? false;
+      } else if (Platform.isIOS) {
+        final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
+        final bool? result = await iosImpl?.checkPermissions();
+        return result ?? false;
+      }
+      
+      return true; // Para otras plataformas, asumir que están habilitadas
     } catch (e) {
       print('Error verificando permisos de notificaciones: $e');
+      return false;
+    }
+  }
+  
+  /// Solicitar permisos de notificaciones de manera robusta
+  static Future<bool> requestPermissions() async {
+    try {
+      if (kIsWeb) return false;
+      
+      if (!_isInitialized) {
+        await initialize();
+      }
+      
+      if (Platform.isAndroid) {
+        final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+        
+        if (androidImpl != null) {
+          // Solicitar permiso básico de notificaciones
+          final bool? notificationsGranted = await androidImpl.requestNotificationsPermission();
+          print('🔐 Permiso de notificaciones: $notificationsGranted');
+          
+          // Solicitar permiso de alarmas exactas
+          try {
+            final bool? exactAlarmGranted = await androidImpl.requestExactAlarmsPermission();
+            print('⏰ Permiso de alarmas exactas: $exactAlarmGranted');
+          } catch (e) {
+            print('⚠️ Error solicitando permiso de alarmas exactas: $e');
+          }
+          
+          return notificationsGranted ?? false;
+        }
+      } else if (Platform.isIOS) {
+        final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
+        
+        if (iosImpl != null) {
+          final bool? granted = await iosImpl.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+            critical: true,
+          );
+          print('🍎 Permisos iOS: $granted');
+          return granted ?? false;
+        }
+      }
+      
+      return true; // Para otras plataformas
+    } catch (e) {
+      print('❌ Error solicitando permisos: $e');
       return false;
     }
   }
