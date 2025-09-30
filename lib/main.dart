@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,13 +21,17 @@ void main() async {
     print('❌ Error inicializando Firebase: $e');
   }
   
-  // Inicializar zona horaria y notificaciones locales
-  try {
-    await TimeService.initialize();
-    await NotificationService.initialize();
-    print('✅ TimeService y NotificationService inicializados');
-  } catch (e) {
-    print('❌ Error inicializando servicios base: $e');
+  // Inicializar zona horaria y notificaciones locales (solo para móvil)
+  if (!kIsWeb) {
+    try {
+      await TimeService.initialize();
+      await NotificationService.initialize();
+      print('✅ TimeService y NotificationService inicializados');
+    } catch (e) {
+      print('❌ Error inicializando servicios base: $e');
+    }
+  } else {
+    print('🌐 Ejecutándose en web - servicios de notificación no disponibles');
   }
   
   runApp(const ProviderScope(child: CalendarioFamiliarApp()));

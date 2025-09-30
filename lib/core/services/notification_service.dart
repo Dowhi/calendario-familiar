@@ -137,8 +137,9 @@ class NotificationService {
       } else if (Platform.isIOS) {
         final iosImpl = _localNotifications.resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>();
-        final bool? result = await iosImpl?.checkPermissions();
-        return result ?? false;
+        final permissions = await iosImpl?.checkPermissions();
+        // checkPermissions() retorna NotificationsEnabledOptions, no bool
+        return permissions?.isEnabled ?? false;
       }
       
       return true; // Para otras plataformas, asumir que están habilitadas

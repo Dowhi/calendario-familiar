@@ -93,7 +93,7 @@ class AlarmService {
     try {
       final notificationId = _generateNotificationId(eventId, alarmNumber);
       await NotificationService.cancelEventNotification(
-        _createTempEventForCancellation(notificationId),
+        _createTempEventForCancellation(notificationId.hashCode),
       );
       
       // Limpiar configuración local
