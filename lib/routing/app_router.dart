@@ -19,13 +19,15 @@ import 'package:calendario_familiar/main.dart';
 import 'package:calendario_familiar/features/auth/presentation/password_recovery_screen.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart'; // Importar AuthController
 import 'package:calendario_familiar/core/models/shift_template.dart'; // Importar ShiftTemplate
+import 'package:calendario_familiar/features/splash/presentation/screens/splash_screen.dart';
+import 'package:calendario_familiar/features/splash/presentation/screens/splash_screen_alternative.dart';
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: navigatorKey,
-  initialLocation: '/', // Cambiado para que inicie en la ruta principal por defecto
+  initialLocation: '/splash', // Iniciar en la pantalla de splash
   redirect: (context, state) async {
     // Primero, manejar la redirección por notificaciones si aplica
     // if (openedFromNotification && state.fullPath != '/notification-screen') {
@@ -48,9 +50,10 @@ final appRouter = GoRouter(
     final loggingIn = state.matchedLocation == '/login';
     final creatingAccount = state.matchedLocation == '/email-signup';
     final recoveringPassword = state.matchedLocation == '/password-recovery';
+    final onSplash = state.matchedLocation == '/splash';
 
     // Rutas permitidas para usuarios no autenticados
-    final bool isAuthRoute = loggingIn || creatingAccount || recoveringPassword;
+    final bool isAuthRoute = loggingIn || creatingAccount || recoveringPassword || onSplash;
 
     print(' Estado de autenticación en redirect: isAuthenticated=$isAuthenticated, hasFamily=$hasFamily, isAuthRoute=$isAuthRoute, currentPath=${state.matchedLocation}');
 
@@ -69,8 +72,8 @@ final appRouter = GoRouter(
     // Si está autenticado y tiene familia, y está en una ruta de autenticación, ir al calendario
     // PERO NO redirigir desde /family-management (permitir acceso a gestión familiar)
     if (isAuthenticated && hasFamily && isAuthRoute && state.matchedLocation != '/family-management') {
-      print('➡️ Usuario autenticado con familia, redirigiendo a /');
-      return '/';
+      print('➡️ Usuario autenticado con familia, redirigiendo a /calendar');
+      return '/calendar';
     }
 
     // Para cualquier otro caso, no redirigir
@@ -78,10 +81,22 @@ final appRouter = GoRouter(
     return null;
   },
   routes: [
-    // Ruta principal del calendario - DIRECTO
+    // Ruta de splash screen
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    
+    // Ruta principal del calendario
+    GoRoute(
+      path: '/calendar',
+      builder: (context, state) => const CalendarScreen(),
+    ),
+    
+    // Ruta raíz que redirige al calendario (para compatibilidad)
     GoRoute(
       path: '/',
-      builder: (context, state) => const CalendarScreen(),
+      redirect: (context, state) => '/calendar',
     ),
     
     // Ruta de detalle del día
@@ -236,7 +251,7 @@ final appRouter = GoRouter(
           Text('Error: ${state.error}'),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => context.go('/'),
+            onPressed: () => context.go('/calendar'),
             child: const Text('Volver al inicio'),
           ),
         ],

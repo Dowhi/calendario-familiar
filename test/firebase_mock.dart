@@ -111,3 +111,4 @@ void teardownFirebaseMocks() {
     null,
   );
 }
+

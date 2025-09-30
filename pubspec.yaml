@@ -32,6 +32,9 @@ dependencies:
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0
   flutter_colorpicker: ^1.1.0
+  # Dependencias para splash screen con video
+  video_player: ^2.8.2
+  chewie: ^1.7.4
 
 dev_dependencies:
   flutter_test:
@@ -50,3 +53,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - assets/
+    - assets/videos/
