@@ -95,7 +95,11 @@ class NotificationService {
         // Verificar que el canal se creó correctamente
         try {
           final channels = await androidImpl.getNotificationChannels();
-          print('📋 Canales disponibles: ${channels.map((c) => c.id).toList()}');
+          if (channels != null) {
+            print('📋 Canales disponibles: ${channels.map((c) => c.id).toList()}');
+          } else {
+            print('📋 No se pudieron obtener los canales (null)');
+          }
         } catch (e) {
           print('⚠️ No se pudieron obtener los canales: $e');
         }
