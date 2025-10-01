@@ -1078,7 +1078,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return const SizedBox.shrink(); // No hay notas que mostrar
     }
 
-    // Verificar si hay turnos - si los hay, las notas ya se muestran en el fondo
+    // Verificar si hay turnos
     bool hasShifts = false;
     for (final eventTitle in events) {
       final template = _dataService.getShiftTemplateByName(eventTitle);
@@ -1088,9 +1088,31 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
     }
 
-    // Si hay turnos, no mostrar las notas aquí porque ya se muestran en el fondo
+    // Si hay turnos, mostrar las notas en la parte inferior
     if (hasShifts) {
-      return const SizedBox.shrink();
+      return Positioned(
+        bottom: 2,
+        left: 2,
+        right: 2,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: Text(
+            notes.first,
+            style: const TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.normal,
+              color: Colors.black87,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
 
     // Solo mostrar las notas si no hay turnos

@@ -35,9 +35,9 @@ class NotificationService {
       // Configurar notificaciones locales para móviles
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const iosSettings = DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
         requestCriticalPermission: false,
       );
       
@@ -82,10 +82,11 @@ class NotificationService {
         _channelId,
         _channelName,
         description: _channelDescription,
-        importance: Importance.high,
+        importance: Importance.max,
         playSound: true,
         enableVibration: true,
         showBadge: true,
+        enableLights: true,
       );
       
       final androidImpl = _localNotifications.resolvePlatformSpecificImplementation<
@@ -228,17 +229,20 @@ class NotificationService {
             _channelId,
             _channelName,
             channelDescription: _channelDescription,
-            importance: Importance.high,
-            priority: Priority.high,
+            importance: Importance.max,
+            priority: Priority.max,
             category: AndroidNotificationCategory.event,
             showWhen: true,
             enableLights: true,
             enableVibration: true,
+            playSound: true,
+            fullScreenIntent: true,
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
+            interruptionLevel: InterruptionLevel.active,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -295,16 +299,19 @@ class NotificationService {
             _channelId,
             _channelName,
             channelDescription: _channelDescription,
-            importance: Importance.high,
-            priority: Priority.high,
+            importance: Importance.max,
+            priority: Priority.max,
             showWhen: true,
             enableLights: true,
             enableVibration: true,
+            playSound: true,
+            fullScreenIntent: true,
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
+            interruptionLevel: InterruptionLevel.active,
           ),
         ),
       );
