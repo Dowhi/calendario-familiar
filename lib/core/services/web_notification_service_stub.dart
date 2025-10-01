@@ -14,7 +14,12 @@ class WebNotificationService {
     return false;
   }
 
-  static Future<void> scheduleEventNotification(AppEvent event) async {
+  static Future<void> scheduleEventNotification({
+    required String eventId,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+  }) async {
     // No hacer nada en plataformas móviles
   }
 

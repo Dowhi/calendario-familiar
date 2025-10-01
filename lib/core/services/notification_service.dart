@@ -204,17 +204,34 @@ class NotificationService {
   /// Programar una notificación para un evento
   static Future<void> scheduleEventNotification(AppEvent event) async {
     try {
-      if (kIsWeb || !_isInitialized) {
-        return;
-      }
-      
+      // Validaciones básicas
       if (event.notifyMinutesBefore <= 0 || event.startAt == null) {
+        print('⚠️ Evento sin notificación programada (minutos: ${event.notifyMinutesBefore}, fecha: ${event.startAt})');
         return;
       }
       
       final notificationTime = event.startAt!.subtract(Duration(minutes: event.notifyMinutesBefore));
       
       if (notificationTime.isBefore(DateTime.now())) {
+        print('⚠️ Notificación en el pasado, no se programará');
+        return;
+      }
+      
+      // Para web, usar servicio web de notificaciones
+      if (kIsWeb) {
+        await WebNotificationService.scheduleEventNotification(
+          eventId: event.id,
+          title: '📅 ${event.title}',
+          body: 'El evento comenzará en ${event.notifyMinutesBefore} minutos',
+          scheduledTime: notificationTime,
+        );
+        print('✅ Notificación web programada para: ${event.title}');
+        return;
+      }
+      
+      // Para móviles, verificar inicialización
+      if (!_isInitialized) {
+        print('⚠️ NotificationService no inicializado');
         return;
       }
       
@@ -250,7 +267,7 @@ class NotificationService {
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
       
-      print('✅ Notificación programada para: ${event.title}');
+      print('✅ Notificación móvil programada para: ${event.title} a las ${scheduledDate}');
       
     } catch (e) {
       print('❌ Error programando notificación: $e');

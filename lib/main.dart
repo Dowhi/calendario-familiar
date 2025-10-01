@@ -21,17 +21,18 @@ void main() async {
     print('❌ Error inicializando Firebase: $e');
   }
   
-  // Inicializar zona horaria y notificaciones locales (solo para móvil)
-  if (!kIsWeb) {
-    try {
+  // Inicializar zona horaria y notificaciones
+  try {
+    if (!kIsWeb) {
       await TimeService.initialize();
-      await NotificationService.initialize();
-      print('✅ TimeService y NotificationService inicializados');
-    } catch (e) {
-      print('❌ Error inicializando servicios base: $e');
+      print('✅ TimeService inicializado');
     }
-  } else {
-    print('🌐 Ejecutándose en web - servicios de notificación no disponibles');
+    
+    // Inicializar notificaciones en todas las plataformas
+    await NotificationService.initialize();
+    print('✅ NotificationService inicializado');
+  } catch (e) {
+    print('❌ Error inicializando servicios base: $e');
   }
   
   runApp(const ProviderScope(child: CalendarioFamiliarApp()));
