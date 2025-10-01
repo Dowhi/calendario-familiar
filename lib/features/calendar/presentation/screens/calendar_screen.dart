@@ -95,13 +95,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               },
             ),
             // Botón para gestionar plantillas de turnos - REMOVIDO (funcionalidad movida a botón TURNOS inferior)
-            // Botón Turno2 - Lista de turnos disponibles
-            IconButton(
-              icon: const Icon(Icons.work),
-              onPressed: () {
-                context.push('/available-shifts');
-              },
-            ),
+            // Botón Turno2 - ELIMINADO por solicitud del usuario
             // Nuevo botón para gestionar la familia
             IconButton(
               icon: const Icon(Icons.group),
@@ -966,7 +960,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    // Si hay notas, mostrar la nota en lugar del nombre del turno
+                    // Si hay notas, mostrar la nota en la mitad superior
+                    // Si no hay notas, mostrar el nombre del primer turno
                     notes.isNotEmpty ? notes.first : shifts.first['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -996,8 +991,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    // Si hay notas, mostrar la nota en lugar del nombre del turno (solo en la mitad inferior)
-                    notes.isNotEmpty ? notes.first : shifts[1]['name'],
+                    // Mostrar solo el nombre del segundo turno (no la nota, para evitar duplicación)
+                    shifts[1]['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: (shifts[1]['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos
