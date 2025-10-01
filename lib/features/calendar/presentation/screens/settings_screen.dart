@@ -11,7 +11,6 @@ import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 import 'package:calendario_familiar/features/calendar/logic/calendar_controller.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
-import 'package:calendario_familiar/core/services/notification_settings_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -21,90 +20,28 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _notificationsEnabled = true;
-  bool _alarmRemindersEnabled = true;
-  bool _eventRemindersEnabled = true;
-  bool _soundEnabled = true;
-  bool _vibrationEnabled = true;
-  int _defaultReminderMinutes = 30;
-  bool _isLoading = true;
   bool _hasPermissions = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadNotificationSettings();
+    _loadPermissionStatus();
   }
 
-  Future<void> _loadNotificationSettings() async {
+  Future<void> _loadPermissionStatus() async {
     try {
-      print('🔧 Cargando configuración de notificaciones...');
-      final settings = await NotificationSettingsService.getAllSettings();
       final hasPermissions = await NotificationService.areNotificationsEnabled();
-      
-      print('🔧 Configuraciones cargadas: $settings');
-      print('🔧 Permisos disponibles: $hasPermissions');
-      
       setState(() {
-        _notificationsEnabled = settings['notificationsEnabled'] as bool;
-        _alarmRemindersEnabled = settings['alarmRemindersEnabled'] as bool;
-        _eventRemindersEnabled = settings['eventRemindersEnabled'] as bool;
-        _soundEnabled = settings['soundEnabled'] as bool;
-        _vibrationEnabled = settings['vibrationEnabled'] as bool;
-        _defaultReminderMinutes = settings['defaultReminderMinutes'] as int;
         _hasPermissions = hasPermissions;
         _isLoading = false;
       });
     } catch (e) {
-      print('❌ Error cargando configuración de notificaciones: $e');
+      print('❌ Error cargando estado de permisos: $e');
       setState(() {
         _isLoading = false;
       });
     }
-  }
-
-  Future<void> _updateNotificationsEnabled(bool value) async {
-    await NotificationSettingsService.setNotificationsEnabled(value);
-    setState(() {
-      _notificationsEnabled = value;
-    });
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(value ? 'Notificaciones habilitadas' : 'Notificaciones deshabilitadas'),
-          backgroundColor: value ? Colors.green : Colors.orange,
-        ),
-      );
-    }
-  }
-
-  Future<void> _updateAlarmReminders(bool value) async {
-    await NotificationSettingsService.setAlarmRemindersEnabled(value);
-    setState(() {
-      _alarmRemindersEnabled = value;
-    });
-  }
-
-  Future<void> _updateEventReminders(bool value) async {
-    await NotificationSettingsService.setEventRemindersEnabled(value);
-    setState(() {
-      _eventRemindersEnabled = value;
-    });
-  }
-
-  Future<void> _updateSoundEnabled(bool value) async {
-    await NotificationSettingsService.setSoundEnabled(value);
-    setState(() {
-      _soundEnabled = value;
-    });
-  }
-
-  Future<void> _updateVibrationEnabled(bool value) async {
-    await NotificationSettingsService.setVibrationEnabled(value);
-    setState(() {
-      _vibrationEnabled = value;
-    });
   }
 
   Future<void> _requestPermissions() async {
@@ -116,9 +53,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       setState(() {
         _hasPermissions = granted;
       });
-      
-      // Recargar configuración después de solicitar permisos
-      await _loadNotificationSettings();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -169,35 +103,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _testImmediateNotification() async {
-    try {
-      await NotificationService.scheduleImmediateNotification(
-        '🔔 Prueba de Recordatorio',
-        'Esta es una notificación programada que aparecerá en 10 segundos',
-        minutesFromNow: 1,
-      );
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Recordatorio de prueba programado (aparecerá en 1 minuto)'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Error programando recordatorio: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    }
-  }
 
   Future<void> _exportData() async {
     try {
@@ -417,7 +322,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Text(
                   _hasPermissions 
                     ? 'Permisos de notificación concedidos' 
-                    : 'Permisos de notificación necesarios',
+                    : 'Permisos de notificación necesarios para alarmas',
                   style: TextStyle(
                     color: _hasPermissions ? Colors.green.shade700 : Colors.red.shade700,
                     fontWeight: FontWeight.w500,
@@ -433,133 +338,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         
-        // Configuración principal
-        SwitchListTile(
-          title: const Text('Notificaciones habilitadas'),
-          subtitle: const Text('Activar/desactivar todas las notificaciones'),
-          value: _notificationsEnabled,
-          onChanged: _updateNotificationsEnabled,
-          secondary: const Icon(Icons.notifications),
-        ),
-        
-        // Subconfiguraciones (solo si las notificaciones están habilitadas)
-        if (_notificationsEnabled) ...[
-          SwitchListTile(
-            title: const Text('Recordatorios de eventos'),
-            subtitle: const Text('Notificaciones antes de eventos programados'),
-            value: _eventRemindersEnabled,
-            onChanged: _updateEventReminders,
-            secondary: const Icon(Icons.event),
-          ),
-          
-          SwitchListTile(
-            title: const Text('Alarmas y recordatorios'),
-            subtitle: const Text('Recordatorios personalizados y alarmas'),
-            value: _alarmRemindersEnabled,
-            onChanged: _updateAlarmReminders,
-            secondary: const Icon(Icons.alarm),
-          ),
-          
-          SwitchListTile(
-            title: const Text('Sonido'),
-            subtitle: const Text('Reproducir sonido en notificaciones'),
-            value: _soundEnabled,
-            onChanged: _updateSoundEnabled,
-            secondary: const Icon(Icons.volume_up),
-          ),
-          
-          SwitchListTile(
-            title: const Text('Vibración'),
-            subtitle: const Text('Vibrar en notificaciones'),
-            value: _vibrationEnabled,
-            onChanged: _updateVibrationEnabled,
-            secondary: const Icon(Icons.vibration),
-          ),
-          
-          // Recordatorio por defecto
-          ListTile(
-            leading: const Icon(Icons.schedule),
-            title: const Text('Recordatorio por defecto'),
-            subtitle: Text('$_defaultReminderMinutes minutos antes'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _showReminderTimeDialog,
-          ),
-        ],
-        
-        // Pruebas
-        const Divider(),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Pruebas',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ),
+        // Prueba de notificaciones
         ListTile(
           leading: const Icon(Icons.notifications_active),
-          title: const Text('Probar notificación inmediata'),
-          subtitle: const Text('Enviar notificación de prueba ahora'),
+          title: const Text('Probar notificación'),
+          subtitle: const Text('Enviar notificación de prueba'),
+          trailing: IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: _testNotification,
+          ),
           onTap: _testNotification,
         ),
-        ListTile(
-          leading: const Icon(Icons.schedule),
-          title: const Text('Probar recordatorio programado'),
-          subtitle: const Text('Programar notificación para 1 minuto'),
-          onTap: _testImmediateNotification,
-        ),
       ],
-    );
-  }
-
-  void _showReminderTimeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Recordatorio por defecto'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Selecciona cuántos minutos antes del evento quieres recibir el recordatorio:'),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              children: [15, 30, 60, 120, 240, 480, 1440].map((minutes) {
-                final hours = minutes ~/ 60;
-                final displayText = hours >= 24 
-                  ? '${hours ~/ 24} día${hours ~/ 24 > 1 ? 's' : ''}'
-                  : hours >= 1 
-                    ? '${hours}h'
-                    : '${minutes}m';
-                
-                return ChoiceChip(
-                  label: Text(displayText),
-                  selected: _defaultReminderMinutes == minutes,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _defaultReminderMinutes = minutes;
-                      });
-                      NotificationSettingsService.setDefaultReminderMinutes(minutes);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-        ],
-      ),
     );
   }
 

@@ -7,7 +7,6 @@ import 'package:calendario_familiar/routing/app_router.dart';
 import 'package:calendario_familiar/theme/app_theme.dart';
 import 'package:calendario_familiar/core/services/time_service.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
-import 'package:calendario_familiar/core/services/notification_settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,20 +26,12 @@ void main() async {
     try {
       await TimeService.initialize();
       await NotificationService.initialize();
-      await NotificationSettingsService.initializeDefaultSettings();
-      print('✅ TimeService, NotificationService y NotificationSettingsService inicializados');
+      print('✅ TimeService y NotificationService inicializados');
     } catch (e) {
       print('❌ Error inicializando servicios base: $e');
     }
   } else {
     print('🌐 Ejecutándose en web - servicios de notificación no disponibles');
-    // Inicializar configuraciones por defecto incluso en web
-    try {
-      await NotificationSettingsService.initializeDefaultSettings();
-      print('✅ NotificationSettingsService inicializado para web');
-    } catch (e) {
-      print('❌ Error inicializando NotificationSettingsService: $e');
-    }
   }
   
   runApp(const ProviderScope(child: CalendarioFamiliarApp()));

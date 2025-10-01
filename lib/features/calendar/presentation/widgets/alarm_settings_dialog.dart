@@ -3,13 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:calendario_familiar/core/utils/responsive_layout.dart';
-import 'package:calendario_familiar/core/services/notification_service.dart';
-import 'package:calendario_familiar/core/services/web_notification_service.dart';
-import 'package:calendario_familiar/core/services/alarm_service.dart';
-import 'package:calendario_familiar/core/services/notification_settings_service.dart';
-import 'package:flutter/foundation.dart';
 
+/// Diálogo simple para configurar alarmas/recordatorios
 class AlarmSettingsDialog extends StatefulWidget {
   final DateTime selectedDate;
   final String eventText;
@@ -26,40 +21,39 @@ class AlarmSettingsDialog extends StatefulWidget {
 
 class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
   final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Estado de los recordatorios
   bool _alarm1Enabled = false;
   bool _alarm2Enabled = false;
   TimeOfDay _alarm1Time = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay _alarm2Time = const TimeOfDay(hour: 18, minute: 0);
-  int _alarm1DaysOffset = 0; // 0 = mismo día, -1 = día anterior, etc.
-  int _alarm2DaysOffset = 0;
-  DateTime? _alarm1CustomDate; // Para fecha personalizada
-  DateTime? _alarm2CustomDate; // Para fecha personalizada
-  String _alarm1Sound = 'Sonido por defecto';
-  String _alarm2Sound = 'Sonido por defecto';
-
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  int _alarm1DaysBefore = 0;
+  int _alarm2DaysBefore = 0;
+  
   bool _isLoading = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
-    _loadExistingAlarms();
+    _initializeAndLoad();
+  }
+
+  Future<void> _initializeAndLoad() async {
+    await _initializeNotifications();
+    await _loadExistingAlarms();
   }
 
   Future<void> _initializeNotifications() async {
     try {
-      // Usar nuestro servicio de notificaciones corregido
-      await NotificationService.initialize();
-      
-      // Inicializar también notificaciones web si estamos en web
-      if (kIsWeb) {
-        await WebNotificationService.initialize();
-      }
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const initSettings = InitializationSettings(android: androidSettings);
+      await _notifications.initialize(initSettings);
 
-      final AndroidNotificationChannel channel = AndroidNotificationChannel(
+      // Crear canal de notificaciones para Android
+      const channel = AndroidNotificationChannel(
         'event_reminders',
         'Recordatorios de eventos',
         description: 'Notificaciones para recordar eventos del calendario',
@@ -69,8 +63,7 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       );
 
       await _notifications
-          .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(channel);
     } catch (e) {
       print('Error inicializando notificaciones: $e');
@@ -79,18 +72,11 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
   Future<void> _loadExistingAlarms() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       final eventDateKey = _formatDateKey(widget.selectedDate);
       final userId = _auth.currentUser?.uid;
 
       if (userId == null) {
-        print('Usuario no autenticado');
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         return;
       }
 
@@ -100,69 +86,35 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
           .doc('${eventDateKey}_alarm_1')
           .get();
 
+      if (alarm1Doc.exists && alarm1Doc.data() != null) {
+        final data = alarm1Doc.data()!;
+        _alarm1Enabled = data['enabled'] ?? false;
+        _alarm1Time = TimeOfDay(
+          hour: data['hour'] ?? 8,
+          minute: data['minute'] ?? 0,
+        );
+        _alarm1DaysBefore = data['daysBefore'] ?? 0;
+      }
+
       // Cargar alarma 2
       final alarm2Doc = await _firestore
           .collection('alarms')
           .doc('${eventDateKey}_alarm_2')
           .get();
 
-      // Procesar datos de alarma 1
-      if (alarm1Doc.exists && alarm1Doc.data() != null) {
-        final alarm1Data = alarm1Doc.data()!;
-        setState(() {
-          _alarm1Enabled = alarm1Data['enabled'] ?? false;
-          _alarm1Time = TimeOfDay(
-            hour: alarm1Data['hour'] ?? 8,
-            minute: alarm1Data['minute'] ?? 0,
-          );
-          _alarm1DaysOffset = alarm1Data['daysOffset'] ?? 0;
-          _alarm1CustomDate = alarm1Data['customDate'] != null
-              ? DateTime.parse(alarm1Data['customDate'])
-              : null;
-          _alarm1Sound = alarm1Data['sound'] ?? 'Sonido por defecto';
-        });
-      } else {
-        // Valores por defecto para alarma 1
-        setState(() {
-          _alarm1Enabled = false;
-          _alarm1Time = const TimeOfDay(hour: 8, minute: 0);
-          _alarm1DaysOffset = 0;
-          _alarm1Sound = 'Sonido por defecto';
-        });
-      }
-
-      // Procesar datos de alarma 2
       if (alarm2Doc.exists && alarm2Doc.data() != null) {
-        final alarm2Data = alarm2Doc.data()!;
-        setState(() {
-          _alarm2Enabled = alarm2Data['enabled'] ?? false;
-          _alarm2Time = TimeOfDay(
-            hour: alarm2Data['hour'] ?? 18,
-            minute: alarm2Data['minute'] ?? 0,
-          );
-          _alarm2DaysOffset = alarm2Data['daysOffset'] ?? 0;
-          _alarm2CustomDate = alarm2Data['customDate'] != null
-              ? DateTime.parse(alarm2Data['customDate'])
-              : null;
-          _alarm2Sound = alarm2Data['sound'] ?? 'Sonido por defecto';
-        });
-      } else {
-        // Valores por defecto para alarma 2
-        setState(() {
-          _alarm2Enabled = false;
-          _alarm2Time = const TimeOfDay(hour: 18, minute: 0);
-          _alarm2DaysOffset = 0;
-          _alarm2Sound = 'Sonido por defecto';
-        });
+        final data = alarm2Doc.data()!;
+        _alarm2Enabled = data['enabled'] ?? false;
+        _alarm2Time = TimeOfDay(
+          hour: data['hour'] ?? 18,
+          minute: data['minute'] ?? 0,
+        );
+        _alarm2DaysBefore = data['daysBefore'] ?? 0;
       }
-
-      print('✅ Alarmas cargadas correctamente');
     } catch (e) {
-      print('❌ Error cargando alarmas: $e');
+      print('Error cargando alarmas: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -170,245 +122,184 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     return '${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
   }
 
+  String _getDayText(int daysBefore) {
+    switch (daysBefore) {
+      case 0:
+        return 'Mismo día del evento';
+      case 1:
+        return '1 día antes';
+      case 2:
+        return '2 días antes';
+      case 3:
+        return '3 días antes';
+      case 7:
+        return '1 semana antes';
+      default:
+        return '$daysBefore días antes';
+    }
+  }
+
   Future<void> _selectTime(bool isAlarm1) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: isAlarm1 ? _alarm1Time : _alarm2Time,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: isAlarm1 ? Colors.green : Colors.blue,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
-    if (pickedTime != null) {
+    if (picked != null) {
       setState(() {
         if (isAlarm1) {
-          _alarm1Time = pickedTime;
+          _alarm1Time = picked;
           _alarm1Enabled = true;
         } else {
-          _alarm2Time = pickedTime;
+          _alarm2Time = picked;
           _alarm2Enabled = true;
         }
       });
     }
   }
 
-  Future<void> _selectCustomDate(bool isAlarm1) async {
-    final DateTime? pickedDate = await showDatePicker(
+  Future<void> _selectDaysBefore(bool isAlarm1) async {
+    final result = await showDialog<int>(
       context: context,
-      initialDate: isAlarm1 ? (_alarm1CustomDate ?? widget.selectedDate) : (_alarm2CustomDate ?? widget.selectedDate),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context) => AlertDialog(
+        title: const Text('Días de anticipación'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDayOption(0),
+            _buildDayOption(1),
+            _buildDayOption(2),
+            _buildDayOption(3),
+            _buildDayOption(7),
+          ],
+        ),
+      ),
     );
 
-    if (pickedDate != null) {
+    if (result != null) {
       setState(() {
         if (isAlarm1) {
-          _alarm1CustomDate = pickedDate;
-          _alarm1DaysOffset = -999; // Valor especial para indicar fecha personalizada
-          _alarm1Enabled = true;
+          _alarm1DaysBefore = result;
         } else {
-          _alarm2CustomDate = pickedDate;
-          _alarm2DaysOffset = -999; // Valor especial para indicar fecha personalizada
-          _alarm2Enabled = true;
+          _alarm2DaysBefore = result;
         }
       });
     }
   }
 
-  String _formatTimeOfDay(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
-
-  String _formatCustomDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  Widget _buildDayOption(int days) {
+    return ListTile(
+      title: Text(_getDayText(days)),
+      onTap: () => Navigator.of(context).pop(days),
+    );
   }
 
   Future<void> _saveAlarms() async {
+    setState(() => _isSaving = true);
+
     try {
       final eventDateKey = _formatDateKey(widget.selectedDate);
       final userId = _auth.currentUser?.uid;
 
       if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Usuario no autenticado')),
-        );
+        _showError('Usuario no autenticado');
         return;
       }
 
-      // Guardar alarma 1 solo si está habilitada
+      // Guardar/eliminar alarma 1
       if (_alarm1Enabled) {
-        await _firestore.collection('alarms').doc('${eventDateKey}_alarm_1').set({
-          'userId': userId,
-          'eventDate': eventDateKey,
-          'eventText': widget.eventText,
-          'enabled': _alarm1Enabled,
-          'hour': _alarm1Time.hour,
-          'minute': _alarm1Time.minute,
-          'daysOffset': _alarm1DaysOffset,
-          'customDate': _alarm1CustomDate?.toIso8601String(),
-          'sound': _alarm1Sound,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-
-        // Programar notificación local
-        final alarmDateTime = _calculateAlarmDateTime(_alarm1Time, _alarm1DaysOffset, _alarm1CustomDate);
-        print('🔔 Programando alarma 1 para: $alarmDateTime');
-        
-        // PRUEBA: Programar notificación inmediata para verificar que funciona
-        final now = DateTime.now();
-        final testTime = now.add(const Duration(seconds: 10)); // 10 segundos desde ahora
-        print('🧪 PRUEBA: Programando notificación de prueba para: $testTime');
-        await _scheduleNotification(1, testTime, 'PRUEBA: ${widget.eventText}');
-        
-        // También programar la alarma real
-        await _scheduleNotification(1, alarmDateTime, widget.eventText);
+        await _saveAlarm(1, eventDateKey, userId, _alarm1Time, _alarm1DaysBefore);
       } else {
-        // Eliminar alarma 1 si no está habilitada
-        await _firestore.collection('alarms').doc('${eventDateKey}_alarm_1').delete();
-        await _notifications.cancel(1);
+        await _deleteAlarm(1, eventDateKey);
       }
 
-      // Guardar alarma 2 solo si está habilitada
+      // Guardar/eliminar alarma 2
       if (_alarm2Enabled) {
-        await _firestore.collection('alarms').doc('${eventDateKey}_alarm_2').set({
-          'userId': userId,
-          'eventDate': eventDateKey,
-          'eventText': widget.eventText,
-          'enabled': _alarm2Enabled,
-          'hour': _alarm2Time.hour,
-          'minute': _alarm2Time.minute,
-          'daysOffset': _alarm2DaysOffset,
-          'customDate': _alarm2CustomDate?.toIso8601String(),
-          'sound': _alarm2Sound,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-
-        // Programar notificación local
-        final alarmDateTime = _calculateAlarmDateTime(_alarm2Time, _alarm2DaysOffset, _alarm2CustomDate);
-        print('🔔 Programando alarma 2 para: $alarmDateTime');
-        await _scheduleNotification(2, alarmDateTime, widget.eventText);
+        await _saveAlarm(2, eventDateKey, userId, _alarm2Time, _alarm2DaysBefore);
       } else {
-        // Eliminar alarma 2 si no está habilitada
-        await _firestore.collection('alarms').doc('${eventDateKey}_alarm_2').delete();
-        await _notifications.cancel(2);
+        await _deleteAlarm(2, eventDateKey);
       }
 
-      // Mostrar mensaje informativo según la plataforma
-      if (kIsWeb) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✅ Alarma guardada en Firebase y notificación web programada. Asegúrate de permitir notificaciones en tu navegador.'),
-            backgroundColor: Colors.blue,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Alarma guardada y notificación móvil programada correctamente'),
+            content: Text('✅ Alarmas guardadas correctamente'),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
           ),
         );
+        Navigator.of(context).pop();
       }
-
-      Navigator.of(context).pop();
     } catch (e) {
-      print('Error guardando alarmas: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error guardando alarmas: $e')),
-      );
+      _showError('Error guardando alarmas: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
-  DateTime _calculateAlarmDateTime(TimeOfDay time, int daysOffset, DateTime? customDate) {
-    DateTime alarmDate;
+  Future<void> _saveAlarm(
+    int alarmNumber,
+    String eventDateKey,
+    String userId,
+    TimeOfDay time,
+    int daysBefore,
+  ) async {
+    // Guardar en Firebase
+    await _firestore
+        .collection('alarms')
+        .doc('${eventDateKey}_alarm_$alarmNumber')
+        .set({
+      'userId': userId,
+      'eventDate': eventDateKey,
+      'eventText': widget.eventText,
+      'enabled': true,
+      'hour': time.hour,
+      'minute': time.minute,
+      'daysBefore': daysBefore,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
 
-    if (daysOffset == -999 && customDate != null) {
-      // Fecha personalizada
-      alarmDate = DateTime(
-        customDate.year,
-        customDate.month,
-        customDate.day,
-        time.hour,
-        time.minute,
-      );
+    // Calcular fecha y hora de la alarma
+    final alarmDate = widget.selectedDate.subtract(Duration(days: daysBefore));
+    final alarmDateTime = DateTime(
+      alarmDate.year,
+      alarmDate.month,
+      alarmDate.day,
+      time.hour,
+      time.minute,
+    );
+
+    // Verificar que la alarma sea en el futuro
+    if (alarmDateTime.isAfter(DateTime.now())) {
+      // Programar notificación local
+      await _scheduleNotification(alarmNumber, alarmDateTime);
     } else {
-      // Fecha relativa al evento
-      final DateTime eventDate = widget.selectedDate;
-      alarmDate = DateTime(
-        eventDate.year,
-        eventDate.month,
-        eventDate.day + daysOffset,
-        time.hour,
-        time.minute,
-      );
+      print('⚠️ Alarma $alarmNumber en el pasado, no se programará');
     }
-
-    return alarmDate;
   }
 
-  Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate, String eventText) async {
+  Future<void> _deleteAlarm(int alarmNumber, String eventDateKey) async {
+    await _firestore
+        .collection('alarms')
+        .doc('${eventDateKey}_alarm_$alarmNumber')
+        .delete();
+    await _notifications.cancel(alarmNumber);
+  }
+
+  Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate) async {
     try {
-      print('🔔 _scheduleNotification iniciado para alarma $alarmId');
-      print('📅 Fecha programada: $scheduledDate');
-      print('📝 Texto del evento: $eventText');
-      
-      // Verificar que la fecha no esté en el pasado
-      final now = DateTime.now();
-      if (scheduledDate.isBefore(now)) {
-        print('⚠️ Fecha en el pasado, no se programará la alarma');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('⚠️ La fecha seleccionada está en el pasado'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-
-      // Verificar si estamos en web
-      if (kIsWeb) {
-        print('🌐 En web - simulando notificación programada');
-        
-        // Para web, vamos a simular la programación y mostrar un mensaje
-        final timeUntilAlarm = scheduledDate.difference(now);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('🌐 Recordatorio programado para ${scheduledDate.day}/${scheduledDate.month} a las ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')} (en ${timeUntilAlarm.inHours}h ${timeUntilAlarm.inMinutes % 60}m)'),
-              backgroundColor: Colors.blue,
-              duration: const Duration(seconds: 4),
-            ),
-          );
-        }
-        
-        // También intentar usar notificaciones web si están disponibles
-        await WebNotificationService.scheduleNotification(
-          title: '🔔 Recordatorio',
-          body: eventText,
-          scheduledTime: scheduledDate,
-          tag: alarmId,
-        );
-        
-        return;
-      }
-
-      print('📱 Programando notificación local para móvil...');
-      
-      // ID único para la alarma
-      final notificationId = '${scheduledDate.millisecondsSinceEpoch}_$alarmId'.hashCode;
-      print('🆔 ID de notificación: $notificationId');
-
-      // Cancelar alarmas anteriores con el mismo ID
-      await _notifications.cancel(notificationId);
-      print('🗑️ Alarmas anteriores canceladas');
-
-      // Configuración de la notificación
-      final AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
+      final androidDetails = AndroidNotificationDetails(
         'event_reminders',
         'Recordatorios de eventos',
         channelDescription: 'Notificaciones para recordar eventos del calendario',
@@ -416,548 +307,345 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         priority: Priority.high,
         enableVibration: true,
         playSound: true,
-        showWhen: true,
-        fullScreenIntent: true,
-        category: AndroidNotificationCategory.alarm,
-        timeoutAfter: 60000,
-        largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-        color: const Color(0xFF2196F3),
-        enableLights: true,
-        ledColor: const Color(0xFF2196F3),
-        ledOnMs: 1000,
-        ledOffMs: 500,
+        category: AndroidNotificationCategory.reminder,
       );
 
-      final NotificationDetails platformChannelSpecifics =
-      NotificationDetails(android: androidPlatformChannelSpecifics);
+      final details = NotificationDetails(android: androidDetails);
 
-      print('⚙️ Configuración de notificación creada');
-
-      // Programar notificación
       await _notifications.zonedSchedule(
-        notificationId,
+        alarmId,
         '🔔 Recordatorio',
-        eventText,
+        widget.eventText,
         tz.TZDateTime.from(scheduledDate, tz.local),
-        platformChannelSpecifics,
+        details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      print('✅ Notificación programada exitosamente para: $scheduledDate');
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ Recordatorio programado para ${scheduledDate.day}/${scheduledDate.month} a las ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      print('✅ Notificación programada para: $scheduledDate');
     } catch (e) {
       print('❌ Error programando notificación: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Error programando recordatorio: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
     }
+  }
+
+  void _showError(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.notifications_active,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Configurar Alarmas',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Contenido
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.all(40),
+                child: CircularProgressIndicator(),
+              )
+            else
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Recordatorio 1
+                      _buildAlarmCard(
+                        title: 'Recordatorio 1',
+                        icon: Icons.notifications,
+                        color: Colors.green,
+                        enabled: _alarm1Enabled,
+                        time: _alarm1Time,
+                        daysBefore: _alarm1DaysBefore,
+                        onToggle: () => setState(() => _alarm1Enabled = !_alarm1Enabled),
+                        onTimeSelect: () => _selectTime(true),
+                        onDaysSelect: () => _selectDaysBefore(true),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Recordatorio 2
+                      _buildAlarmCard(
+                        title: 'Recordatorio 2',
+                        icon: Icons.notifications,
+                        color: Colors.grey,
+                        enabled: _alarm2Enabled,
+                        time: _alarm2Time,
+                        daysBefore: _alarm2DaysBefore,
+                        onToggle: () => setState(() => _alarm2Enabled = !_alarm2Enabled),
+                        onTimeSelect: () => _selectTime(false),
+                        onDaysSelect: () => _selectDaysBefore(false),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // Botones
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: _isSaving ? null : () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isSaving ? null : _saveAlarms,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(Colors.white),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.save, size: 20),
+                                SizedBox(width: 8),
+                                Text('Guardar'),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildAlarmCard({
     required String title,
     required IconData icon,
     required Color color,
-    required bool isEnabled,
-    required VoidCallback onToggle,
+    required bool enabled,
     required TimeOfDay time,
+    required int daysBefore,
+    required VoidCallback onToggle,
     required VoidCallback onTimeSelect,
-    required int daysOffset,
-    required ValueChanged<int?> onDaysOffsetChanged,
-    required DateTime? customDate,
-    required VoidCallback onCustomDateSelect,
+    required VoidCallback onDaysSelect,
   }) {
+    final effectiveColor = enabled ? color : Colors.grey;
+
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8.0,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isEnabled ? color.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
-          width: 1.5,
+          color: enabled ? color.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
+          width: 2,
         ),
       ),
       child: Column(
         children: [
-          // Header de la tarjeta
+          // Header con toggle
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isEnabled ? color.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
+              color: enabled ? color.withOpacity(0.1) : Colors.transparent,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16.0),
-                topRight: Radius.circular(16.0),
+                topLeft: Radius.circular(14),
+                topRight: Radius.circular(14),
               ),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isEnabled ? color : Colors.grey,
-                    borderRadius: BorderRadius.circular(12.0),
+                    color: effectiveColor,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 20.0,
-                  ),
+                  child: Icon(icon, color: Colors.white, size: 22),
                 ),
-                const SizedBox(width: 12.0),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16.0,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: isEnabled ? Colors.black87 : Colors.grey.shade600,
+                      color: enabled ? Colors.black87 : Colors.grey,
                     ),
                   ),
                 ),
-                Transform.scale(
-                  scale: 1.1,
-                  child: Switch(
-                    value: isEnabled,
-                    onChanged: (value) => onToggle(),
-                    activeColor: color,
-                    activeTrackColor: color.withOpacity(0.3),
-                    inactiveTrackColor: Colors.grey.withOpacity(0.3),
-                  ),
+                Switch(
+                  value: enabled,
+                  onChanged: (_) => onToggle(),
+                  activeColor: color,
                 ),
               ],
             ),
           ),
 
-          // Configuración (solo si está habilitada)
-          if (isEnabled) ...[
+          // Configuración (solo si está activado)
+          if (enabled) ...[
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   // Hora
-                  _buildConfigRow(
-                    icon: Icons.access_time_rounded,
-                    label: 'Hora:',
-                    child: InkWell(
-                      onTap: onTimeSelect,
-                      borderRadius: BorderRadius.circular(12.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(color: color.withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _formatTimeOfDay(time),
-                              style: TextStyle(
-                                color: color,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            Icon(
-                              Icons.edit_rounded,
-                              color: color,
-                              size: 16.0,
-                            ),
-                          ],
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, size: 18),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Hora:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16.0),
-
-                  // Días offset
-                  _buildConfigRow(
-                    icon: Icons.calendar_today_rounded,
-                    label: 'Día:',
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12.0),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<int>(
-                          value: daysOffset,
-                          isExpanded: true,
-                          icon: Icon(Icons.keyboard_arrow_down_rounded, color: color),
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          items: [
-                            const DropdownMenuItem(
-                                value: 0,
-                                child: Text('Mismo día del evento')
-                            ),
-                            const DropdownMenuItem(
-                                value: -1,
-                                child: Text('1 día antes')
-                            ),
-                            const DropdownMenuItem(
-                                value: -2,
-                                child: Text('2 días antes')
-                            ),
-                            const DropdownMenuItem(
-                                value: -3,
-                                child: Text('3 días antes')
-                            ),
-                            const DropdownMenuItem(
-                                value: -5,
-                                child: Text('5 días antes')
-                            ),
-                            const DropdownMenuItem(
-                                value: -999,
-                                child: Text('📅 Fecha personalizada')
-                            ),
-                          ],
-                          onChanged: onDaysOffsetChanged,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Fecha personalizada
-                  if (daysOffset == -999 && customDate != null) ...[
-                    const SizedBox(height: 16.0),
-                    _buildConfigRow(
-                      icon: Icons.event_rounded,
-                      label: 'Fecha',
-                      child: InkWell(
-                        onTap: onCustomDateSelect,
-                        borderRadius: BorderRadius.circular(12.0),
+                      const Spacer(),
+                      InkWell(
+                        onTap: onTimeSelect,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                            color: color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: color.withOpacity(0.3)),
                           ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                _formatCustomDate(customDate),
-                                style: const TextStyle(
-                                  color: Colors.orange,
+                                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                                style: TextStyle(
+                                  color: color,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
+                                  fontSize: 16,
                                 ),
                               ),
-                              const SizedBox(width: 8.0),
+                              const SizedBox(width: 8),
+                              Icon(Icons.edit, size: 16, color: color),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Día
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 18),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Día:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: onDaysSelect,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                _getDayText(daysBefore),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
                               const Icon(
-                                Icons.edit_rounded,
-                                color: Colors.orange,
-                                size: 16.0,
+                                Icons.arrow_drop_down,
+                                size: 20,
+                                color: Colors.grey,
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ],
               ),
             ),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildConfigRow({
-    required IconData icon,
-    required String label,
-    required Widget child,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6.0),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Icon(
-            icon,
-            size: 16.0,
-            color: Colors.grey.shade600,
-          ),
-        ),
-        const SizedBox(width: 12.0),
-        SizedBox(
-          width: 60.0,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade700,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12.0),
-        Expanded(child: child),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(6.0),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 20.0,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header del diálogo
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.deepPurple.shade600,
-                    Colors.deepPurple.shade700,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24.0),
-                  topRight: Radius.circular(24.0),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: const Icon(
-                      Icons.notifications_active_rounded,
-                      color: Colors.white,
-                      size: 24.0,
-                    ),
-                  ),
-                  const SizedBox(width: 16.0),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Configurar Alarmas',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Contenido del diálogo
-            Container(
-              constraints: const BoxConstraints(maxHeight: 500.0),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(10.0),
-                child: _isLoading
-                    ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(4.0),
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
-                        ),
-                        SizedBox(height: 16.0),
-                        Text(
-                          'Cargando configuración...',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                    : Column(
-                  children: [
-                    // Información del evento
-
-
-                    // Alarma 1
-                    _buildAlarmCard(
-                      title: 'Recordatorio 1',
-                      icon: Icons.notifications_rounded,
-                      color: Colors.green,
-                      isEnabled: _alarm1Enabled,
-                      onToggle: () {
-                        setState(() {
-                          _alarm1Enabled = !_alarm1Enabled;
-                        });
-                      },
-                      time: _alarm1Time,
-                      onTimeSelect: () => _selectTime(true),
-                      daysOffset: _alarm1DaysOffset,
-                      onDaysOffsetChanged: (value) {
-                        setState(() {
-                          _alarm1DaysOffset = value ?? 0;
-                          if (value == -999) {
-                            _selectCustomDate(true);
-                          }
-                        });
-                      },
-                      customDate: _alarm1CustomDate,
-                      onCustomDateSelect: () => _selectCustomDate(true),
-                    ),
-
-                    // Alarma 2
-                    _buildAlarmCard(
-                      title: 'Recordatorio 2',
-                      icon: Icons.notification_add_rounded,
-                      color: Colors.orange,
-                      isEnabled: _alarm2Enabled,
-                      onToggle: () {
-                        setState(() {
-                          _alarm2Enabled = !_alarm2Enabled;
-                        });
-                      },
-                      time: _alarm2Time,
-                      onTimeSelect: () => _selectTime(false),
-                      daysOffset: _alarm2DaysOffset,
-                      onDaysOffsetChanged: (value) {
-                        setState(() {
-                          _alarm2DaysOffset = value ?? 0;
-                          if (value == -999) {
-                            _selectCustomDate(false);
-                          }
-                        });
-                      },
-                      customDate: _alarm2CustomDate,
-                      onCustomDateSelect: () => _selectCustomDate(false),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Botones de acción
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        backgroundColor: Colors.grey.shade50,
-                        foregroundColor: Colors.grey.shade700,
-                      ),
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16.0),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _saveAlarms,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        elevation: 2.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.save_rounded,
-                            size: 20.0,
-                          ),
-                          const SizedBox(width: 8.0),
-                          const Text(
-                            'Guardar',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
