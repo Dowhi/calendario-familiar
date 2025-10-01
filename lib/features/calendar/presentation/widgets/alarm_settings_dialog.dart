@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:calendario_familiar/core/services/notification_service.dart';
 
 /// Diálogo simple para configurar alarmas/recordatorios
 class AlarmSettingsDialog extends StatefulWidget {
@@ -299,32 +300,47 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
   Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate) async {
     try {
+      print('🔔 Programando notificación de alarma #$alarmId para: $scheduledDate');
+      print('   - Texto del evento: ${widget.eventText}');
+      
       final androidDetails = AndroidNotificationDetails(
         'event_reminders',
         'Recordatorios de eventos',
         channelDescription: 'Notificaciones para recordar eventos del calendario',
-        importance: Importance.high,
-        priority: Priority.high,
+        importance: Importance.max,
+        priority: Priority.max,
         enableVibration: true,
         playSound: true,
         category: AndroidNotificationCategory.reminder,
+        fullScreenIntent: true,
+      );
+      
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.active,
       );
 
-      final details = NotificationDetails(android: androidDetails);
+      final details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
 
       await _notifications.zonedSchedule(
         alarmId,
-        '🔔 Recordatorio',
-        widget.eventText,
+        '🔔 Recordatorio: ${widget.eventText}',
+        'Evento programado para hoy',
         tz.TZDateTime.from(scheduledDate, tz.local),
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      print('✅ Notificación programada para: $scheduledDate');
+      print('✅ Notificación #$alarmId programada correctamente para: $scheduledDate');
     } catch (e) {
-      print('❌ Error programando notificación: $e');
+      print('❌ Error programando notificación #$alarmId: $e');
+      print('   Stack trace: ${StackTrace.current}');
     }
   }
 
