@@ -404,13 +404,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               ),
             ),
 
-            // Notas del día - mostrar debajo del número del día
-            Positioned(
-              top: 20, // Dejar espacio para el número del día
-              left: 2,
-              right: 2,
-              child: _buildNotes(date, events),
-            ),
+            // Notas del día - mostrar debajo del número del día (solo si no hay turnos)
+            if (!_hasShifts(events))
+              Positioned(
+                top: 20, // Dejar espacio para el número del día
+                left: 2,
+                right: 2,
+                child: _buildNotes(date, events),
+              ),
 
 
 

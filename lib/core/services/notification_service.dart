@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:calendario_familiar/core/models/app_event.dart';
+import 'package:calendario_familiar/core/services/web_notification_service.dart';
 
 /// Servicio simplificado de notificaciones locales
 class NotificationService {
@@ -25,7 +26,8 @@ class NotificationService {
       
       // Verificar si estamos en web
       if (kIsWeb) {
-        print('🌐 Ejecutándose en web - notificaciones locales no disponibles');
+        print('🌐 Ejecutándose en web - inicializando servicio web');
+        await WebNotificationService.initialize();
         _isInitialized = true;
         return;
       }
@@ -108,7 +110,7 @@ class NotificationService {
   static Future<bool> areNotificationsEnabled() async {
     try {
       if (kIsWeb) {
-        return false;
+        return await WebNotificationService.areNotificationsEnabled();
       }
       
       if (!_isInitialized) {
@@ -149,7 +151,7 @@ class NotificationService {
       print('🔔 Solicitando permisos...');
       
       if (kIsWeb) {
-        return false;
+        return await WebNotificationService.requestPermissions();
       }
       
       if (!_isInitialized) {
@@ -275,7 +277,12 @@ class NotificationService {
   /// Mostrar notificación de prueba
   static Future<void> showTestNotification() async {
     try {
-      if (kIsWeb || !_isInitialized) {
+      if (kIsWeb) {
+        await WebNotificationService.showTestNotification();
+        return;
+      }
+      
+      if (!_isInitialized) {
         return;
       }
       
