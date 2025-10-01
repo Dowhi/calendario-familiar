@@ -6,8 +6,7 @@ class OverflowFixes {
     required Widget child,
     double? maxWidth,
     EdgeInsets? padding,
-  }) {
-    return SingleChildScrollView(
+  }) => SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -19,7 +18,6 @@ class OverflowFixes {
         ),
       ),
     );
-  }
 
   /// Row que se convierte en Wrap en pantallas pequeñas
   static Widget responsiveRow({
@@ -55,8 +53,7 @@ class OverflowFixes {
     required ValueChanged<String?> onChanged,
     required String label,
     double width = 0.28,
-  }) {
-    return Builder(
+  }) => Builder(
       builder: (context) {
         return SizedBox(
           width: MediaQuery.of(context).size.width * width,
@@ -97,7 +94,6 @@ class OverflowFixes {
         );
       },
     );
-  }
 
   /// Botones responsivos que se adaptan al tamaño de pantalla
   static Widget responsiveButtons({
@@ -112,19 +108,15 @@ class OverflowFixes {
       return Wrap(
         spacing: spacing,
         runSpacing: spacing,
-        children: buttons.map((button) {
-          return SizedBox(
+        children: buttons.map((button) => SizedBox(
             width: screenWidth * 0.35,
             child: button,
-          );
-        }).toList(),
+          )).toList(),
       );
     } else {
       // En pantallas más grandes, usar Row
       return Row(
-        children: buttons.map((button) {
-          return Expanded(child: button);
-        }).toList(),
+        children: buttons.map((button) => Expanded(child: button)).toList(),
       );
     }
   }
@@ -136,8 +128,7 @@ class OverflowFixes {
     double? maxHeight,
     EdgeInsets? padding,
     BoxDecoration? decoration,
-  }) {
-    return ConstrainedBox(
+  }) => ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: maxWidth ?? double.infinity,
         maxHeight: maxHeight ?? double.infinity,
@@ -148,7 +139,6 @@ class OverflowFixes {
         child: child,
       ),
     );
-  }
 
   /// Texto que se adapta al espacio disponible
   static Widget adaptiveText({
@@ -157,8 +147,7 @@ class OverflowFixes {
     TextAlign textAlign = TextAlign.start,
     int? maxLines,
     double? fontSize,
-  }) {
-    return FittedBox(
+  }) => FittedBox(
       fit: BoxFit.scaleDown,
       child: Text(
         text,
@@ -168,15 +157,13 @@ class OverflowFixes {
         overflow: TextOverflow.ellipsis,
       ),
     );
-  }
 
   /// Lista que se adapta al espacio disponible
   static Widget adaptiveList({
     required List<Widget> children,
     Axis scrollDirection = Axis.vertical,
     double spacing = 8.0,
-  }) {
-    return SingleChildScrollView(
+  }) => SingleChildScrollView(
       scrollDirection: scrollDirection,
       child: scrollDirection == Axis.horizontal
           ? Row(
@@ -196,15 +183,13 @@ class OverflowFixes {
               }).toList(),
             ),
     );
-  }
 
   /// Tabla responsiva que se adapta a pantallas pequeñas
   static Widget responsiveTable({
     required List<Widget> headers,
     required List<List<Widget>> rows,
     double cellPadding = 8.0,
-  }) {
-    return Builder(
+  }) => Builder(
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
         
@@ -252,7 +237,6 @@ class OverflowFixes {
         }
       },
     );
-  }
 }
 
 

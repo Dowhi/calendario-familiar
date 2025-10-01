@@ -32,6 +32,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
   TimeOfDay _alarm2Time = const TimeOfDay(hour: 18, minute: 0);
   int _alarm1DaysBefore = 0;
   int _alarm2DaysBefore = 0;
+  int _alarm1MinutesBefore = 5; // Minutos de anticipación por defecto
+  int _alarm2MinutesBefore = 10; // Minutos de anticipación por defecto
   
   bool _isLoading = true;
   bool _isSaving = false;
@@ -118,6 +120,53 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         return '1 semana antes';
       default:
         return '$daysBefore días antes';
+    }
+  }
+
+  Future<void> _selectMinutesBefore(bool isAlarm1) async {
+    final currentMinutes = isAlarm1 ? _alarm1MinutesBefore : _alarm2MinutesBefore;
+    
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Minutos de anticipación - ${isAlarm1 ? "Recordatorio 1" : "Recordatorio 2"}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('¿Cuántos minutos antes del evento quieres que suene la alarma?'),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [1, 5, 10, 15, 30, 60].map((minutes) {
+                return ElevatedButton(
+                  onPressed: () => Navigator.pop(context, minutes),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: currentMinutes == minutes ? Colors.blue : Colors.grey[200],
+                    foregroundColor: currentMinutes == minutes ? Colors.white : Colors.black,
+                  ),
+                  child: Text('${minutes}m'),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        if (isAlarm1) {
+          _alarm1MinutesBefore = result;
+        } else {
+          _alarm2MinutesBefore = result;
+        }
+      });
     }
   }
 
@@ -287,20 +336,10 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       print('   - Fecha del evento: ${widget.selectedDate}');
       print('   - Fecha programada de la alarma: $scheduledDate');
       
-      // Calcular los minutos de anticipación correctamente
-      // La alarma debe sonar ANTES del evento, así que calculamos la diferencia
-      final eventDateTime = DateTime(
-        widget.selectedDate.year,
-        widget.selectedDate.month,
-        widget.selectedDate.day,
-        _alarm1Time.hour,
-        _alarm1Time.minute,
-      );
-      
-      final minutesBefore = eventDateTime.difference(scheduledDate).inMinutes;
-      print('   - Fecha/hora del evento: $eventDateTime');
+      // Usar los minutos de anticipación configurados por el usuario
+      final minutesBefore = _alarm1MinutesBefore;
+      print('   - Minutos de anticipación configurados: $minutesBefore');
       print('   - Fecha/hora de la alarma: $scheduledDate');
-      print('   - Minutos de anticipación calculados: $minutesBefore');
       
       // Crear un evento temporal para usar con NotificationService
       final tempEvent = AppEvent(
@@ -308,8 +347,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         familyId: _auth.currentUser?.uid ?? 'temp',
         title: widget.eventText,
         dateKey: _formatDateKey(widget.selectedDate),
-        startAt: eventDateTime, // Usar la fecha/hora del evento
-        notifyMinutesBefore: minutesBefore.abs(), // Minutos de anticipación
+        startAt: scheduledDate, // Usar la fecha programada de la alarma
+        notifyMinutesBefore: minutesBefore, // Minutos de anticipación
       );
       
       // Usar el servicio centralizado de notificaciones
@@ -399,9 +438,11 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                         enabled: _alarm1Enabled,
                       time: _alarm1Time,
                         daysBefore: _alarm1DaysBefore,
+                        minutesBefore: _alarm1MinutesBefore,
                         onToggle: () => setState(() => _alarm1Enabled = !_alarm1Enabled),
                       onTimeSelect: () => _selectTime(true),
                         onDaysSelect: () => _selectDaysBefore(true),
+                        onMinutesSelect: () => _selectMinutesBefore(true),
                       ),
 
                       const SizedBox(height: 16),
@@ -414,9 +455,11 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                         enabled: _alarm2Enabled,
                       time: _alarm2Time,
                         daysBefore: _alarm2DaysBefore,
+                        minutesBefore: _alarm2MinutesBefore,
                         onToggle: () => setState(() => _alarm2Enabled = !_alarm2Enabled),
                       onTimeSelect: () => _selectTime(false),
                         onDaysSelect: () => _selectDaysBefore(false),
+                        onMinutesSelect: () => _selectMinutesBefore(false),
                     ),
                   ],
                 ),
@@ -480,9 +523,11 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     required bool enabled,
     required TimeOfDay time,
     required int daysBefore,
+    required int minutesBefore,
     required VoidCallback onToggle,
     required VoidCallback onTimeSelect,
     required VoidCallback onDaysSelect,
+    required VoidCallback onMinutesSelect,
   }) {
     final effectiveColor = enabled ? color : Colors.grey;
 
@@ -629,6 +674,52 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                                 size: 20,
                                 color: Colors.grey,
                               ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Minutos de anticipación
+                  Row(
+                    children: [
+                      const Icon(Icons.timer, size: 18),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Minutos antes:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: onMinutesSelect,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: color.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                '$minutesBefore min',
+                                style: TextStyle(
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(Icons.edit, size: 16, color: color),
                             ],
                           ),
                         ),

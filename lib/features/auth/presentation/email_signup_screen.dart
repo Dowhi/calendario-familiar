@@ -72,7 +72,7 @@ class _EmailSignupScreenState extends ConsumerState<EmailSignupScreen> {
             context.go('/family-management');
             
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('✅ Registro exitoso. Ahora necesitas crear o unirte a una familia.'),
                 backgroundColor: Colors.blue,
               ),
@@ -119,8 +119,7 @@ class _EmailSignupScreenState extends ConsumerState<EmailSignupScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text('Registro'),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -321,7 +320,6 @@ class _EmailSignupScreenState extends ConsumerState<EmailSignupScreen> {
         ),
       ),
     );
-  }
 }
 
 

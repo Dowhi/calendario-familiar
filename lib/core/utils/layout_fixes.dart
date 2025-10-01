@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'responsive_layout.dart';
+import 'package:calendario_familiar/core/utils/responsive_layout.dart';
 
 class LayoutFixes {
   /// Corrige dropdowns que pueden causar overflow
@@ -7,13 +7,11 @@ class LayoutFixes {
     required BuildContext context,
     required Widget child,
     double? maxWidth,
-  }) {
-    return ResponsiveLayout.buildResponsiveDropdown(
+  }) => ResponsiveLayout.buildResponsiveDropdown(
       context: context,
       child: child,
       maxWidth: maxWidth,
     );
-  }
 
   /// Crea un Row seguro que se convierte en Wrap en pantallas pequeñas
   static Widget safeRow({
@@ -22,15 +20,13 @@ class LayoutFixes {
     double spacing = 8.0,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-  }) {
-    return ResponsiveLayout.buildResponsiveRow(
+  }) => ResponsiveLayout.buildResponsiveRow(
       context: context,
       children: children,
       spacing: spacing,
       mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: crossAxisAlignment,
     );
-  }
 
   /// Crea botones responsivos que se adaptan al tamaño de pantalla
   static Widget responsiveButton({
@@ -42,8 +38,7 @@ class LayoutFixes {
     Color? borderColor,
     double? width,
     double? height,
-  }) {
-    return SizedBox(
+  }) => SizedBox(
       width: width ?? ResponsiveLayout.getResponsiveWidth(context, small: 0.4, medium: 0.3, large: 0.25),
       height: height ?? 48,
       child: ElevatedButton(
@@ -64,7 +59,6 @@ class LayoutFixes {
         ),
       ),
     );
-  }
 
   /// Crea un contenedor con padding responsivo
   static Widget responsiveContainer({
@@ -74,8 +68,7 @@ class LayoutFixes {
     EdgeInsets? margin,
     Color? color,
     double? borderRadius,
-  }) {
-    return Container(
+  }) => Container(
       padding: padding ?? ResponsiveLayout.getResponsivePadding(context),
       margin: margin,
       decoration: BoxDecoration(
@@ -84,7 +77,6 @@ class LayoutFixes {
       ),
       child: child,
     );
-  }
 
   /// Crea un texto con tamaño responsivo
   static Widget responsiveText({
@@ -96,8 +88,7 @@ class LayoutFixes {
     Color? color,
     FontWeight? fontWeight,
     TextAlign? textAlign,
-  }) {
-    return Text(
+  }) => Text(
       text,
       style: TextStyle(
         fontSize: ResponsiveLayout.getResponsiveFontSize(
@@ -111,7 +102,6 @@ class LayoutFixes {
       ),
       textAlign: textAlign,
     );
-  }
 
   /// Crea un campo de texto responsivo
   static Widget responsiveTextField({
@@ -122,8 +112,7 @@ class LayoutFixes {
     int? maxLines,
     TextInputType? keyboardType,
     bool? enabled,
-  }) {
-    return TextField(
+  }) => TextField(
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
@@ -140,7 +129,6 @@ class LayoutFixes {
         fontSize: ResponsiveLayout.getResponsiveFontSize(context, small: 12, medium: 14, large: 16),
       ),
     );
-  }
 }
 
 

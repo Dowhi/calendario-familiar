@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CompactDropdown extends StatelessWidget {
-  final String value;
-  final List<Map<String, dynamic>> items;
-  final ValueChanged<String?> onChanged;
-  final String label;
-  final double width;
 
   const CompactDropdown({
     Key? key,
@@ -15,10 +10,14 @@ class CompactDropdown extends StatelessWidget {
     required this.label,
     this.width = 0.18,
   }) : super(key: key);
+  final String value;
+  final List<Map<String, dynamic>> items;
+  final ValueChanged<String?> onChanged;
+  final String label;
+  final double width;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
+  Widget build(BuildContext context) => SizedBox(
       width: MediaQuery.of(context).size.width * width,
       child: DropdownButtonFormField<String>(
         value: value,
@@ -55,7 +54,6 @@ class CompactDropdown extends StatelessWidget {
         }).toList(),
       ),
     );
-  }
 }
 
 

@@ -60,8 +60,7 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildHeader(String reportType, String period) {
-    return pw.Header(
+  static pw.Widget _buildHeader(String reportType, String period) => pw.Header(
       level: 0,
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -101,7 +100,6 @@ class PdfService {
         ],
       ),
     );
-  }
 
   static pw.Widget _buildReportContent(String reportType, Map<String, dynamic> reportData) {
     final reportTypeKey = reportData['type'] as String?;
@@ -253,9 +251,7 @@ class PdfService {
         pw.SizedBox(height: 16),
         _buildDataTable(
           headers: ['Fecha', 'Notas'],
-          data: data.entries.take(20).map((entry) {
-            return [entry.key, '${entry.value} notas'];
-          }).toList(),
+          data: data.entries.take(20).map((entry) => [entry.key, '${entry.value} notas']).toList(),
           includeTotal: true, // Incluir total para mostrar el total de notas mostradas
         ),
         if (data.length > 20)
@@ -305,7 +301,7 @@ class PdfService {
               ),
               pw.Text(
                 'Productividad',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 14,
                   color: PdfColors.white,
                 ),
@@ -397,7 +393,7 @@ class PdfService {
     required List<List<String>> data,
     bool includeTotal = true,
   }) {
-    List<pw.TableRow> rows = [
+    final List<pw.TableRow> rows = [
       // Encabezados
       pw.TableRow(
         children: headers.map((header) => pw.Padding(
@@ -419,7 +415,7 @@ class PdfService {
 
     // Añadir fila de totales si se solicita y hay datos
     if (includeTotal && data.isNotEmpty && headers.length >= 2) {
-      List<String> totalRow = [];
+      final List<String> totalRow = [];
       
       // Primera columna: "TOTAL"
       totalRow.add('TOTAL');
@@ -478,8 +474,7 @@ class PdfService {
     return numericString.isNotEmpty ? int.tryParse(numericString) ?? 0 : 0;
   }
 
-     static pw.Widget _buildStatCard(String title, String value, PdfColor color) {
-     return pw.Container(
+     static pw.Widget _buildStatCard(String title, String value, PdfColor color) => pw.Container(
        padding: const pw.EdgeInsets.all(12),
        decoration: pw.BoxDecoration(
          color: PdfColors.grey.shade(0.1),
@@ -508,7 +503,6 @@ class PdfService {
         ],
       ),
     );
-  }
 
        static pw.Widget _buildMonthlySummaryReportContent(Map<String, dynamic> reportData) {
     final months = reportData['months'] as List<String>;
@@ -551,8 +545,7 @@ class PdfService {
     );
   }
 
-     static pw.Widget _buildMonthlyDataTable(List<String> months, List<String> shiftTypes, Map<String, Map<String, int>> monthlyData, Map<String, int> columnTotals) {
-    return pw.Table(
+     static pw.Widget _buildMonthlyDataTable(List<String> months, List<String> shiftTypes, Map<String, Map<String, int>> monthlyData, Map<String, int> columnTotals) => pw.Table(
       border: pw.TableBorder.all(),
       children: [
         // Encabezados
@@ -637,7 +630,6 @@ class PdfService {
         ),
       ],
     );
-  }
 
    static PdfColor _getProductivityColor(int percentage) {
      if (percentage >= 80) return PdfColors.green;

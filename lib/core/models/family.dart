@@ -41,7 +41,5 @@ DateTime? _timestampToDateTime(dynamic timestamp) {
   }
 }
 
-dynamic _dateTimeToTimestamp(DateTime? dateTime) {
-  return dateTime?.toIso8601String();
-}
+dynamic _dateTimeToTimestamp(DateTime? dateTime) => dateTime?.toIso8601String();
 

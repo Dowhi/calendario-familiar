@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ResponsiveLayout {
-  static bool isSmallScreen(BuildContext context) {
-    return MediaQuery.of(context).size.width < 600;
-  }
+  static bool isSmallScreen(BuildContext context) => MediaQuery.of(context).size.width < 600;
 
   static bool isMediumScreen(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     return width >= 600 && width < 1200;
   }
 
-  static bool isLargeScreen(BuildContext context) {
-    return MediaQuery.of(context).size.width >= 1200;
-  }
+  static bool isLargeScreen(BuildContext context) => MediaQuery.of(context).size.width >= 1200;
 
   static double getResponsiveWidth(BuildContext context, {double small = 0.9, double medium = 0.8, double large = 0.7}) {
     if (isSmallScreen(context)) {
@@ -52,14 +48,12 @@ class ResponsiveLayout {
     required BuildContext context,
     required Widget child,
     double? maxWidth,
-  }) {
-    return ConstrainedBox(
+  }) => ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: maxWidth ?? getResponsiveWidth(context, small: 0.28, medium: 0.25, large: 0.2),
       ),
       child: child,
     );
-  }
 
   static EdgeInsets getResponsivePadding(BuildContext context) {
     if (isSmallScreen(context)) {

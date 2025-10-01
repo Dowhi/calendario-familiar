@@ -56,24 +56,16 @@ extension DateTimeExtension on DateTime {
     return DateTime(newYear, adjustedMonth, day);
   }
   
-  bool isSameDay(DateTime other) {
-    return year == other.year && month == other.month && day == other.day;
-  }
+  bool isSameDay(DateTime other) => year == other.year && month == other.month && day == other.day;
   
-  bool isBetween(DateTime start, DateTime end) {
-    return isAfter(start) && isBefore(end);
-  }
+  bool isBetween(DateTime start, DateTime end) => isAfter(start) && isBefore(end);
   
-  bool isBetweenInclusive(DateTime start, DateTime end) {
-    return (isAfter(start) || isAtSameMomentAs(start)) && 
+  bool isBetweenInclusive(DateTime start, DateTime end) => (isAfter(start) || isAtSameMomentAs(start)) && 
            (isBefore(end) || isAtSameMomentAs(end));
-  }
 }
 
 extension DateTimeRangeExtension on DateTimeRange {
-  bool containsDate(DateTime date) {
-    return date.isBetweenInclusive(start, end);
-  }
+  bool containsDate(DateTime date) => date.isBetweenInclusive(start, end);
   
   List<DateTime> get daysInRange {
     final days = <DateTime>[];

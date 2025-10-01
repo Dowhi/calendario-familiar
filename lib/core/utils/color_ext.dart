@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 
 extension ColorExtension on Color {
-  String toHex() {
-    return '#${red.toRadixString(16).padLeft(2, '0')}'
+  String toHex() => '#${red.toRadixString(16).padLeft(2, '0')}'
         '${green.toRadixString(16).padLeft(2, '0')}'
         '${blue.toRadixString(16).padLeft(2, '0')}';
-  }
 
-  String toHexWithAlpha() {
-    return '#${alpha.toRadixString(16).padLeft(2, '0')}'
+  String toHexWithAlpha() => '#${alpha.toRadixString(16).padLeft(2, '0')}'
         '${red.toRadixString(16).padLeft(2, '0')}'
         '${green.toRadixString(16).padLeft(2, '0')}'
         '${blue.toRadixString(16).padLeft(2, '0')}';
-  }
 }
 
 extension StringColorExtension on String {

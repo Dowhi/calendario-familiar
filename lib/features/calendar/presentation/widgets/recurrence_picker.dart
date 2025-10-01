@@ -3,14 +3,14 @@ import 'package:calendario_familiar/core/models/recurrence.dart';
 import 'package:calendario_familiar/core/utils/recurrence_utils.dart';
 
 class RecurrencePicker extends StatefulWidget {
-  final Recurrence? recurrence;
-  final Function(Recurrence?) onRecurrenceChanged;
 
   const RecurrencePicker({
     super.key,
     this.recurrence,
     required this.onRecurrenceChanged,
   });
+  final Recurrence? recurrence;
+  final Function(Recurrence?) onRecurrenceChanged;
 
   @override
   State<RecurrencePicker> createState() => _RecurrencePickerState();
@@ -28,8 +28,7 @@ class _RecurrencePickerState extends State<RecurrencePicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       children: [
         DropdownButtonFormField<String>(
           value: _selectedOption,
@@ -60,7 +59,6 @@ class _RecurrencePickerState extends State<RecurrencePicker> {
         ],
       ],
     );
-  }
 
   Widget _buildIntervalSelector() {
     final currentInterval = widget.recurrence?.interval ?? 1;
@@ -70,17 +68,15 @@ class _RecurrencePickerState extends State<RecurrencePicker> {
         const Text('Cada '),
         Expanded(
           child: DropdownButtonFormField<int>(
-            value: currentInterval,
+            initialValue: currentInterval,
             decoration: const InputDecoration(
               isDense: true,
               contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             ),
-            items: List.generate(12, (index) => index + 1).map((interval) {
-              return DropdownMenuItem(
+            items: List.generate(12, (index) => index + 1).map((interval) => DropdownMenuItem(
                 value: interval,
                 child: Text('$interval'),
-              );
-            }).toList(),
+              )).toList(),
             onChanged: (value) {
               if (value != null) {
                 final rule = RecurrenceUtils.getRecurrenceRule(_selectedOption);

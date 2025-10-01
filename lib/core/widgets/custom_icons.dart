@@ -8,12 +8,10 @@ class CustomIcons {
   static Widget fireCloudIcon({
     double? size,
     Color? color,
-  }) {
-    return SvgPicture.string(
+  }) => SvgPicture.string(
       fireCloudSvg,
       width: size ?? 24,
       height: size ?? 24,
       colorFilter: color != null ? ColorFilter.mode(color, BlendMode.srcIn) : null,
     );
-  }
 }

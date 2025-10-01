@@ -22,7 +22,7 @@ class RecurrenceUtils {
     final until = event.recurrence!.until ?? range.end;
 
     while (currentDate.isBefore(until)) {
-      if (currentDate.isAfter(range.start.subtract(Duration(days: 1)))) {
+      if (currentDate.isAfter(range.start.subtract(const Duration(days: 1)))) {
         final occurrenceStart = currentDate;
         final occurrenceEnd = currentDate.add(duration);
         
@@ -50,13 +50,11 @@ class RecurrenceUtils {
       case 'monthly':
         return _getNextMonthly(current, recurrence);
       default:
-        return current.add(Duration(days: 1));
+        return current.add(const Duration(days: 1));
     }
   }
 
-  static DateTime _getNextDaily(DateTime current, int interval) {
-    return current.add(Duration(days: interval));
-  }
+  static DateTime _getNextDaily(DateTime current, int interval) => current.add(Duration(days: interval));
 
   static DateTime _getNextWeekly(DateTime current, Recurrence recurrence) {
     final interval = recurrence.interval ?? 1;
@@ -64,9 +62,9 @@ class RecurrenceUtils {
     
     if (byWeekdays != null && byWeekdays.isNotEmpty) {
       // Find next occurrence based on specific weekdays
-      DateTime next = current.add(Duration(days: 1));
+      DateTime next = current.add(const Duration(days: 1));
       while (!byWeekdays.contains(next.weekday)) {
-        next = next.add(Duration(days: 1));
+        next = next.add(const Duration(days: 1));
       }
       return next;
     } else {
@@ -163,14 +161,12 @@ class RecurrenceUtils {
     }
   }
 
-  static List<String> getRecurrenceOptions() {
-    return [
+  static List<String> getRecurrenceOptions() => [
       'Sin repetición',
       'Diario',
       'Semanal',
       'Mensual',
     ];
-  }
 
   static Recurrence? getRecurrenceRule(String option) {
     switch (option) {

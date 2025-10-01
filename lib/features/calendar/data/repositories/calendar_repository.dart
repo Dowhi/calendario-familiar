@@ -7,13 +7,11 @@ class CalendarRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Uuid _uuid = const Uuid();
   
-  Stream<FamilyCalendar?> getCalendarStream(String calendarId) {
-    return _firestore
+  Stream<FamilyCalendar?> getCalendarStream(String calendarId) => _firestore
         .collection('calendars')
         .doc(calendarId)
         .snapshots()
         .map((doc) => doc.exists ? FamilyCalendar.fromJson(doc.data()!) : null);
-  }
   
   Future<FamilyCalendar?> getCalendar(String calendarId) async {
     try {

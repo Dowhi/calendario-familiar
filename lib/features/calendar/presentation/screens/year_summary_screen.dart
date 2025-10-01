@@ -9,12 +9,12 @@ import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
 
 class YearSummaryScreen extends ConsumerStatefulWidget {
-  final int year;
   
   const YearSummaryScreen({
     super.key,
     required this.year,
   });
+  final int year;
 
   @override
   ConsumerState<YearSummaryScreen> createState() => _YearSummaryScreenState();
@@ -30,8 +30,7 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: const Color(0xFF1B5E20),
@@ -55,10 +54,8 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
         ],
       ),
     );
-  }
 
-  Widget _buildTopHeader() {
-    return Container(
+  Widget _buildTopHeader() => Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF1B5E20),
@@ -114,10 +111,8 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
         ],
       ),
     );
-  }
 
-  Widget _buildMonthsGrid() {
-    return GridView.builder(
+  Widget _buildMonthsGrid() => GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -131,7 +126,6 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
         return _buildMonthCard(month);
       },
     );
-  }
 
   Widget _buildMonthCard(int month) {
     final monthName = _getMonthName(month);
@@ -159,9 +153,9 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 2),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.blueAccent,
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
               ),
@@ -181,8 +175,7 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
-              children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) {
-                return Expanded(
+              children: ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) => Expanded(
                   child: Text(
                     day,
                     textAlign: TextAlign.center,
@@ -192,8 +185,7 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
                       color: Colors.grey[600],
                     ),
                   ),
-                );
-              }).toList(),
+                )).toList(),
             ),
           ),
           
@@ -211,8 +203,7 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
     final weeks = (totalDays / 7).ceil();
     
     return Column(
-      children: List.generate(weeks, (weekIndex) {
-        return Expanded(
+      children: List.generate(weeks, (weekIndex) => Expanded(
           child: Row(
             children: List.generate(7, (dayIndex) {
               final dayNumber = weekIndex * 7 + dayIndex - (firstWeekday - 1) + 1;
@@ -281,14 +272,13 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
                );
             }),
           ),
-        );
-      }),
+        )),
     );
   }
 
   Widget _buildDayBackground(DateTime date, List<String> events) {
     // Separar turnos y notas
-    List<Map<String, dynamic>> shifts = [];
+    final List<Map<String, dynamic>> shifts = [];
     for (final eventTitle in events) {
       final template = _dataService.getShiftTemplateByName(eventTitle);
       if (template != null) {
@@ -385,7 +375,7 @@ class _YearSummaryScreenState extends ConsumerState<YearSummaryScreen> {
   }
 
   Widget _buildDayContent(DateTime date, List<String> events) {
-    List<Map<String, dynamic>> shifts = [];
+    final List<Map<String, dynamic>> shifts = [];
     
     // Separar turnos
     for (final eventTitle in events) {

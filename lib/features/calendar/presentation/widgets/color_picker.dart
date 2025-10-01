@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:calendario_familiar/core/utils/color_ext.dart';
 
 class ColorPicker extends StatelessWidget {
-  final String selectedColor;
-  final Function(String) onColorSelected;
 
   const ColorPicker({
     super.key,
     required this.selectedColor,
     required this.onColorSelected,
   });
+  final String selectedColor;
+  final Function(String) onColorSelected;
 
   @override
-  Widget build(BuildContext context) {
-    return Wrap(
+  Widget build(BuildContext context) => Wrap(
       spacing: 8,
       runSpacing: 8,
       children: AppColors.eventColors.map((color) {
@@ -53,6 +52,5 @@ class ColorPicker extends StatelessWidget {
         );
       }).toList(),
     );
-  }
 }
 

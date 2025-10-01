@@ -10,8 +10,7 @@ class EventRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Uuid _uuid = const Uuid();
   
-  Stream<List<AppEvent>> getEventsStream(String calendarId, DateTimeRange range) {
-    return _firestore
+  Stream<List<AppEvent>> getEventsStream(String calendarId, DateTimeRange range) => _firestore
         .collection('calendars')
         .doc(calendarId)
         .collection('events')
@@ -38,7 +37,6 @@ class EventRepository {
           
           return expandedEvents;
         });
-  }
   
   Future<List<AppEvent>> getEvents(String calendarId, DateTimeRange range) async {
     try {

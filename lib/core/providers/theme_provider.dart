@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, bool>((ref) {
-  return ThemeNotifier();
-});
+final themeProvider = StateNotifierProvider<ThemeNotifier, bool>((ref) => ThemeNotifier());
 
 class ThemeNotifier extends StateNotifier<bool> {
   ThemeNotifier() : super(false) {

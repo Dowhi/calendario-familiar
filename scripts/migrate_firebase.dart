@@ -247,7 +247,7 @@ class FirebaseMigration {
   
   /// Genera un reporte de la migración
   void _generateReport() {
-    print('\n' + '=' * 50);
+    print('\n${'=' * 50}');
     print('📋 REPORTE DE MIGRACIÓN');
     print('=' * 50);
     print('📅 Fecha: ${DateTime.now()}');

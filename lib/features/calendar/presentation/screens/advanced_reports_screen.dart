@@ -405,7 +405,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
           if (shiftDate.isAfter(_startDate.subtract(const Duration(days: 1))) && 
               shiftDate.isBefore(_endDate.add(const Duration(days: 1)))) {
             
-            final monthKey = '${year}-${month.toString().padLeft(2, '0')}';
+            final monthKey = '$year-${month.toString().padLeft(2, '0')}';
             
                          for (final shift in shiftsList) {
                if (_selectedShiftTypes.contains('Todos') || _selectedShiftTypes.contains(shift)) {
@@ -511,8 +511,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.grey[100],
              appBar: AppBar(
          title: const Text('Reportes'),
@@ -549,10 +548,8 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
         ),
       ),
     );
-  }
 
-  Widget _buildFiltersSection() {
-    return Container(
+  Widget _buildFiltersSection() => Container(
       margin: const EdgeInsets.all(14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -889,7 +886,6 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
         ],
       ),
     );
-  }
 
   Widget _buildReportContent() {
     if (_reportData.isEmpty) {
@@ -1049,7 +1045,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -1128,7 +1124,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -1207,7 +1203,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -1254,8 +1250,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          ...data.entries.take(10).map((entry) {
-            return Padding(
+          ...data.entries.take(10).map((entry) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
@@ -1276,8 +1271,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                   ),
                 ],
               ),
-            );
-          }).toList(),
+            )),
                      if (data.length > 10)
              Padding(
                padding: const EdgeInsets.only(top: 8),
@@ -1430,15 +1424,13 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            ...absentDays.take(10).map((date) {
-              return Padding(
+            ...absentDays.take(10).map((date) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   '• $date',
                   style: const TextStyle(color: Colors.grey),
                 ),
-              );
-            }).toList(),
+              )),
                          if (absentDays.length > 10)
                Padding(
                  padding: const EdgeInsets.only(top: 8),
@@ -1528,7 +1520,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                 const DataColumn(label: Text('Mes')),
                 ...shiftTypes.map((shiftType) => DataColumn(
                   label: Text(shiftType),
-                )).toList(),
+                )),
               ],
               rows: [
                 // Filas de datos por mes
@@ -1551,19 +1543,19 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                       DataCell(Text(monthName)),
                       ...shiftTypes.map((shiftType) => DataCell(
                         Text(monthData[shiftType]?.toString() ?? '0'),
-                      )).toList(),
+                      )),
                     ],
                   );
-                }).toList(),
+                }),
                 
                 // Fila de totales
                 DataRow(
-                  color: MaterialStateProperty.all(Colors.grey[100]),
+                  color: WidgetStateProperty.all(Colors.grey[100]),
                   cells: [
-                    DataCell(
+                    const DataCell(
                       Text(
                         'TOTAL',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -1577,7 +1569,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
                           fontSize: 14,
                         ),
                       ),
-                    )).toList(),
+                    )),
                   ],
                 ),
               ],
@@ -1588,8 +1580,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) => Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
@@ -1619,7 +1610,6 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen> {
         ],
       ),
     );
-  }
 
      Color _getProductivityColor(int percentage) {
      if (percentage >= 80) return Colors.green;

@@ -147,11 +147,11 @@ class _FamilySettingsScreenState extends ConsumerState<FamilySettingsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(Icons.admin_panel_settings, size: 24, color: Colors.blue),
-                              const SizedBox(width: 8),
-                              const Text(
+                              Icon(Icons.admin_panel_settings, size: 24, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text(
                                 'Panel de Administrador',
                                 style: TextStyle(
                                   fontSize: 18,
@@ -164,11 +164,11 @@ class _FamilySettingsScreenState extends ConsumerState<FamilySettingsScreen> {
                           const SizedBox(height: 16),
                           
                           // Contraseña de la familia
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(Icons.lock, size: 20),
-                              const SizedBox(width: 8),
-                              const Text(
+                              Icon(Icons.lock, size: 20),
+                              SizedBox(width: 8),
+                              Text(
                                 'Contraseña de la familia:',
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                               ),
@@ -343,8 +343,7 @@ class _FamilySettingsScreenState extends ConsumerState<FamilySettingsScreen> {
     required String label,
     required String value,
     required bool canCopy,
-  }) {
-    return Row(
+  }) => Row(
       children: [
         Icon(icon, size: 20, color: Colors.grey[600]),
         const SizedBox(width: 8),
@@ -388,11 +387,8 @@ class _FamilySettingsScreenState extends ConsumerState<FamilySettingsScreen> {
           ),
       ],
     );
-  }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
+  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
 
   // Cargar contraseña de la familia (solo para administradores)
   Future<void> _loadFamilyPassword(String familyId, String userId) async {
