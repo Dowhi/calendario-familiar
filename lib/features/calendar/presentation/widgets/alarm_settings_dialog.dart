@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
+import 'package:calendario_familiar/core/models/app_event.dart';
 
 /// Diálogo simple para configurar alarmas/recordatorios
 class AlarmSettingsDialog extends StatefulWidget {
@@ -21,7 +22,6 @@ class AlarmSettingsDialog extends StatefulWidget {
 }
 
 class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -48,27 +48,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
   }
 
   Future<void> _initializeNotifications() async {
-    try {
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-      const initSettings = InitializationSettings(android: androidSettings);
-      await _notifications.initialize(initSettings);
-
-      // Crear canal de notificaciones para Android
-      const channel = AndroidNotificationChannel(
-        'event_reminders',
-        'Recordatorios de eventos',
-        description: 'Notificaciones para recordar eventos del calendario',
-        importance: Importance.high,
-        enableVibration: true,
-        playSound: true,
-      );
-
-      await _notifications
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
-    } catch (e) {
-      print('Error inicializando notificaciones: $e');
-    }
+    // Ya no necesitamos inicializar aquí, usamos NotificationService
+    print('Usando NotificationService centralizado');
   }
 
   Future<void> _loadExistingAlarms() async {
@@ -106,7 +87,7 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       if (alarm2Doc.exists && alarm2Doc.data() != null) {
         final data = alarm2Doc.data()!;
         _alarm2Enabled = data['enabled'] ?? false;
-        _alarm2Time = TimeOfDay(
+          _alarm2Time = TimeOfDay(
           hour: data['hour'] ?? 18,
           minute: data['minute'] ?? 0,
         );
@@ -232,13 +213,13 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Alarmas guardadas correctamente'),
             backgroundColor: Colors.green,
           ),
-        );
-        Navigator.of(context).pop();
+      );
+      Navigator.of(context).pop();
       }
     } catch (e) {
       _showError('Error guardando alarmas: $e');
@@ -277,9 +258,9 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       alarmDate.year,
       alarmDate.month,
       alarmDate.day,
-      time.hour,
-      time.minute,
-    );
+        time.hour,
+        time.minute,
+      );
 
     // Verificar que la alarma sea en el futuro
     if (alarmDateTime.isAfter(DateTime.now())) {
@@ -295,7 +276,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         .collection('alarms')
         .doc('${eventDateKey}_alarm_$alarmNumber')
         .delete();
-    await _notifications.cancel(alarmNumber);
+    // Usar el servicio centralizado para cancelar
+    await NotificationService.cancelAllNotifications();
   }
 
   Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate) async {
@@ -303,40 +285,19 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       print('🔔 Programando notificación de alarma #$alarmId para: $scheduledDate');
       print('   - Texto del evento: ${widget.eventText}');
       
-      final androidDetails = AndroidNotificationDetails(
-        'event_reminders',
-        'Recordatorios de eventos',
-        channelDescription: 'Notificaciones para recordar eventos del calendario',
-        importance: Importance.max,
-        priority: Priority.max,
-        enableVibration: true,
-        playSound: true,
-        category: AndroidNotificationCategory.reminder,
-        fullScreenIntent: true,
+      // Crear un evento temporal para usar con NotificationService
+      final tempEvent = AppEvent(
+        id: 'alarm_${alarmId}_${scheduledDate.millisecondsSinceEpoch}',
+        familyId: _auth.currentUser?.uid ?? 'temp',
+        title: widget.eventText,
+        dateKey: _formatDateKey(widget.selectedDate),
+        startAt: scheduledDate,
+        notifyMinutesBefore: 0, // Ya está calculado
       );
       
-      const iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        interruptionLevel: InterruptionLevel.active,
-      );
-
-      final details = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
-      await _notifications.zonedSchedule(
-        alarmId,
-        '🔔 Recordatorio: ${widget.eventText}',
-        'Evento programado para hoy',
-        tz.TZDateTime.from(scheduledDate, tz.local),
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      );
-
+      // Usar el servicio centralizado de notificaciones
+      await NotificationService.scheduleEventNotification(tempEvent);
+      
       print('✅ Notificación #$alarmId programada correctamente para: $scheduledDate');
     } catch (e) {
       print('❌ Error programando notificación #$alarmId: $e');
@@ -350,9 +311,9 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
-        ),
-      );
-    }
+      ),
+    );
+  }
   }
 
   @override
@@ -390,11 +351,11 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                   ),
                   const SizedBox(width: 12),
                   const Text(
-                    'Configurar Alarmas',
-                    style: TextStyle(
-                      color: Colors.white,
+                          'Configurar Alarmas',
+                          style: TextStyle(
+                            color: Colors.white,
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -409,41 +370,41 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
               )
             else
               Flexible(
-                child: SingleChildScrollView(
+              child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
+                    child: Column(
+                      children: [
                       // Recordatorio 1
-                      _buildAlarmCard(
-                        title: 'Recordatorio 1',
+                    _buildAlarmCard(
+                      title: 'Recordatorio 1',
                         icon: Icons.notifications,
-                        color: Colors.green,
+                      color: Colors.green,
                         enabled: _alarm1Enabled,
-                        time: _alarm1Time,
+                      time: _alarm1Time,
                         daysBefore: _alarm1DaysBefore,
                         onToggle: () => setState(() => _alarm1Enabled = !_alarm1Enabled),
-                        onTimeSelect: () => _selectTime(true),
+                      onTimeSelect: () => _selectTime(true),
                         onDaysSelect: () => _selectDaysBefore(true),
                       ),
 
                       const SizedBox(height: 16),
 
                       // Recordatorio 2
-                      _buildAlarmCard(
-                        title: 'Recordatorio 2',
+                    _buildAlarmCard(
+                      title: 'Recordatorio 2',
                         icon: Icons.notifications,
                         color: Colors.grey,
                         enabled: _alarm2Enabled,
-                        time: _alarm2Time,
+                      time: _alarm2Time,
                         daysBefore: _alarm2DaysBefore,
                         onToggle: () => setState(() => _alarm2Enabled = !_alarm2Enabled),
-                        onTimeSelect: () => _selectTime(false),
+                      onTimeSelect: () => _selectTime(false),
                         onDaysSelect: () => _selectDaysBefore(false),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+            ),
 
             // Botones
             Padding(
@@ -477,13 +438,13 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                               ),
                             )
                           : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
                                 Icon(Icons.save, size: 20),
                                 SizedBox(width: 8),
                                 Text('Guardar'),
-                              ],
-                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
