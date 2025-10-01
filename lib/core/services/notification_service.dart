@@ -204,6 +204,12 @@ class NotificationService {
   /// Programar una notificación para un evento
   static Future<void> scheduleEventNotification(AppEvent event) async {
     try {
+      print('🔔 scheduleEventNotification llamado con evento: ${event.title}');
+      print('   - ID: ${event.id}');
+      print('   - Minutos antes: ${event.notifyMinutesBefore}');
+      print('   - Fecha inicio: ${event.startAt}');
+      print('   - Es web: $kIsWeb');
+      
       // Validaciones básicas
       if (event.notifyMinutesBefore <= 0 || event.startAt == null) {
         print('⚠️ Evento sin notificación programada (minutos: ${event.notifyMinutesBefore}, fecha: ${event.startAt})');

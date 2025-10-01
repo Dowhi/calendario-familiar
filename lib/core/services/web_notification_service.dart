@@ -225,23 +225,44 @@ class WebNotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
-    if (!kIsWeb || !_isInitialized) return;
+    print('🌐 WebNotificationService.scheduleEventNotification llamado');
+    print('   - eventId: $eventId');
+    print('   - title: $title');
+    print('   - scheduledTime: $scheduledTime');
+    print('   - kIsWeb: $kIsWeb');
+    print('   - _isInitialized: $_isInitialized');
+    
+    if (!kIsWeb) {
+      print('⚠️ No es web, saltando');
+      return;
+    }
+    
+    if (!_isInitialized) {
+      print('⚠️ WebNotificationService no está inicializado');
+      return;
+    }
     
     try {
       // Para web, usamos setTimeout para simular notificaciones programadas
       final now = DateTime.now();
       final delay = scheduledTime.difference(now).inMilliseconds;
       
+      print('   - Delay calculado: ${delay}ms (${Duration(milliseconds: delay)})');
+      
       if (delay > 0) {
         // Usar Future.delayed para simular notificación programada
         Future.delayed(Duration(milliseconds: delay), () {
+          print('⏰ Ejecutando notificación programada: $title');
           _showWebNotification(title, body);
         });
         
-        print('✅ Notificación programada para: $title');
+        print('✅ Notificación web programada para: $title en ${Duration(milliseconds: delay)}');
+      } else {
+        print('⚠️ Delay negativo o cero, no se programará notificación');
       }
     } catch (e) {
-      print('❌ Error programando notificación: $e');
+      print('❌ Error programando notificación web: $e');
+      print('   Stack trace: ${StackTrace.current}');
     }
   }
   
