@@ -912,13 +912,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       final textColor = shifts.first['textColor'] as Color;
       final textSize = shifts.first['textSize'] as double;
       
-      // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
-      String displayText;
-      if (notes.isNotEmpty) {
-        displayText = notes.first; // Mostrar la primera nota
-      } else {
-        displayText = shifts.first['name']; // Mostrar el nombre del turno
-      }
+      // Mostrar solo el nombre del turno, las notas se muestran por separado
+      String displayText = shifts.first['name'];
       
       return Container(
         decoration: BoxDecoration(
@@ -966,8 +961,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
-                    notes.isNotEmpty ? notes.first : shifts.first['name'],
+                    // Mostrar solo el nombre del turno
+                    shifts.first['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: (shifts.first['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos
@@ -996,8 +991,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    // Si hay notas, mostrar solo el texto de las notas (no el nombre del turno)
-                    notes.isNotEmpty ? notes.first : shifts[1]['name'],
+                    // Mostrar solo el nombre del turno
+                    shifts[1]['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: (shifts[1]['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos

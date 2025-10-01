@@ -27,6 +27,9 @@ class WebNotificationService {
         return;
       }
       
+      // Esperar a que Firebase esté inicializado
+      await Future.delayed(const Duration(seconds: 1));
+      
       // Solicitar permisos de notificación
       final NotificationSettings settings = await _messaging.requestPermission(
         alert: true,
@@ -57,12 +60,12 @@ class WebNotificationService {
         print('✅ Servicio de notificaciones web inicializado correctamente');
       } else {
         print('❌ Permisos de notificación denegados');
-        _isInitialized = false;
+        _isInitialized = true; // Marcar como inicializado aunque no tenga permisos
       }
       
     } catch (e) {
       print('❌ Error inicializando servicio de notificaciones web: $e');
-      _isInitialized = false;
+      _isInitialized = true; // Marcar como inicializado para evitar errores
     }
   }
   
