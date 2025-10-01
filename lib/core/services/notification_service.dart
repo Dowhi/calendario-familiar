@@ -211,15 +211,26 @@ class NotificationService {
       print('   - Es web: $kIsWeb');
       
       // Validaciones básicas
-      if (event.notifyMinutesBefore <= 0 || event.startAt == null) {
-        print('⚠️ Evento sin notificación programada (minutos: ${event.notifyMinutesBefore}, fecha: ${event.startAt})');
+      if (event.startAt == null) {
+        print('⚠️ Evento sin fecha de inicio');
         return;
       }
       
-      final notificationTime = event.startAt!.subtract(Duration(minutes: event.notifyMinutesBefore));
+      // Asegurar que los minutos de anticipación sean positivos
+      final notifyMinutes = event.notifyMinutesBefore.abs();
+      if (notifyMinutes == 0) {
+        print('⚠️ Los minutos de anticipación no pueden ser cero');
+        return;
+      }
       
-      if (notificationTime.isBefore(DateTime.now())) {
+      final notificationTime = event.startAt!.subtract(Duration(minutes: notifyMinutes));
+      print('   - Tiempo calculado para la notificación: $notificationTime');
+      
+      final now = DateTime.now();
+      if (notificationTime.isBefore(now)) {
         print('⚠️ Notificación en el pasado, no se programará');
+        print('   - Hora actual: $now');
+        print('   - Diferencia: ${notificationTime.difference(now).inMinutes} minutos');
         return;
       }
       
@@ -235,13 +246,35 @@ class NotificationService {
         return;
       }
       
-      // Para móviles, verificar inicialización
+      // Para móviles, verificar inicialización y permisos
       if (!_isInitialized) {
         print('⚠️ NotificationService no inicializado');
+        await initialize();
+        if (!_isInitialized) {
+          print('❌ No se pudo inicializar NotificationService');
+          return;
+        }
+      }
+      
+      // Verificar permisos de notificación
+      final bool? permissionGranted = await _localNotifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()?.areNotificationsEnabled();
+      
+      if (permissionGranted != true) {
+        print('⚠️ Permisos de notificación no concedidos');
         return;
       }
       
-      final tz.TZDateTime scheduledDate = tz.TZDateTime.from(notificationTime, tz.local);
+      print('✅ Permisos de notificación verificados');
+      
+      // Asegurarse de usar la zona horaria local correctamente
+      final tz.TZDateTime scheduledDate = tz.TZDateTime.local(
+        notificationTime.year,
+        notificationTime.month,
+        notificationTime.day,
+        notificationTime.hour,
+        notificationTime.minute,
+      );
       
       await _localNotifications.zonedSchedule(
         event.id.hashCode,
