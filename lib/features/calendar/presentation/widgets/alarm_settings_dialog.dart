@@ -284,6 +284,23 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     try {
       print('🔔 Programando notificación de alarma #$alarmId para: $scheduledDate');
       print('   - Texto del evento: ${widget.eventText}');
+      print('   - Fecha del evento: ${widget.selectedDate}');
+      print('   - Fecha programada de la alarma: $scheduledDate');
+      
+      // Calcular los minutos de anticipación correctamente
+      // La alarma debe sonar ANTES del evento, así que calculamos la diferencia
+      final eventDateTime = DateTime(
+        widget.selectedDate.year,
+        widget.selectedDate.month,
+        widget.selectedDate.day,
+        _alarm1Time.hour,
+        _alarm1Time.minute,
+      );
+      
+      final minutesBefore = eventDateTime.difference(scheduledDate).inMinutes;
+      print('   - Fecha/hora del evento: $eventDateTime');
+      print('   - Fecha/hora de la alarma: $scheduledDate');
+      print('   - Minutos de anticipación calculados: $minutesBefore');
       
       // Crear un evento temporal para usar con NotificationService
       final tempEvent = AppEvent(
@@ -291,8 +308,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
         familyId: _auth.currentUser?.uid ?? 'temp',
         title: widget.eventText,
         dateKey: _formatDateKey(widget.selectedDate),
-        startAt: scheduledDate,
-        notifyMinutesBefore: 0, // Ya está calculado
+        startAt: eventDateTime, // Usar la fecha/hora del evento
+        notifyMinutesBefore: minutesBefore.abs(), // Minutos de anticipación
       );
       
       // Usar el servicio centralizado de notificaciones
