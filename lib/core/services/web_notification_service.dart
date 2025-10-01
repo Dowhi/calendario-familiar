@@ -143,7 +143,7 @@ class WebNotificationService {
         );
         
         notification.onClick.listen((_) {
-          html.window.focus();
+          // html.window.focus(); // Este método no está disponible en la versión actual de dart:html
           notification.close();
         });
       }

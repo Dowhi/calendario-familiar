@@ -404,8 +404,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               ),
             ),
 
-            // Notas del día - mostrar siempre
-            _buildNotesWidget(date, events),
+            // Notas del día - mostrar debajo del número del día (solo si no hay turnos)
+            if (!_hasShifts(events))
+              Positioned(
+                top: 20, // Dejar espacio para el número del día
+                left: 2,
+                right: 2,
+                child: _buildNotes(date, events),
+              ),
 
 
 
@@ -906,8 +912,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       final textColor = shifts.first['textColor'] as Color;
       final textSize = shifts.first['textSize'] as double;
       
-      // Mostrar solo el nombre del turno, las notas se muestran por separado
-      String displayText = shifts.first['name'];
+      // Si hay notas, mostrar la nota en lugar del nombre del turno
+      String displayText;
+      if (notes.isNotEmpty) {
+        displayText = notes.first; // Mostrar la primera nota
+      } else {
+        displayText = shifts.first['name']; // Mostrar el nombre del turno
+      }
       
       return Container(
         decoration: BoxDecoration(
@@ -955,8 +966,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    // Mostrar solo el nombre del turno
-                    shifts.first['name'],
+                    // Si hay notas, mostrar la nota en lugar del nombre del turno
+                    notes.isNotEmpty ? notes.first : shifts.first['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: (shifts.first['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos
@@ -985,8 +996,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Text(
-                    // Mostrar solo el nombre del turno
-                    shifts[1]['name'],
+                    // Si hay notas, mostrar la nota en lugar del nombre del turno (solo en la mitad inferior)
+                    notes.isNotEmpty ? notes.first : shifts[1]['name'],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: (shifts[1]['textSize'] as double) * 0.7, // Reducir tamaño para dos turnos
@@ -1063,71 +1074,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return false;
   }
 
-  // Construye el widget para mostrar las notas (wrapper con Positioned)
-  Widget _buildNotesWidget(DateTime date, List<String> events) {
-    final dateKey = _formatDate(date);
-    final notes = _dataService.getNotes()[dateKey] ?? [];
-    
-    if (notes.isEmpty) {
-      return const SizedBox.shrink(); // No hay notas que mostrar
-    }
-
-    // Verificar si hay turnos
-    bool hasShifts = false;
-    for (final eventTitle in events) {
-      final template = _dataService.getShiftTemplateByName(eventTitle);
-      if (template != null) {
-        hasShifts = true;
-        break;
-      }
-    }
-
-    // Si hay turnos, mostrar las notas en la parte inferior con fondo blanco
-    if (hasShifts) {
-      return Positioned(
-        bottom: 2,
-        left: 2,
-        right: 2,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: Text(
-            notes.first,
-            style: const TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.normal,
-              color: Colors.black87,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    // Si no hay turnos, mostrar las notas debajo del número del día
-    return Positioned(
-      top: 20, // Dejar espacio para el número del día
-      left: 2,
-      right: 2,
-      child: Text(
-        notes.first,
-        style: const TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.normal,
-          color: Colors.black87,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-  
-  // Construye el widget de texto de notas (sin Positioned) - para uso interno
+  // Construye el widget de texto de notas (sin Positioned)
   Widget _buildNotes(DateTime date, List<String> events) {
     final dateKey = _formatDate(date);
     final notes = _dataService.getNotes()[dateKey] ?? [];
