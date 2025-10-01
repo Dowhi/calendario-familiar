@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:js' as js;
+import 'package:calendario_familiar/core/models/app_event.dart';
+import 'dart:html' as html;
 
 /// Servicio de notificaciones web usando Firebase Cloud Messaging
 class WebNotificationService {
@@ -133,18 +134,18 @@ class WebNotificationService {
     if (!kIsWeb) return;
     
     try {
-      // Usar la API de notificaciones web nativa
-      if (js.context['Notification'] != null) {
-        final notification = js.JsObject(js.context['Notification'], [title, js.JsObject.jsify({
-          'body': body,
-          'icon': '/favicon.png',
-          'badge': '/favicon.png',
-        })]);
+      // Usar la API de notificaciones web nativa con dart:html
+      if (html.Notification.supported) {
+        final notification = html.Notification(
+          title,
+          body: body,
+          icon: '/favicon.png',
+        );
         
-        notification['onclick'] = (event) {
-          js.context['window']['focus']();
-          notification.callMethod('close');
-        };
+        notification.onClick.listen((_) {
+          html.window.focus();
+          notification.close();
+        });
       }
     } catch (e) {
       print('❌ Error mostrando notificación web: $e');

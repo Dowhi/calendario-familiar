@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:calendario_familiar/core/models/app_event.dart';
-import 'package:calendario_familiar/core/services/web_notification_service.dart';
+import 'package:calendario_familiar/core/services/web_notification_service_stub.dart'
+  if (dart.library.html) 'package:calendario_familiar/core/services/web_notification_service.dart';
 
 /// Servicio simplificado de notificaciones locales
 class NotificationService {

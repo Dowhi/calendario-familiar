@@ -404,14 +404,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               ),
             ),
 
-            // Notas del día - mostrar debajo del número del día (solo si no hay turnos)
-            if (!_hasShifts(events))
-              Positioned(
-                top: 20, // Dejar espacio para el número del día
-                left: 2,
-                right: 2,
-                child: _buildNotes(date, events),
-              ),
+            // Notas del día - mostrar siempre
+            _buildNotesWidget(date, events),
 
 
 
@@ -1069,8 +1063,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return false;
   }
 
-  // Construye el widget para mostrar las notas
-  Widget _buildNotes(DateTime date, List<String> events) {
+  // Construye el widget para mostrar las notas (wrapper con Positioned)
+  Widget _buildNotesWidget(DateTime date, List<String> events) {
     final dateKey = _formatDate(date);
     final notes = _dataService.getNotes()[dateKey] ?? [];
     
@@ -1088,7 +1082,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
     }
 
-    // Si hay turnos, mostrar las notas en la parte inferior
+    // Si hay turnos, mostrar las notas en la parte inferior con fondo blanco
     if (hasShifts) {
       return Positioned(
         bottom: 2,
@@ -1115,7 +1109,33 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       );
     }
 
-    // Solo mostrar las notas si no hay turnos
+    // Si no hay turnos, mostrar las notas debajo del número del día
+    return Positioned(
+      top: 20, // Dejar espacio para el número del día
+      left: 2,
+      right: 2,
+      child: Text(
+        notes.first,
+        style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.normal,
+          color: Colors.black87,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+  
+  // Construye el widget de texto de notas (sin Positioned) - para uso interno
+  Widget _buildNotes(DateTime date, List<String> events) {
+    final dateKey = _formatDate(date);
+    final notes = _dataService.getNotes()[dateKey] ?? [];
+    
+    if (notes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Text(
       notes.first,
       style: const TextStyle(
