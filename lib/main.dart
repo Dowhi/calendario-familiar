@@ -7,6 +7,7 @@ import 'package:calendario_familiar/routing/app_router.dart';
 import 'package:calendario_familiar/theme/app_theme.dart';
 import 'package:calendario_familiar/core/services/time_service.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
+import 'package:calendario_familiar/core/providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,11 +44,13 @@ class CalendarioFamiliarApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(themeProvider);
+    
     return MaterialApp.router(
       title: 'Calendario Familiar',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
     );
