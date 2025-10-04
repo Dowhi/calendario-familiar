@@ -12,6 +12,7 @@ import 'package:calendario_familiar/features/calendar/logic/calendar_controller.
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
 import 'package:calendario_familiar/core/providers/text_size_provider.dart';
+import 'package:calendario_familiar/core/providers/theme_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -212,11 +213,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 
                 const Divider(),
                 
-                // Prueba de notificaciones
-                _buildNotificationTestSection(context),
-                
-                const Divider(),
-                
                 // Datos y respaldo
                 _buildDataSection(context),
                 
@@ -257,31 +253,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
-        // Control de tamaño de texto de eventos (siempre visible)
-        Consumer(
-          builder: (context, ref, child) {
-            final eventTextSize = ref.watch(eventTextSizeProvider);
-            return ListTile(
-              leading: const Icon(Icons.text_fields),
-              title: const Text('Tamaño del texto de eventos'),
-              subtitle: Text('${eventTextSize.round()} puntos'),
-              trailing: SizedBox(
-                width: 100,
-                child: Slider(
-                  value: eventTextSize,
-                  min: 8.0,
-                  max: 24.0,
-                  divisions: 16,
-                  activeColor: Colors.teal,
-                  inactiveColor: Colors.grey[300],
-                  onChanged: (value) {
-                    ref.read(eventTextSizeProvider.notifier).setTextSize(value);
+                // Control de tamaño de texto de eventos (siempre visible)
+                Consumer(
+                  builder: (context, ref, child) {
+                    final eventTextSize = ref.watch(eventTextSizeProvider);
+                    return ListTile(
+                      leading: const Icon(Icons.text_fields),
+                      title: const Text('Tamaño del texto de eventos'),
+                      subtitle: Text('${eventTextSize.round()} puntos'),
+                      trailing: SizedBox(
+                        width: 100,
+                        child: Slider(
+                          value: eventTextSize,
+                          min: 8.0,
+                          max: 24.0,
+                          divisions: 16,
+                          activeColor: Colors.teal,
+                          inactiveColor: Colors.grey[300],
+                          onChanged: (value) {
+                            ref.read(eventTextSizeProvider.notifier).setTextSize(value);
+                          },
+                        ),
+                      ),
+                    );
                   },
                 ),
-              ),
-            );
-          },
-        ),
+                // Control de tema claro/oscuro
+                Consumer(
+                  builder: (context, ref, child) {
+                    final isDarkMode = ref.watch(themeProvider);
+                    return SwitchListTile(
+                      secondary: const Icon(Icons.dark_mode),
+                      title: const Text('Modo oscuro'),
+                      subtitle: Text(isDarkMode ? 'Activado' : 'Desactivado'),
+                      value: isDarkMode,
+                      onChanged: (value) {
+                        ref.read(themeProvider.notifier).setTheme(value);
+                      },
+                    );
+                  },
+                ),
         calendarState.when(
           data: (calendar) {
             if (calendar == null) return const SizedBox.shrink();
@@ -410,32 +421,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           title: const Text('Importar datos'),
           subtitle: const Text('Restaurar desde un respaldo'),
           onTap: _importData,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNotificationTestSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Prueba de Notificaciones',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.science, color: Colors.purple),
-          title: const Text('Probar Notificaciones'),
-          subtitle: const Text('Verificar que funcionan correctamente'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () {
-            context.push('/notification-test');
-          },
         ),
       ],
     );

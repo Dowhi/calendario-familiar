@@ -15,14 +15,6 @@
     "edge_side_panel": {
         "preferred_width": 400
     },
-    "permissions": [
-        "notifications"
-    ],
-    "serviceworker": {
-        "src": "/sw.js",
-        "scope": "/",
-        "update_via_cache": "none"
-    },
     "icons": [
         {
             "src": "icons/Icon-192.png",
