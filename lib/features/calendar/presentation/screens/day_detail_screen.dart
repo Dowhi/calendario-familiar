@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
-import 'package:calendario_familiar/features/calendar/presentation/widgets/simple_alarm_dialog.dart';
+import 'package:calendario_familiar/features/calendar/presentation/widgets/alarm_settings_dialog.dart';
 import 'package:calendario_familiar/core/widgets/custom_icons.dart';
 
 class DayDetailScreen extends ConsumerStatefulWidget {
@@ -229,10 +229,10 @@ class _DayDetailScreenState extends ConsumerState<DayDetailScreen> {
         ? _eventTextController.text 
         : "Recordatorio";
     
-    // Mostrar el diálogo de alarma simplificado
+    // Mostrar el diálogo de alarma con la nueva interfaz
     showDialog(
       context: context,
-      builder: (context) => SimpleAlarmDialog(
+      builder: (context) => AlarmSettingsDialog(
         selectedDate: widget.date,
         eventText: eventText,
       ),

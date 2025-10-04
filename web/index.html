@@ -88,13 +88,26 @@
     const db = getFirestore(app);
     const messaging = getMessaging(app);
 
-    // Solicitar permisos de notificación
-    if ('Notification' in window) {
-      Notification.requestPermission().then(function(permission) {
-        if (permission === 'granted') {
-          console.log('✅ Permisos de notificación concedidos');
-        }
-      });
+    // Registrar Service Worker para notificaciones
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+          console.log('✅ Service Worker registrado:', registration);
+          
+          // Solicitar permisos de notificación
+          if ('Notification' in window) {
+            Notification.requestPermission().then(function(permission) {
+              if (permission === 'granted') {
+                console.log('✅ Permisos de notificación concedidos');
+              } else {
+                console.warn('⚠️ Permisos de notificación denegados');
+              }
+            });
+          }
+        })
+        .catch(function(error) {
+          console.error('❌ Error registrando Service Worker:', error);
+        });
     }
 
     // Detectar iOS y mostrar información

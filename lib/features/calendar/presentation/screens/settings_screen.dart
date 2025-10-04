@@ -212,6 +212,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 
                 const Divider(),
                 
+                // Prueba de notificaciones
+                _buildNotificationTestSection(context),
+                
+                const Divider(),
+                
                 // Datos y respaldo
                 _buildDataSection(context),
                 
@@ -405,6 +410,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           title: const Text('Importar datos'),
           subtitle: const Text('Restaurar desde un respaldo'),
           onTap: _importData,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotificationTestSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Prueba de Notificaciones',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.science, color: Colors.purple),
+          title: const Text('Probar Notificaciones'),
+          subtitle: const Text('Verificar que funcionan correctamente'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            context.push('/notification-test');
+          },
         ),
       ],
     );

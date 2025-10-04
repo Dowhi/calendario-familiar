@@ -1,189 +1,198 @@
-# Guía de Notificaciones y Recordatorios
+# 🔔 Guía de Notificaciones - Calendario Familiar
 
-## Resumen
+## ✅ Problemas Solucionados
 
-Esta aplicación implementa un sistema de recordatorios que funciona tanto en **Flutter Web (PWA)** como en **móviles (Android/iOS)**. La implementación es simple, funcional y respeta las limitaciones de cada plataforma.
+### Problemas Identificados y Corregidos:
+1. **Falta de inicialización del servicio de notificaciones** - ✅ Solucionado
+2. **Permisos no solicitados correctamente** - ✅ Solucionado  
+3. **Configuración de notificaciones ausente en ajustes** - ✅ Solucionado
+4. **Sistema de alarmas no funcional** - ✅ Solucionado
+5. **Falta de gestión de configuración persistente** - ✅ Solucionado
 
-## Arquitectura
+## 🚀 Nuevas Funcionalidades Implementadas
 
-### Servicios Principales
+### 1. Servicio de Notificaciones Mejorado (`NotificationService`)
+- ✅ Inicialización robusta con manejo de errores
+- ✅ Solicitud automática de permisos en Android 13+
+- ✅ Soporte para alarmas exactas
+- ✅ Verificación de estado de permisos
+- ✅ Notificaciones de prueba
 
-- **`ReminderService`**: Servicio principal que maneja recordatorios en todas las plataformas
-- **`NotificationService`**: Wrapper de compatibilidad que delega a `ReminderService`
-- **`SimpleAlarmDialog`**: Interfaz simplificada para configurar recordatorios
+### 2. Servicio de Configuración (`NotificationSettingsService`)
+- ✅ Configuración persistente con SharedPreferences
+- ✅ Control granular de notificaciones
+- ✅ Configuración de sonido y vibración
+- ✅ Recordatorios por defecto personalizables
 
-### Plataformas Soportadas
+### 3. Servicio de Alarmas (`AlarmService`)
+- ✅ Programación de alarmas para eventos
+- ✅ Gestión de múltiples recordatorios
+- ✅ Cancelación de alarmas
+- ✅ Limpieza automática de alarmas expiradas
 
-#### Flutter Web (PWA)
-- **Tecnología**: API nativa de notificaciones del navegador (`dart:js`)
-- **Limitación**: Los recordatorios solo funcionan mientras la pestaña esté abierta
-- **Permisos**: Requiere permiso del usuario para mostrar notificaciones
-- **Compatibilidad**: Chrome, Firefox, Safari, Edge (con HTTPS)
+### 4. Pantalla de Ajustes Mejorada
+- ✅ Sección completa de notificaciones
+- ✅ Estado de permisos visible
+- ✅ Configuración granular
+- ✅ Pruebas de notificaciones
+- ✅ Interfaz intuitiva
 
-#### Flutter Móvil (Android/iOS)
-- **Tecnología**: `flutter_local_notifications` con `timezone`
-- **Funcionalidad**: Recordatorios programados que funcionan en background
-- **Permisos**: Notificaciones locales automáticas
-- **Compatibilidad**: Android 4.1+, iOS 10+
+### 5. Diálogo de Alarmas Mejorado (`ImprovedAlarmDialog`)
+- ✅ Configuración visual de recordatorios
+- ✅ Selector de tiempo integrado
+- ✅ Configuración de días antes del evento
+- ✅ Validación de configuración
 
-## Cómo Usar
+## 📱 Cómo Usar las Notificaciones
 
-### 1. Configurar un Recordatorio
+### 1. Configurar Notificaciones Globales
 
-1. Abre un día en el calendario
-2. Escribe una nota o evento
-3. Haz clic en el botón de alarma (🔔)
-4. Selecciona la hora del recordatorio
-5. Haz clic en "Programar"
+1. **Ir a Configuración**:
+   - Abre la app
+   - Toca el ícono de configuración (⚙️)
+   - Ve a la sección "Notificaciones y Recordatorios"
 
-### 2. Probar Notificaciones
+2. **Verificar Permisos**:
+   - Si ves un mensaje rojo "Permisos de notificación necesarios"
+   - Toca "Solicitar" para habilitar permisos
+   - Acepta los permisos en el diálogo del sistema
 
-1. En el diálogo de recordatorio, haz clic en "Probar"
-2. Deberías ver una notificación inmediata
-3. Si no aparece, verifica los permisos
+3. **Configurar Opciones**:
+   - ✅ **Notificaciones habilitadas**: Activar/desactivar todas las notificaciones
+   - ✅ **Recordatorios de eventos**: Notificaciones antes de eventos programados
+   - ✅ **Alarmas y recordatorios**: Recordatorios personalizados
+   - ✅ **Sonido**: Reproducir sonido en notificaciones
+   - ✅ **Vibración**: Vibrar en notificaciones
 
-### 3. Verificar Permisos
+### 2. Configurar Recordatorios para Eventos
 
-#### En Web:
-1. Busca el ícono de notificaciones en la barra de direcciones
-2. Debe mostrar "Permitir" o "Bloquear"
-3. Si está bloqueado, haz clic y selecciona "Permitir"
-4. Recarga la página
+1. **Crear un Evento**:
+   - Toca el botón "+" en el calendario
+   - Completa los datos del evento
+   - Guarda el evento
 
-#### En Móvil:
-1. Ve a Configuración > Aplicaciones > Calendario Familiar
-2. Verifica que las notificaciones estén habilitadas
-3. Si no, habilítalas manualmente
+2. **Configurar Alarmas**:
+   - Toca el evento en el calendario
+   - Toca el botón de alarma (🔔)
+   - Configura los recordatorios:
+     - **Recordatorio 1**: Primer recordatorio
+     - **Recordatorio 2**: Segundo recordatorio
+   - Para cada recordatorio:
+     - Activa/desactiva con el switch
+     - Selecciona la hora tocando el tiempo
+     - Ajusta los días antes del evento con el slider
+   - Toca "Guardar"
 
-## Limitaciones
+### 3. Probar Notificaciones
 
-### Flutter Web (PWA)
+En la sección de Configuración > Notificaciones:
 
-⚠️ **Limitación Principal**: Los recordatorios programados solo funcionan mientras la pestaña del navegador esté abierta.
+1. **Notificación Inmediata**:
+   - Toca "Probar notificación inmediata"
+   - Deberías ver una notificación inmediatamente
 
-**¿Por qué?**
-- Los navegadores no permiten que las PWA ejecuten código en background
-- `setTimeout()` y `setInterval()` se pausan cuando la pestaña no está activa
-- No hay Service Workers para notificaciones programadas sin servidor
+2. **Recordatorio Programado**:
+   - Toca "Probar recordatorio programado"
+   - Una notificación aparecerá en 1 minuto
 
-**Soluciones Alternativas:**
-- Usar notificaciones push con Firebase (requiere servidor)
-- Implementar Service Worker con background sync (limitado)
-- Usar notificaciones inmediatas cuando el usuario esté activo
+## ⚙️ Configuración Técnica
 
-### Flutter Móvil
+### Permisos Requeridos
 
-✅ **Funcionalidad Completa**: Los recordatorios funcionan correctamente en background.
+#### Android:
+- `POST_NOTIFICATIONS` (Android 13+)
+- `USE_EXACT_ALARM` (Para alarmas precisas)
+- `VIBRATE` (Para vibración)
 
-**Características:**
-- Notificaciones programadas exactas
-- Funcionan con la app cerrada
-- Respeta el modo "No molestar"
-- Integración con el sistema de notificaciones
+#### iOS:
+- `alert` (Alertas)
+- `badge` (Badge en ícono)
+- `sound` (Sonido)
+- `critical` (Notificaciones críticas)
 
-## Diagnóstico de Problemas
+### Canales de Notificación
 
-### Las notificaciones no aparecen
+- **ID**: `calendar_events`
+- **Nombre**: `Eventos del Calendario`
+- **Descripción**: `Notificaciones de eventos del calendario familiar`
+- **Importancia**: Alta
+- **Sonido**: Habilitado
+- **Vibración**: Habilitada
 
-#### En Web:
-1. **Verificar HTTPS**: Las notificaciones web requieren HTTPS
-2. **Verificar permisos**: Debe estar en "Permitir"
-3. **Verificar pestaña activa**: La pestaña debe estar abierta
-4. **Verificar consola**: Revisar errores en DevTools
+## 🔧 Solución de Problemas
 
-#### En Móvil:
-1. **Verificar permisos**: Notificaciones habilitadas en configuración
-2. **Verificar batería**: Algunos dispositivos pausan apps en background
-3. **Verificar modo avión**: Desactivar si está activo
-4. **Verificar logs**: Revisar logs de la app
+### Las Notificaciones No Aparecen
 
-### Código de Diagnóstico
+1. **Verificar Permisos**:
+   - Ve a Configuración > Notificaciones
+   - Si el estado muestra "Permisos necesarios", solicítalos
+   - Ve a Configuración del sistema si es necesario
+
+2. **Verificar Configuración Global**:
+   - Asegúrate de que "Notificaciones habilitadas" esté activado
+   - Verifica que el tipo de recordatorio específico esté habilitado
+
+3. **Probar Notificación**:
+   - Usa "Probar notificación inmediata" para verificar
+   - Si no funciona, reinicia la app
+
+### Las Alarmas No Se Programan
+
+1. **Verificar Fecha**:
+   - Las alarmas deben ser en el futuro
+   - No se pueden programar para fechas pasadas
+
+2. **Verificar Configuración**:
+   - Asegúrate de que los recordatorios de alarma estén habilitados
+   - Verifica que las notificaciones globales estén activas
+
+3. **Verificar Permisos de Alarma Exacta**:
+   - En Android, puede ser necesario habilitar "Alarmas y recordatorios" en configuración del sistema
+
+### Problemas de Sonido/Vibración
+
+1. **Verificar Configuración de la App**:
+   - Ve a Configuración > Notificaciones
+   - Asegúrate de que Sonido y Vibración estén habilitados
+
+2. **Verificar Configuración del Sistema**:
+   - Ve a Configuración del sistema > Aplicaciones > Calendario Familiar > Notificaciones
+   - Asegúrate de que el sonido y vibración estén habilitados
+
+## 📊 Monitoreo y Logs
+
+### Logs de Debug
+
+El sistema incluye logs detallados para debugging:
+
+```
+🔔 Inicializando servicio de notificaciones...
+✅ Notificaciones inicializadas: true
+✅ Canal de notificaciones Android creado
+🔐 Permiso POST_NOTIFICATIONS concedido: true
+⏰ Permiso USE_EXACT_ALARM concedido: true
+✅ Servicio de notificaciones inicializado completamente
+```
+
+### Verificar Estado
+
+Puedes verificar el estado de las notificaciones usando:
 
 ```dart
-// Verificar estado de permisos
-final enabled = await ReminderService.areNotificationsEnabled();
-print('Notificaciones habilitadas: $enabled');
-
-// Solicitar permisos
-final granted = await ReminderService.requestPermissions();
-print('Permisos concedidos: $granted');
-
-// Probar notificación
-await ReminderService.showTestNotification();
+final status = await NotificationService.getNotificationStatus();
+print('Estado: $status');
 ```
 
-## Implementación Técnica
+## 🚀 Próximas Mejoras
 
-### Estructura de Archivos
+- [ ] Notificaciones push con Firebase Cloud Messaging
+- [ ] Recordatorios recurrentes
+- [ ] Personalización de sonidos
+- [ ] Integración con calendarios del sistema
+- [ ] Notificaciones inteligentes basadas en ubicación
 
-```
-lib/
-├── core/services/
-│   ├── reminder_service.dart          # Servicio principal
-│   └── notification_service.dart      # Wrapper de compatibilidad
-├── features/calendar/presentation/widgets/
-│   └── simple_alarm_dialog.dart       # Interfaz de usuario
-└── main.dart                          # Inicialización
-```
+---
 
-### Flujo de Datos
+**¡El sistema de notificaciones está ahora completamente funcional! 🎉**
 
-1. **Usuario configura recordatorio** → `SimpleAlarmDialog`
-2. **Diálogo valida datos** → `ReminderService.scheduleReminder()`
-3. **Servicio detecta plataforma** → Web o Móvil
-4. **Web**: `Future.delayed()` + API de notificaciones
-5. **Móvil**: `flutter_local_notifications.zonedSchedule()`
-
-### Dependencias
-
-```yaml
-dependencies:
-  flutter_local_notifications: ^17.2.3  # Para móviles
-  timezone: ^0.9.2                      # Para zonas horarias
-  # dart:js (incluido en Flutter)       # Para web
-```
-
-## Pruebas
-
-### Prueba Básica
-
-1. **Configurar recordatorio para 1 minuto en el futuro**
-2. **Esperar y verificar que aparece la notificación**
-3. **Hacer clic en la notificación para verificar interacción**
-
-### Prueba de Permisos
-
-1. **Denegar permisos inicialmente**
-2. **Intentar configurar recordatorio**
-3. **Verificar que solicita permisos**
-4. **Conceder permisos y probar de nuevo**
-
-### Prueba de Plataforma
-
-1. **Probar en navegador web (Chrome/Firefox)**
-2. **Probar en dispositivo Android**
-3. **Probar en dispositivo iOS**
-4. **Verificar comportamiento específico de cada plataforma**
-
-## Futuras Mejoras
-
-### Posibles Extensiones
-
-1. **Notificaciones Push**: Integrar Firebase Cloud Messaging
-2. **Recordatorios Recurrentes**: Diario, semanal, mensual
-3. **Sonidos Personalizados**: Diferentes tonos por tipo de evento
-4. **Notificaciones Silenciosas**: Solo vibración o badge
-5. **Integración con Calendario**: Sincronizar con Google Calendar
-
-### Consideraciones Técnicas
-
-- **Service Workers**: Para notificaciones web en background
-- **Background Tasks**: Para tareas programadas en móviles
-- **Push Notifications**: Para notificaciones remotas
-- **Local Storage**: Para persistir recordatorios programados
-
-## Conclusión
-
-La implementación actual proporciona una base sólida y funcional para recordatorios en todas las plataformas. Aunque tiene limitaciones en web (solo funciona con pestaña abierta), es una solución práctica que cumple con los requisitos básicos y es fácil de extender en el futuro.
-
-Para casos de uso más avanzados, se recomienda implementar notificaciones push con un servidor backend.
+Para cualquier problema, revisa esta guía o contacta al equipo de desarrollo.

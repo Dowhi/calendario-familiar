@@ -6,7 +6,7 @@ import 'package:calendario_familiar/core/firebase/firebase_options.dart';
 import 'package:calendario_familiar/routing/app_router.dart';
 import 'package:calendario_familiar/theme/app_theme.dart';
 import 'package:calendario_familiar/core/services/time_service.dart';
-import 'package:calendario_familiar/core/services/reminder_service.dart';
+import 'package:calendario_familiar/core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,9 +28,9 @@ void main() async {
       print('✅ TimeService inicializado');
     }
     
-    // Inicializar recordatorios en todas las plataformas
-    await ReminderService.initialize();
-    print('✅ ReminderService inicializado');
+    // Inicializar notificaciones en todas las plataformas
+    await NotificationService.initialize();
+    print('✅ NotificationService inicializado');
   } catch (e) {
     print('❌ Error inicializando servicios base: $e');
   }

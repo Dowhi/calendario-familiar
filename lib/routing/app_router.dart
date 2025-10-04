@@ -21,6 +21,7 @@ import 'package:calendario_familiar/features/auth/logic/auth_controller.dart'; /
 import 'package:calendario_familiar/core/models/shift_template.dart'; // Importar ShiftTemplate
 import 'package:calendario_familiar/features/splash/presentation/screens/splash_screen.dart';
 import 'package:calendario_familiar/features/splash/presentation/screens/splash_screen_alternative.dart';
+import 'package:calendario_familiar/features/notifications/notification_test_screen.dart';
 
 // Variable global para el navigatorKey
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -209,6 +210,12 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/password-recovery',
       builder: (context, state) => const PasswordRecoveryScreen(),
+    ),
+    
+    // Nueva ruta para prueba de notificaciones
+    GoRoute(
+      path: '/notification-test',
+      builder: (context, state) => const NotificationTestScreen(),
     ),
     
     // Ruta para pantalla de notificaciones
