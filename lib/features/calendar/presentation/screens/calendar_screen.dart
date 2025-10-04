@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/features/calendar/presentation/screens/day_detail_screen.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
+import 'package:calendario_familiar/core/providers/text_size_provider.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -1078,15 +1079,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return const SizedBox.shrink();
     }
 
-    return Text(
-      notes.first,
-      style: const TextStyle(
-        fontSize: 9,
-        fontWeight: FontWeight.normal,
-        color: Colors.black87,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    return Consumer(
+      builder: (context, ref, child) {
+        final eventTextSize = ref.watch(eventTextSizeProvider);
+        return Text(
+          notes.first,
+          style: TextStyle(
+            fontSize: eventTextSize,
+            fontWeight: FontWeight.normal,
+            color: Colors.black87,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+      },
     );
   }
 
@@ -1239,21 +1245,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
     // Si solo hay notas (sin turnos)
     if (notes.isNotEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Text(
-            notes.first,
-            style: const TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.normal,
-              color: Colors.black87,
+      return Consumer(
+        builder: (context, ref, child) {
+          final eventTextSize = ref.watch(eventTextSizeProvider);
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Text(
+                notes.first,
+                style: TextStyle(
+                  fontSize: eventTextSize,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black87,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
+          );
+        },
       );
     }
 
