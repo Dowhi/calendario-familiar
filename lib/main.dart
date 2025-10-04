@@ -27,11 +27,13 @@ void main() async {
     if (!kIsWeb) {
       await TimeService.initialize();
       print('✅ TimeService inicializado');
+      
+      // Inicializar notificaciones solo en móvil/desktop
+      await NotificationService.initialize();
+      print('✅ NotificationService inicializado');
+    } else {
+      print('ℹ️ Servicios de notificaciones locales no disponibles en web');
     }
-    
-    // Inicializar notificaciones en todas las plataformas
-    await NotificationService.initialize();
-    print('✅ NotificationService inicializado');
   } catch (e) {
     print('❌ Error inicializando servicios base: $e');
   }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:calendario_familiar/core/providers/theme_provider.dart';
+
+// Importación condicional para notificaciones locales (no compatible con web)
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class NotificationScreen extends ConsumerWidget {
   final String eventText;
@@ -170,21 +174,22 @@ class NotificationScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Botón posponer
-                    ElevatedButton.icon(
-                      onPressed: () => _postponeNotification(context),
-                      icon: const Icon(Icons.snooze, size: 18),
-                      label: const Text('Posponer'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    // Botón posponer (solo en móvil/desktop)
+                    if (!kIsWeb)
+                      ElevatedButton.icon(
+                        onPressed: () => _postponeNotification(context),
+                        icon: const Icon(Icons.snooze, size: 18),
+                        label: const Text('Posponer'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 3,
                         ),
-                        elevation: 3,
                       ),
-                    ),
                     
                     // Botón principal
                     ElevatedButton(
@@ -258,36 +263,52 @@ class NotificationScreen extends ConsumerWidget {
   Future<void> _schedulePostponedNotification(int minutes, BuildContext context) async {
     if (!context.mounted) return;
     
+    // En web, solo mostrar mensaje (las notificaciones locales no están disponibles)
+    if (kIsWeb) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('En la versión web, el recordatorio se pospondría por $minutes minutos'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+    
     try {
-      final notifications = FlutterLocalNotificationsPlugin();
-      final now = DateTime.now();
-      final scheduledTime = now.add(Duration(minutes: minutes));
-      final alarmId = scheduledTime.millisecondsSinceEpoch ~/ 1000;
+      if (!kIsWeb) {
+        final notifications = FlutterLocalNotificationsPlugin();
+        final now = DateTime.now();
+        final scheduledTime = now.add(Duration(minutes: minutes));
+        final alarmId = scheduledTime.millisecondsSinceEpoch ~/ 1000;
 
-      const AndroidNotificationDetails androidPlatformChannelSpecifics =
-          AndroidNotificationDetails(
-        'event_reminders',
-        'Recordatorios de eventos',
-        channelDescription: 'Notificaciones para recordar eventos del calendario',
-        importance: Importance.high,
-        priority: Priority.high,
-        enableVibration: true,
-        playSound: true,
-      );
+        const AndroidNotificationDetails androidPlatformChannelSpecifics =
+            AndroidNotificationDetails(
+          'event_reminders',
+          'Recordatorios de eventos',
+          channelDescription: 'Notificaciones para recordar eventos del calendario',
+          importance: Importance.high,
+          priority: Priority.high,
+          enableVibration: true,
+          playSound: true,
+        );
 
-      const NotificationDetails platformChannelSpecifics =
-          NotificationDetails(android: androidPlatformChannelSpecifics);
+        const NotificationDetails platformChannelSpecifics =
+            NotificationDetails(android: androidPlatformChannelSpecifics);
 
-      await notifications.zonedSchedule(
-        alarmId,
-        '🔔 Recordatorio pospuesto',
-        'Evento: $eventText',
-        scheduledTime,
-        platformChannelSpecifics,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        payload: 'notification_screen|eventText:$eventText|autoOpen:true',
-      );
+        await notifications.zonedSchedule(
+          alarmId,
+          '🔔 Recordatorio pospuesto',
+          'Evento: $eventText',
+          tz.TZDateTime.from(scheduledTime, tz.local),
+          platformChannelSpecifics,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          payload: 'notification_screen|eventText:$eventText|autoOpen:true',
+        );
+      }
 
       // Cerrar la pantalla actual
       if (context.mounted) {
