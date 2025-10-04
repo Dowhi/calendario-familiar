@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:go_router/go_router.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
 import 'dart:js' as js;
+import 'package:calendario_familiar/features/calendar/presentation/screens/fullscreen_alert_screen.dart';
 
 /// Servicio simplificado de recordatorios
 /// Funciona tanto en web como en móvil
@@ -98,7 +101,50 @@ class ReminderService {
   
   static void _onNotificationTapped(NotificationResponse response) {
     print('🔔 Recordatorio tocado: ${response.payload}');
+    
+    // Mostrar pantalla de aviso completa
+    _showFullscreenAlert(
+      title: 'Recordatorio',
+      message: response.payload ?? 'Es hora de tu recordatorio',
+      dateTime: DateTime.now(),
+    );
   }
+  
+  /// Mostrar pantalla de aviso completa
+  static void _showFullscreenAlert({
+    required String title,
+    required String message,
+    required DateTime dateTime,
+  }) {
+    // Obtener el contexto de navegación global
+    final context = _getCurrentContext();
+    if (context != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => FullscreenAlertScreen(
+            title: title,
+            message: message,
+            dateTime: dateTime,
+          ),
+          fullscreenDialog: true,
+        ),
+      );
+    }
+  }
+  
+  /// Obtener el contexto de navegación actual
+  static BuildContext? _getCurrentContext() {
+    // Intentar obtener el contexto desde el router
+    try {
+      return navigatorKey.currentContext;
+    } catch (e) {
+      print('❌ Error obteniendo contexto: $e');
+      return null;
+    }
+  }
+  
+  /// Clave global para el navegador
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   
   /// Verificar si las notificaciones están habilitadas
   static Future<bool> areNotificationsEnabled() async {
@@ -192,6 +238,13 @@ class ReminderService {
         if (!_isInitialized) return;
       }
       
+      // Verificar permisos antes de programar
+      final hasPermission = await areNotificationsEnabled();
+      if (!hasPermission) {
+        print('⚠️ Permisos de notificación no concedidos');
+        return;
+      }
+      
       // Para móviles, usar notificaciones locales
       final tz.TZDateTime scheduledDate = tz.TZDateTime.local(
         scheduledTime.year,
@@ -217,21 +270,29 @@ class ReminderService {
             enableLights: true,
             enableVibration: true,
             playSound: true,
+            fullScreenIntent: true, // Mostrar pantalla completa
+            category: AndroidNotificationCategory.alarm,
+            visibility: NotificationVisibility.public,
+            ongoing: true, // Notificación persistente
+            // payload: body, // Incluir mensaje en el payload
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
+            interruptionLevel: InterruptionLevel.critical,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
       );
       
-      print('✅ Recordatorio programado correctamente');
+      print('✅ Recordatorio programado correctamente para: $scheduledDate');
       
     } catch (e) {
       print('❌ Error programando recordatorio: $e');
+      print('Stack trace: ${StackTrace.current}');
     }
   }
   
@@ -261,7 +322,17 @@ class ReminderService {
         return;
       }
       
-      if (!_isInitialized) return;
+      if (!_isInitialized) {
+        await initialize();
+        if (!_isInitialized) return;
+      }
+      
+      // Verificar permisos
+      final hasPermission = await areNotificationsEnabled();
+      if (!hasPermission) {
+        print('⚠️ Permisos de notificación no concedidos para prueba');
+        return;
+      }
       
       await _localNotifications.show(
         999,
@@ -278,11 +349,15 @@ class ReminderService {
             enableLights: true,
             enableVibration: true,
             playSound: true,
+            fullScreenIntent: true,
+            category: AndroidNotificationCategory.alarm,
+            visibility: NotificationVisibility.public,
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
+            interruptionLevel: InterruptionLevel.critical,
           ),
         ),
       );
@@ -291,6 +366,7 @@ class ReminderService {
       
     } catch (e) {
       print('❌ Error enviando notificación de prueba: $e');
+      print('Stack trace: ${StackTrace.current}');
     }
   }
   
