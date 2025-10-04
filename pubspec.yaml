@@ -35,8 +35,6 @@ dependencies:
   # Dependencias para splash screen con video
   video_player: ^2.8.2
   chewie: ^1.7.4
-  # Dependencias para notificaciones web
-  firebase_messaging: ^15.1.3
 
 dev_dependencies:
   flutter_test:
