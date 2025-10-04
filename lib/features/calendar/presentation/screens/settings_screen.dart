@@ -11,6 +11,7 @@ import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
 import 'package:calendario_familiar/features/calendar/logic/calendar_controller.dart';
 import 'package:calendario_familiar/core/services/calendar_data_service.dart';
 import 'package:calendario_familiar/core/services/notification_service.dart';
+import 'package:calendario_familiar/core/providers/text_size_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -267,6 +268,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: const Text('Gestionar miembros'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/members'),
+                ),
+                // Control de tamaño de texto de eventos
+                Consumer(
+                  builder: (context, ref, child) {
+                    final eventTextSize = ref.watch(eventTextSizeProvider);
+                    return ListTile(
+                      leading: const Icon(Icons.text_fields),
+                      title: const Text('Tamaño del texto de eventos'),
+                      subtitle: Text('${eventTextSize.round()} puntos'),
+                      trailing: SizedBox(
+                        width: 100,
+                        child: Slider(
+                          value: eventTextSize,
+                          min: 8.0,
+                          max: 24.0,
+                          divisions: 16,
+                          activeColor: Colors.teal,
+                          inactiveColor: Colors.grey[300],
+                          onChanged: (value) {
+                            ref.read(eventTextSizeProvider.notifier).setTextSize(value);
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             );

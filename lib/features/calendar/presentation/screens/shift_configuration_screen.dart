@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:calendario_familiar/core/models/shift_template.dart';
 import 'package:calendario_familiar/core/services/firestore_service.dart';
 import 'package:calendario_familiar/features/auth/logic/auth_controller.dart';
-import 'package:calendario_familiar/core/providers/text_size_provider.dart';
 
 class ShiftConfigurationScreen extends ConsumerStatefulWidget {
   final ShiftTemplate? shiftTemplate; // null para crear nuevo, no null para editar
@@ -392,57 +391,6 @@ class _ShiftConfigurationScreenState extends ConsumerState<ShiftConfigurationScr
                 ),
               ],
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Tamaño del texto de eventos del día
-          const Text(
-            'TAMAÑO DEL TEXTO DE EVENTOS',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Consumer(
-            builder: (context, ref, child) {
-              final eventTextSize = ref.watch(eventTextSizeProvider);
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      eventTextSize.round().toString(),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Slider(
-                        value: eventTextSize,
-                        min: 8.0,
-                        max: 24.0,
-                        divisions: 16,
-                        activeColor: Colors.teal,
-                        inactiveColor: Colors.grey[300],
-                        onChanged: (value) {
-                          ref.read(eventTextSizeProvider.notifier).setTextSize(value);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
         ],
       ),
