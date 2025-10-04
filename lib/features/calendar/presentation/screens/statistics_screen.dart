@@ -54,6 +54,62 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   @override
+  Widget build(BuildContext context) {
+    // Escuchar cambios en el servicio de datos para actualizar la UI
+    ref.listen<CalendarDataService>(calendarDataServiceProvider, (previous, next) {
+      if (mounted) {
+        setState(() {
+          // Forzar actualización cuando cambien los datos
+        });
+      }
+    });
+
+    final stats = _calculateStatistics();
+    final shiftCounts = stats['shiftCounts'] as Map<String, int>;
+    final totalShifts = stats['totalShifts'] as int;
+    final totalHours = stats['totalHours'] as int;
+
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Barra de navegación superior
+            _buildTopNavigationBar(),
+            
+            // Contenido principal
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Sección de Estadísticas
+                    _buildStatisticsSection(shiftCounts, totalShifts, totalHours),
+                    
+                    const SizedBox(height: 8), // Reducido de 12 a 8
+                    
+                    // Sección de Notas Cercanas
+                    _buildNearbyNotesSection(),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Sección de Buscar en Notas
+                    _buildSearchInNotesSection(),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Sección de Buscar Días por Icono
+                    _buildSearchDaysByIconSection(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -466,52 +522,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Color(int.parse(hexColor, radix: 16));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final stats = _calculateStatistics();
-    final shiftCounts = stats['shiftCounts'] as Map<String, int>;
-    final totalShifts = stats['totalShifts'] as int;
-    final totalHours = stats['totalHours'] as int;
-
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Barra de navegación superior
-            _buildTopNavigationBar(),
-            
-            // Contenido principal
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Sección de Estadísticas
-                    _buildStatisticsSection(shiftCounts, totalShifts, totalHours),
-                    
-                    const SizedBox(height: 8), // Reducido de 12 a 8
-                    
-                    // Sección de Notas Cercanas
-                    _buildNearbyNotesSection(),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // Sección de Buscar en Notas
-                    _buildSearchInNotesSection(),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // Sección de Buscar Días por Icono
-                    _buildSearchDaysByIconSection(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildTopNavigationBar() {
     return Container(

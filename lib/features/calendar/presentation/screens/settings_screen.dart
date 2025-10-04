@@ -252,6 +252,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        // Control de tamaño de texto de eventos (siempre visible)
+        Consumer(
+          builder: (context, ref, child) {
+            final eventTextSize = ref.watch(eventTextSizeProvider);
+            return ListTile(
+              leading: const Icon(Icons.text_fields),
+              title: const Text('Tamaño del texto de eventos'),
+              subtitle: Text('${eventTextSize.round()} puntos'),
+              trailing: SizedBox(
+                width: 100,
+                child: Slider(
+                  value: eventTextSize,
+                  min: 8.0,
+                  max: 24.0,
+                  divisions: 16,
+                  activeColor: Colors.teal,
+                  inactiveColor: Colors.grey[300],
+                  onChanged: (value) {
+                    ref.read(eventTextSizeProvider.notifier).setTextSize(value);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
         calendarState.when(
           data: (calendar) {
             if (calendar == null) return const SizedBox.shrink();
@@ -268,31 +293,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: const Text('Gestionar miembros'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/members'),
-                ),
-                // Control de tamaño de texto de eventos
-                Consumer(
-                  builder: (context, ref, child) {
-                    final eventTextSize = ref.watch(eventTextSizeProvider);
-                    return ListTile(
-                      leading: const Icon(Icons.text_fields),
-                      title: const Text('Tamaño del texto de eventos'),
-                      subtitle: Text('${eventTextSize.round()} puntos'),
-                      trailing: SizedBox(
-                        width: 100,
-                        child: Slider(
-                          value: eventTextSize,
-                          min: 8.0,
-                          max: 24.0,
-                          divisions: 16,
-                          activeColor: Colors.teal,
-                          inactiveColor: Colors.grey[300],
-                          onChanged: (value) {
-                            ref.read(eventTextSizeProvider.notifier).setTextSize(value);
-                          },
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ],
             );

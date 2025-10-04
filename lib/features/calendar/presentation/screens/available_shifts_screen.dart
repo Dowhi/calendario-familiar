@@ -396,10 +396,8 @@ class _AvailableShiftsScreenState extends ConsumerState<AvailableShiftsScreen> {
               title: const Text('Editar', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implementar edición
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Función en desarrollo')),
-                );
+                // Navegar a la pantalla de configuración con el template para editar
+                context.push('/shift-configuration', extra: template);
               },
             ),
             ListTile(
