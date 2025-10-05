@@ -106,6 +106,21 @@ class NotificationService {
   
   static void _onNotificationTapped(NotificationResponse response) {
     print('🔔 Notificación tocada: ${response.payload}');
+    
+    // Extraer información del payload
+    if (response.payload != null && response.payload!.isNotEmpty) {
+      try {
+        // El payload debería contener el ID del evento en formato: alarm_X_YYYYMMDD
+        final eventId = response.payload!;
+        print('   - Event ID: $eventId');
+        
+        // Aquí podríamos navegar al día específico, pero necesitaríamos un GlobalKey<NavigatorState>
+        // Por ahora, solo logueamos. La navegación se puede implementar con un NavigatorKey global.
+        // TODO: Implementar navegación global cuando se toque la notificación
+      } catch (e) {
+        print('❌ Error procesando payload de notificación: $e');
+      }
+    }
   }
   
   /// Verificar si las notificaciones están habilitadas
@@ -213,14 +228,14 @@ class NotificationService {
       // Validaciones básicas
       if (event.startAt == null) {
         print('⚠️ Evento sin fecha de inicio');
-        return;
+        throw Exception('El evento debe tener una fecha de inicio');
       }
       
       // Asegurar que los minutos de anticipación sean positivos
       final notifyMinutes = event.notifyMinutesBefore.abs();
       if (notifyMinutes == 0) {
         print('⚠️ Los minutos de anticipación no pueden ser cero');
-        return;
+        throw Exception('Los minutos de anticipación deben ser mayor que cero');
       }
       
       final notificationTime = event.startAt!.subtract(Duration(minutes: notifyMinutes));
@@ -231,11 +246,17 @@ class NotificationService {
         print('⚠️ Notificación en el pasado, no se programará');
         print('   - Hora actual: $now');
         print('   - Diferencia: ${notificationTime.difference(now).inMinutes} minutos');
-        return;
+        throw Exception('No se pueden programar notificaciones en el pasado');
       }
       
       // Para web, usar servicio web de notificaciones
       if (kIsWeb) {
+        final webPermissions = await WebNotificationService.areNotificationsEnabled();
+        if (!webPermissions) {
+          print('⚠️ Permisos de notificación web no concedidos');
+          throw Exception('Se requieren permisos de notificación. Por favor, actívalos en la configuración del navegador.');
+        }
+        
         await WebNotificationService.scheduleEventNotification(
           eventId: event.id,
           title: '📅 ${event.title}',
@@ -246,23 +267,22 @@ class NotificationService {
         return;
       }
       
-      // Para móviles, verificar inicialización y permisos
+      // Para móviles, verificar inicialización
       if (!_isInitialized) {
-        print('⚠️ NotificationService no inicializado');
+        print('⚠️ NotificationService no inicializado, inicializando...');
         await initialize();
         if (!_isInitialized) {
           print('❌ No se pudo inicializar NotificationService');
-          return;
+          throw Exception('No se pudo inicializar el servicio de notificaciones');
         }
       }
       
-      // Verificar permisos de notificación
-      final bool? permissionGranted = await _localNotifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()?.areNotificationsEnabled();
+      // Verificar permisos de notificación en tiempo real
+      final permissionsEnabled = await areNotificationsEnabled();
       
-      if (permissionGranted != true) {
+      if (!permissionsEnabled) {
         print('⚠️ Permisos de notificación no concedidos');
-        return;
+        throw Exception('Se requieren permisos de notificación. Por favor, actívalos en la configuración de la aplicación.');
       }
       
       print('✅ Permisos de notificación verificados');
@@ -304,9 +324,11 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        payload: '${event.id}|${event.dateKey}|${event.title}', // Añadir payload para deep linking
       );
       
       print('✅ Notificación móvil programada para: ${event.title} a las ${scheduledDate}');
+      print('   - Payload: ${event.id}|${event.dateKey}|${event.title}');
       
     } catch (e) {
       print('❌ Error programando notificación: $e');

@@ -37,6 +37,8 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
   
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _hasExistingAlarm1 = false;
+  bool _hasExistingAlarm2 = false;
 
   @override
   void initState() {
@@ -72,12 +74,16 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
       if (alarm1Doc.exists && alarm1Doc.data() != null) {
         final data = alarm1Doc.data()!;
-        _alarm1Enabled = data['enabled'] ?? false;
-        _alarm1Time = TimeOfDay(
-          hour: data['hour'] ?? 8,
-          minute: data['minute'] ?? 0,
-        );
-        _alarm1DaysBefore = data['daysBefore'] ?? 0;
+        setState(() {
+          _alarm1Enabled = data['enabled'] ?? false;
+          _alarm1Time = TimeOfDay(
+            hour: data['hour'] ?? 8,
+            minute: data['minute'] ?? 0,
+          );
+          _alarm1DaysBefore = data['daysBefore'] ?? 0;
+          _alarm1MinutesBefore = data['minutesBefore'] ?? 5;
+          _hasExistingAlarm1 = true;
+        });
       }
 
       // Cargar alarma 2
@@ -88,12 +94,16 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
       if (alarm2Doc.exists && alarm2Doc.data() != null) {
         final data = alarm2Doc.data()!;
-        _alarm2Enabled = data['enabled'] ?? false;
+        setState(() {
+          _alarm2Enabled = data['enabled'] ?? false;
           _alarm2Time = TimeOfDay(
-          hour: data['hour'] ?? 18,
-          minute: data['minute'] ?? 0,
-        );
-        _alarm2DaysBefore = data['daysBefore'] ?? 0;
+            hour: data['hour'] ?? 18,
+            minute: data['minute'] ?? 0,
+          );
+          _alarm2DaysBefore = data['daysBefore'] ?? 0;
+          _alarm2MinutesBefore = data['minutesBefore'] ?? 10;
+          _hasExistingAlarm2 = true;
+        });
       }
     } catch (e) {
       print('Error cargando alarmas: $e');
@@ -249,14 +259,14 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
       // Guardar/eliminar alarma 1
       if (_alarm1Enabled) {
-        await _saveAlarm(1, eventDateKey, userId, _alarm1Time, _alarm1DaysBefore);
+        await _saveAlarm(1, eventDateKey, userId, _alarm1Time, _alarm1DaysBefore, _alarm1MinutesBefore);
       } else {
         await _deleteAlarm(1, eventDateKey);
       }
 
       // Guardar/eliminar alarma 2
       if (_alarm2Enabled) {
-        await _saveAlarm(2, eventDateKey, userId, _alarm2Time, _alarm2DaysBefore);
+        await _saveAlarm(2, eventDateKey, userId, _alarm2Time, _alarm2DaysBefore, _alarm2MinutesBefore);
       } else {
         await _deleteAlarm(2, eventDateKey);
       }
@@ -285,6 +295,7 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     String userId,
     TimeOfDay time,
     int daysBefore,
+    int minutesBefore,
   ) async {
     // Guardar en Firebase
     await _firestore
@@ -298,6 +309,7 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       'hour': time.hour,
       'minute': time.minute,
       'daysBefore': daysBefore,
+      'minutesBefore': minutesBefore,
       'createdAt': FieldValue.serverTimestamp(),
     });
 
@@ -314,36 +326,47 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     // Verificar que la alarma sea en el futuro
     if (alarmDateTime.isAfter(DateTime.now())) {
       // Programar notificación local
-      await _scheduleNotification(alarmNumber, alarmDateTime);
+      await _scheduleNotification(alarmNumber, alarmDateTime, minutesBefore);
     } else {
       print('⚠️ Alarma $alarmNumber en el pasado, no se programará');
     }
   }
 
   Future<void> _deleteAlarm(int alarmNumber, String eventDateKey) async {
-    await _firestore
-        .collection('alarms')
-        .doc('${eventDateKey}_alarm_$alarmNumber')
-        .delete();
-    // Usar el servicio centralizado para cancelar
-    await NotificationService.cancelAllNotifications();
+    try {
+      // Eliminar de Firebase
+      await _firestore
+          .collection('alarms')
+          .doc('${eventDateKey}_alarm_$alarmNumber')
+          .delete();
+      
+      // Cancelar solo la notificación específica de esta alarma
+      final eventId = 'alarm_${alarmNumber}_$eventDateKey';
+      final tempEvent = AppEvent(
+        id: eventId,
+        familyId: _auth.currentUser?.uid ?? 'temp',
+        title: widget.eventText,
+        dateKey: eventDateKey,
+      );
+      
+      await NotificationService.cancelEventNotification(tempEvent);
+      print('✅ Notificación de alarma $alarmNumber cancelada correctamente');
+    } catch (e) {
+      print('❌ Error eliminando alarma $alarmNumber: $e');
+    }
   }
 
-  Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate) async {
+  Future<void> _scheduleNotification(int alarmId, DateTime scheduledDate, int minutesBefore) async {
     try {
       print('🔔 Programando notificación de alarma #$alarmId para: $scheduledDate');
       print('   - Texto del evento: ${widget.eventText}');
       print('   - Fecha del evento: ${widget.selectedDate}');
       print('   - Fecha programada de la alarma: $scheduledDate');
-      
-      // Usar los minutos de anticipación configurados por el usuario
-      final minutesBefore = _alarm1MinutesBefore;
       print('   - Minutos de anticipación configurados: $minutesBefore');
-      print('   - Fecha/hora de la alarma: $scheduledDate');
       
       // Crear un evento temporal para usar con NotificationService
       final tempEvent = AppEvent(
-        id: 'alarm_${alarmId}_${scheduledDate.millisecondsSinceEpoch}',
+        id: 'alarm_${alarmId}_${_formatDateKey(widget.selectedDate)}',
         familyId: _auth.currentUser?.uid ?? 'temp',
         title: widget.eventText,
         dateKey: _formatDateKey(widget.selectedDate),
@@ -358,6 +381,61 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
     } catch (e) {
       print('❌ Error programando notificación #$alarmId: $e');
       print('   Stack trace: ${StackTrace.current}');
+      
+      // Mostrar mensaje educativo al usuario
+      if (mounted) {
+        final errorMessage = e.toString().replaceFirst('Exception: ', '');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                SizedBox(width: 12),
+                Text('Problema con Notificaciones'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(errorMessage),
+                const SizedBox(height: 16),
+                const Text(
+                  'La alarma se guardó, pero no se pudo programar la notificación.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendido'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  // Solicitar permisos
+                  final granted = await NotificationService.requestPermissions();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(granted 
+                          ? '✅ Permisos concedidos' 
+                          : '❌ Permisos denegados'),
+                        backgroundColor: granted ? Colors.green : Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Activar Permisos'),
+              ),
+            ],
+          ),
+        );
+      }
+      
+      rethrow;
     }
   }
 
@@ -372,6 +450,31 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
   }
   }
 
+  Future<void> _testNotification() async {
+    try {
+      await NotificationService.showTestNotification();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🧪 Notificación de prueba enviada'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Error enviando notificación de prueba: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -384,35 +487,64 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
             // Header
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF6C63FF), Color(0xFF5A52FF)],
+                ),
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.notifications_active,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                          'Configurar Alarmas',
-                          style: TextStyle(
-                            color: Colors.white,
-                      fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.notifications_active,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Configurar Alarmas',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Programa recordatorios para tu evento',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Botón de prueba de notificación
+                      IconButton(
+                        onPressed: _testNotification,
+                        icon: const Icon(Icons.science, color: Colors.white),
+                        tooltip: 'Probar notificación',
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -433,12 +565,14 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                       // Recordatorio 1
                     _buildAlarmCard(
                       title: 'Recordatorio 1',
+                      subtitle: 'Recordatorio principal',
                         icon: Icons.notifications,
                       color: Colors.green,
                         enabled: _alarm1Enabled,
                       time: _alarm1Time,
                         daysBefore: _alarm1DaysBefore,
                         minutesBefore: _alarm1MinutesBefore,
+                        hasExistingAlarm: _hasExistingAlarm1,
                         onToggle: () => setState(() => _alarm1Enabled = !_alarm1Enabled),
                       onTimeSelect: () => _selectTime(true),
                         onDaysSelect: () => _selectDaysBefore(true),
@@ -450,12 +584,14 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                       // Recordatorio 2
                     _buildAlarmCard(
                       title: 'Recordatorio 2',
+                      subtitle: 'Recordatorio adicional',
                         icon: Icons.notifications,
-                        color: Colors.grey,
+                        color: Colors.blue,
                         enabled: _alarm2Enabled,
                       time: _alarm2Time,
                         daysBefore: _alarm2DaysBefore,
                         minutesBefore: _alarm2MinutesBefore,
+                        hasExistingAlarm: _hasExistingAlarm2,
                         onToggle: () => setState(() => _alarm2Enabled = !_alarm2Enabled),
                       onTimeSelect: () => _selectTime(false),
                         onDaysSelect: () => _selectDaysBefore(false),
@@ -518,12 +654,14 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
 
   Widget _buildAlarmCard({
     required String title,
+    required String subtitle,
     required IconData icon,
     required Color color,
     required bool enabled,
     required TimeOfDay time,
     required int daysBefore,
     required int minutesBefore,
+    required bool hasExistingAlarm,
     required VoidCallback onToggle,
     required VoidCallback onTimeSelect,
     required VoidCallback onDaysSelect,
@@ -564,13 +702,47 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: enabled ? Colors.black87 : Colors.grey,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: enabled ? Colors.black87 : Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (hasExistingAlarm && enabled)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text(
+                                'ACTIVA',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Switch(
