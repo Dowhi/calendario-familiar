@@ -364,14 +364,22 @@ class _AlarmSettingsDialogState extends State<AlarmSettingsDialog> {
       print('   - Fecha programada de la alarma: $scheduledDate');
       print('   - Minutos de anticipación configurados: $minutesBefore');
       
+      // CORRECCIÓN: El scheduledDate ya es la hora exacta de la alarma.
+      // Necesitamos SUMAR los minutos antes de pasarlo al servicio porque
+      // el servicio los RESTARÁ. Así quedará en la hora correcta.
+      final adjustedDate = scheduledDate.add(Duration(minutes: minutesBefore));
+      
+      print('   - Fecha ajustada para el servicio: $adjustedDate');
+      print('   - Después de restar $minutesBefore minutos quedará: $scheduledDate');
+      
       // Crear un evento temporal para usar con NotificationService
       final tempEvent = AppEvent(
         id: 'alarm_${alarmId}_${_formatDateKey(widget.selectedDate)}',
         familyId: _auth.currentUser?.uid ?? 'temp',
         title: widget.eventText,
         dateKey: _formatDateKey(widget.selectedDate),
-        startAt: scheduledDate, // Usar la fecha programada de la alarma
-        notifyMinutesBefore: minutesBefore, // Minutos de anticipación
+        startAt: adjustedDate, // Usar la fecha AJUSTADA
+        notifyMinutesBefore: minutesBefore, // El servicio restará esto
       );
       
       // Usar el servicio centralizado de notificaciones

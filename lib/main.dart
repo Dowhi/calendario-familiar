@@ -31,6 +31,18 @@ void main() async {
       // Inicializar notificaciones solo en móvil/desktop
       await NotificationService.initialize();
       print('✅ NotificationService inicializado');
+      
+      // Solicitar permisos de notificación inmediatamente
+      final hasPermissions = await NotificationService.areNotificationsEnabled();
+      print('🔔 Permisos de notificación: $hasPermissions');
+      
+      if (!hasPermissions) {
+        print('⚠️ Solicitando permisos de notificación...');
+        final granted = await NotificationService.requestPermissions();
+        print(granted 
+          ? '✅ Permisos concedidos' 
+          : '❌ Permisos denegados - Las notificaciones no funcionarán');
+      }
     } else {
       print('ℹ️ Servicios de notificaciones locales no disponibles en web');
     }

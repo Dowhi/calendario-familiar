@@ -360,19 +360,40 @@ class NotificationService {
   /// Mostrar notificación de prueba
   static Future<void> showTestNotification() async {
     try {
+      print('🧪 Intentando mostrar notificación de prueba...');
+      
       if (kIsWeb) {
         await WebNotificationService.showTestNotification();
         return;
       }
       
+      // Verificar inicialización
       if (!_isInitialized) {
-        return;
+        print('⚠️ Servicio no inicializado, inicializando...');
+        await initialize();
+        if (!_isInitialized) {
+          throw Exception('No se pudo inicializar el servicio de notificaciones');
+        }
       }
+      
+      // Verificar permisos
+      final hasPermissions = await areNotificationsEnabled();
+      print('🔔 Estado de permisos: $hasPermissions');
+      
+      if (!hasPermissions) {
+        print('⚠️ Solicitando permisos...');
+        final granted = await requestPermissions();
+        if (!granted) {
+          throw Exception('Permisos de notificación denegados');
+        }
+      }
+      
+      print('✅ Todo listo, enviando notificación...');
       
       await _localNotifications.show(
         999,
         '🔔 Notificación de Prueba',
-        'Esta es una notificación de prueba del Calendario Familiar',
+        'Si ves esto, las notificaciones funcionan correctamente! ✅',
         NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
@@ -395,10 +416,11 @@ class NotificationService {
         ),
       );
       
-      print('✅ Notificación de prueba enviada');
+      print('✅ Notificación de prueba enviada correctamente');
       
     } catch (e) {
       print('❌ Error enviando notificación de prueba: $e');
+      rethrow;
     }
   }
 }
