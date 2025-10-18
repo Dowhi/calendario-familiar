@@ -21,21 +21,7 @@
   <title>Calendario Familiar - Mínimo</title>
   <link rel="manifest" href="manifest.json">
   
-        <!-- Redirección inmediata para iOS -->
-        <script>
-          // Redirección inmediata para iOS - ANTES de que Flutter se cargue
-          (function() {
-            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            if (isIOS || isMobile) {
-              console.log('Dispositivo móvil detectado: Redirigiendo a versión HTML');
-              // Redirección inmediata que no espera a Flutter
-              window.location.replace('ios-calendar.html');
-              return; // Salir inmediatamente
-            }
-          })();
-        </script>
+        <!-- Eliminado fallback HTML: cargar siempre Flutter -->
 </head>
 <body>
   <div id="loading">
