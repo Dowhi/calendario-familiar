@@ -20,6 +20,22 @@
 
   <title>Calendario Familiar - Mínimo</title>
   <link rel="manifest" href="manifest.json">
+  
+        <!-- Redirección inmediata para iOS -->
+        <script>
+          // Redirección inmediata para iOS - ANTES de que Flutter se cargue
+          (function() {
+            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isIOS || isMobile) {
+              console.log('Dispositivo móvil detectado: Redirigiendo a versión HTML');
+              // Redirección inmediata que no espera a Flutter
+              window.location.replace('ios-calendar.html');
+              return; // Salir inmediatamente
+            }
+          })();
+        </script>
 </head>
 <body>
   <div id="loading">
@@ -63,42 +79,106 @@
     </div>
   </div>
 
-  <script>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getMessaging } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5vvp7IQOZLO7LlsUY_Wq-H8M_5PH3ZQE",
+      authDomain: "apptaxi-f2190.firebaseapp.com",
+      projectId: "apptaxi-f2190",
+      storageBucket: "apptaxi-f2190.firebasestorage.app",
+      messagingSenderId: "804273724178",
+      appId: "1:804273724178:web:c5955a1f657884c0e7f1cb",
+      measurementId: "G-3D8R30TYTM"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const messaging = getMessaging(app);
+
+    // Solicitar permisos de notificación
+    if ('Notification' in window) {
+      Notification.requestPermission().then(function(permission) {
+        if (permission === 'granted') {
+          console.log('✅ Permisos de notificación concedidos');
+        }
+      });
+    }
+
     // Detectar iOS y mostrar información
     if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
       console.log('iOS device detected');
       document.body.classList.add('ios-device');
     }
 
-    // Timeout para mostrar mensaje si no carga
+    // Detectar cuando Flutter se ha cargado completamente
+    function hideLoading() {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.display = 'none';
+        console.log('✅ Flutter cargado - Loading ocultado');
+      }
+    }
+
+    // Intentar detectar cuando Flutter está listo
+    window.addEventListener('flutter-first-frame', hideLoading);
+    
+    // Fallback: detectar cuando el DOM de Flutter está presente
+    const checkFlutterReady = setInterval(() => {
+      if (document.querySelector('flt-glass-pane') || 
+          document.querySelector('[data-flutter-view]') ||
+          document.querySelector('canvas')) {
+        clearInterval(checkFlutterReady);
+        hideLoading();
+      }
+    }, 1000);
+
+    // Timeout extendido para Flutter - 30 segundos
     setTimeout(function() {
       const loading = document.getElementById('loading');
       if (loading) {
         loading.innerHTML = `
           <div class="loading-content">
-            <h2>⚠️ Problema de carga</h2>
-            <p>Si la app no carga en iPhone, intenta:</p>
-            <ul style="text-align: left; font-size: 14px;">
-              <li>Recargar la página</li>
-              <li>Usar Safari en lugar de Chrome</li>
-              <li>Verificar conexión a internet</li>
-            </ul>
-            <button onclick="window.location.reload()" style="
-              margin-top: 20px; 
-              padding: 10px 20px; 
-              background: white; 
-              color: #667eea; 
+            <h2>⏳ Cargando aplicación...</h2>
+            <p>La aplicación Flutter está cargando. Por favor espera...</p>
+            <p style="font-size: 12px; margin-top: 10px;">
+              Si tarda mucho, puedes usar la versión HTML:
+            </p>
+            <button onclick="window.location.href='ios-calendar.html'" style="
+              margin-top: 10px; 
+              padding: 8px 16px; 
+              background: #4CAF50; 
+              color: white; 
               border: none; 
               border-radius: 5px; 
-              font-size: 14px;
+              font-size: 12px;
               cursor: pointer;
             ">
-              Recargar
+              Versión HTML
             </button>
           </div>
         `;
       }
-    }, 10000);
+    }, 30000);
+  </script>
+  
+  <script>
+    // Deshabilitar service worker para evitar errores de caché
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
   </script>
   
   <script src="flutter_bootstrap.js" async></script>
