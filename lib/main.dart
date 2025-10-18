@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:calendario_familiar/core/firebase/firebase_options.dart';
@@ -16,6 +17,10 @@ import 'package:go_router/go_router.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Web: usar hash strategy para evitar problemas de rutas en GitHub Pages
+  if (kIsWeb) {
+    setUrlStrategy(const HashUrlStrategy());
+  }
   
   // Inicializar Firebase INMEDIATAMENTE para web
   try {
