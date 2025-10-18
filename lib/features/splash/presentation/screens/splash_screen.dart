@@ -3,6 +3,7 @@ import 'package:video_player/video_player.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:html' as html;
 // Eliminado: import firebase_auth (ya no se utiliza)
 
 class SplashScreen extends StatefulWidget {
@@ -17,26 +18,49 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isVideoInitialized = false;
   bool _hasNavigated = false;
 
+  // Función para detectar iOS de forma confiable
+  bool _isIOSDevice() {
+    if (!kIsWeb) return false;
+    try {
+      final userAgent = html.window.navigator.userAgent;
+      return userAgent.contains('iPhone') || 
+             userAgent.contains('iPad') || 
+             userAgent.contains('iPod');
+    } catch (e) {
+      print('Error detectando iOS: $e');
+      return false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     
     // SOLUCIÓN RADICAL: Para iOS Safari, bypass completo del splash
     if (kIsWeb) {
-      // Detectar iOS de múltiples formas
-      final userAgent = Uri.base.queryParameters['userAgent'] ?? '';
-      final isIOS = userAgent.contains('iPhone') || 
-                    userAgent.contains('iPad') || 
-                    userAgent.contains('iPod');
+      // Detectar iOS de forma confiable
+      final isIOS = _isIOSDevice();
       
       if (isIOS) {
         print('📱 iOS Safari detectado - bypass completo del splash');
         // Navegar inmediatamente sin video ni esperas
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted && !_hasNavigated) {
             _hasNavigated = true;
             print('🚀 Navegando directamente al calendario desde splash');
-            context.go('/calendar');
+            try {
+              context.go('/calendar');
+              print('✅ Navegación iOS exitosa');
+            } catch (e) {
+              print('❌ Error navegando en iOS: $e');
+              // Fallback: intentar con push
+              try {
+                Navigator.of(context).pushReplacementNamed('/calendar');
+                print('✅ Fallback iOS exitoso');
+              } catch (e2) {
+                print('❌ Fallback iOS falló: $e2');
+              }
+            }
           }
         });
         return;

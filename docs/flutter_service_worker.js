@@ -29,7 +29,7 @@ const RESOURCES = {"assets/AssetManifest.bin": "da8347a7089808ba77a97fce761b43cf
 "canvaskit/skwasm_heavy.wasm": "8034ad26ba2485dab2fd49bdd786837b",
 "favicon.png": "a8c3e5444ad6579a4bc5dfb9fb6bc14a",
 "flutter.js": "888483df48293866f9f41d3d9274a779",
-"flutter_bootstrap.js": "cedde99b3baa86bd68d8d35437b7ee7a",
+"flutter_bootstrap.js": "42711bdec0109de458c093143a6e4fc5",
 "flutter_bootstrap_simple.js": "50b2b30283f2c956cedd294ec7304a59",
 "icons/Icon-192.png": "f91107f59c7b6175a568da7372f5173c",
 "icons/Icon-512.png": "279c35343aca424086b33d02ef4ebe47",
@@ -40,7 +40,7 @@ const RESOURCES = {"assets/AssetManifest.bin": "da8347a7089808ba77a97fce761b43cf
 "index_simple.html": "0558b64c87514738bc0c4741a1c037fc",
 "ios-calendar.html": "0c8187e6201bbedef0ea4e3daaee6ffc",
 "ios-debug-simple.js": "9ca4a1be88698206b7f4627ae1d9e162",
-"main.dart.js": "df0f4fca451e8727558730b636b7d399",
+"main.dart.js": "5ec29d51d3385314023617361ca96e96",
 "manifest.json": "5c96ee212eb72f22ffdb2efbd1fda82f",
 "version.json": "da02de1699ca37293002448d9268a30a"};
 // The application shell files that are downloaded before a service worker can
