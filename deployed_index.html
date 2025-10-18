@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Calendario familiar compartido con sincronización en tiempo real">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2196F3">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Calendario Familiar">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Calendario Familiar</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <script>
+    // Redirección para iOS antes de cargar cualquier otra cosa.
+    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+      console.log('iOS detectado, redirigiendo a la versión fallback...');
+      window.location.replace('ios-fallback.html');
+    }
+  </script>
+</head>
+<body>
+  <div id="loading">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      #loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+      }
+      .loading-content {
+        max-width: 300px;
+        padding: 20px;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      h1 {
+        margin: 20px 0 10px 0;
+        font-size: 24px;
+      }
+      p {
+        margin: 10px 0;
+        opacity: 0.9;
+      }
+    </style>
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h1>Calendario Familiar</h1>
+      <p>Cargando...</p>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs - Versión compatible -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+  
+  <script>
+    // Configurar renderer HTML para iOS antes de que Flutter se cargue.
+    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+      window.flutterWebRenderer = 'html';
+    }
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5vvp7IQOZLO7LlsUY_Wq-H8M_5PH3ZQE",
+      authDomain: "apptaxi-f2190.firebaseapp.com",
+      projectId: "apptaxi-f2190",
+      storageBucket: "apptaxi-f2190.firebasestorage.app",
+      messagingSenderId: "804273724178",
+      appId: "1:804273724178:web:c5955a1f657884c0e7f1cb",
+      measurementId: "G-3D8R30TYTM"
+    };
+
+    // Inicializar Firebase de manera simple
+    try {
+      if (firebase.apps.length === 0) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      window.firebaseInitialized = true;
+      console.log('✅ Firebase inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error inicializando Firebase:', error);
+      window.firebaseError = error;
+    }
+  </script>
+  
+  <!-- Flutter Bootstrap Simple -->
+  <script src="flutter_bootstrap_simple.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+# Configuración de TestSprite para Calendario Familiar
+test_sprite:
+  # Configuración general
+  project_name: "Calendario Familiar"
+  version: "1.0.0"
+  
+  # Configuración de dispositivos para pruebas
+  devices:
+    android:
+      - name: "Pixel 7"
+        api_level: 33
+        screen_size: "1080x2400"
+      - name: "Pixel 4"
+        api_level: 29
+        screen_size: "1080x2280"
+    ios:
+      - name: "iPhone 14"
+        ios_version: "16.0"
+        screen_size: "1170x2532"
+      - name: "iPhone SE"
+        ios_version: "15.0"
+        screen_size: "640x1136"
+  
+  # Configuración de pruebas
+  test_suites:
+    unit_tests:
+      path: "test/unit"
+      enabled: true
+      timeout: 300 # segundos
+    
+    widget_tests:
+      path: "test/widget"
+      enabled: true
+      timeout: 600 # segundos
+    
+    integration_tests:
+      path: "integration_test"
+      enabled: true
+      timeout: 1800 # segundos
+    
+    e2e_tests:
+      path: "test/e2e"
+      enabled: true
+      timeout: 3600 # segundos
+  
+  # Configuración de reportes
+  reporting:
+    format: ["html", "json", "junit"]
+    output_dir: "test_reports"
+    screenshots: true
+    videos: true
+  
+  # Configuración de Firebase para pruebas
+  firebase:
+    test_mode: true
+    emulator:
+      enabled: true
+      auth_port: 9099
+      firestore_port: 8080
+      storage_port: 9199
+  
+  # Configuración de notificaciones
+  notifications:
+    enabled: true
+    test_permissions: true
+  
+  # Configuración de calendario
+  calendar:
+    test_events: true
+    mock_data: true
+    sync_testing: true
+

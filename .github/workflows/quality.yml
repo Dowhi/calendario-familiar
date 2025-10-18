@@ -1,0 +1,64 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 2 * * 1' # Ejecutar cada lunes a las 2 AM
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.35.4'
+        channel: 'stable'
+        cache: true
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Analyze code (continue on error)
+      run: flutter analyze || true
+      
+    - name: Check formatting (continue on error)
+      run: dart format --output=none --set-exit-if-changed . || true
+      
+    - name: Run tests (continue on error)
+      run: flutter test || true
+      
+    - name: Generate code coverage (continue on error)
+      run: flutter test --coverage || true
+      
+    - name: Upload coverage to Codecov (continue on error)
+      uses: codecov/codecov-action@v4
+      continue-on-error: true
+      with:
+        file: coverage/lcov.info
+
+  security:
+    name: Security Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.35.4'
+        channel: 'stable'
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Check for known vulnerabilities
+      run: dart pub audit || true

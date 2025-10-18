@@ -1,0 +1,246 @@
+(()=>{var C={blink:!0,gecko:!1,webkit:!1,unknown:!1},R=()=>navigator.vendor==="Google Inc."||navigator.userAgent.includes("Edg/")?"blink":navigator.vendor==="Apple Computer, Inc."?"webkit":navigator.vendor===""&&navigator.userAgent.includes("Firefox")?"gecko":"unknown",L=R(),x=()=>typeof ImageDecoder>"u"?!1:L==="blink",K=()=>typeof Intl.v8BreakIterator<"u"&&typeof Intl.Segmenter<"u",B=()=>{let i=[0,97,115,109,1,0,0,0,1,5,1,95,1,120,0];return WebAssembly.validate(new Uint8Array(i))},w={browserEngine:L,hasImageCodecs:x(),hasChromiumBreakIterators:K(),supportsWasmGC:B(),crossOriginIsolated:window.crossOriginIsolated};function c(...i){return new URL(T(...i),document.baseURI).toString()}function T(...i){return i.filter(e=>!!e).map((e,r)=>r===0?I(e):z(I(e))).filter(e=>e.length).join("/")}function z(i){let e=0;for(;e<i.length&&i.charAt(e)==="/";)e++;return i.substring(e)}function I(i){let e=i.length;for(;e>0&&i.charAt(e-1)==="/";)e--;return i.substring(0,e)}function U(i,e){return i.canvasKitBaseUrl?i.canvasKitBaseUrl:e.engineRevision&&!e.useLocalCanvasKit?T("https://www.gstatic.com/flutter-canvaskit",e.engineRevision):"canvaskit"}var v=class{constructor(){this._scriptLoaded=!1}setTrustedTypesPolicy(e){this._ttPolicy=e}async loadEntrypoint(e){let{entrypointUrl:r=c("main.dart.js"),onEntrypointLoaded:t,nonce:n}=e||{};return this._loadJSEntrypoint(r,t,n)}async load(e,r,t,n,s){s??=u=>{u.initializeEngine(t).then(m=>m.runApp())};let{entrypointBaseUrl:a}=t,{entryPointBaseUrl:o}=t;if(!a&&o&&(console.warn("[deprecated] `entryPointBaseUrl` is deprecated and will be removed in a future release. Use `entrypointBaseUrl` instead."),a=o),e.compileTarget==="dart2wasm")return this._loadWasmEntrypoint(e,r,a,s);{let u=e.mainJsPath??"main.dart.js",m=c(a,u);return this._loadJSEntrypoint(m,s,n)}}didCreateEngineInitializer(e){typeof this._didCreateEngineInitializerResolve=="function"&&(this._didCreateEngineInitializerResolve(e),this._didCreateEngineInitializerResolve=null,delete _flutter.loader.didCreateEngineInitializer),typeof this._onEntrypointLoaded=="function"&&this._onEntrypointLoaded(e)}_loadJSEntrypoint(e,r,t){let n=typeof r=="function";if(!this._scriptLoaded){this._scriptLoaded=!0;let s=this._createScriptTag(e,t);if(n)console.debug("Injecting <script> tag. Using callback."),this._onEntrypointLoaded=r,document.head.append(s);else return new Promise((a,o)=>{console.debug("Injecting <script> tag. Using Promises. Use the callback approach instead!"),this._didCreateEngineInitializerResolve=a,s.addEventListener("error",o),document.head.append(s)})}}async _loadWasmEntrypoint(e,r,t,n){if(!this._scriptLoaded){this._scriptLoaded=!0,this._onEntrypointLoaded=n;let{mainWasmPath:s,jsSupportRuntimePath:a}=e,o=c(t,s),u=c(t,a);this._ttPolicy!=null&&(u=this._ttPolicy.createScriptURL(u));let p=(await import(u)).compileStreaming(fetch(o)),l;e.renderer==="skwasm"?l=(async()=>{let d=await r.skwasm;return window._flutter_skwasmInstance=d,{skwasm:d.wasmExports,skwasmWrapper:d,ffi:{memory:d.wasmMemory}}})():l=Promise.resolve({}),await(await(await p).instantiate(await l,{loadDynamicModule:async(d,S)=>{let j=fetch(c(t,d)),_=c(t,S);this._ttPolicy!=null&&(_=this._ttPolicy.createScriptURL(_));let A=import(_);return[await j,await A]}})).invokeMain()}}_createScriptTag(e,r){let t=document.createElement("script");t.type="application/javascript",r&&(t.nonce=r);let n=e;return this._ttPolicy!=null&&(n=this._ttPolicy.createScriptURL(e)),t.src=n,t}};async function E(i,e,r){if(e<0)return i;let t,n=new Promise((s,a)=>{t=setTimeout(()=>{a(new Error(`${r} took more than ${e}ms to resolve. Moving on.`,{cause:E}))},e)});return Promise.race([i,n]).finally(()=>{clearTimeout(t)})}var h=class{setTrustedTypesPolicy(e){this._ttPolicy=e}loadServiceWorker(e){if(!e)return console.debug("Null serviceWorker configuration. Skipping."),Promise.resolve();if(!("serviceWorker"in navigator)){let o="Service Worker API unavailable.";return window.isSecureContext||(o+=`
+The current context is NOT secure.`,o+=`
+Read more: https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts`),Promise.reject(new Error(o))}let{serviceWorkerVersion:r,serviceWorkerUrl:t=c(`flutter_service_worker.js?v=${r}`),timeoutMillis:n=4e3}=e,s=t;this._ttPolicy!=null&&(s=this._ttPolicy.createScriptURL(s));let a=navigator.serviceWorker.register(s).then(o=>this._getNewServiceWorker(o,r)).then(this._waitForServiceWorkerActivation);return E(a,n,"prepareServiceWorker")}async _getNewServiceWorker(e,r){if(!e.active&&(e.installing||e.waiting))return console.debug("Installing/Activating first service worker."),e.installing||e.waiting;if(e.active.scriptURL.endsWith(r))return console.debug("Loading from existing service worker."),e.active;{let t=await e.update();return console.debug("Updating service worker."),t.installing||t.waiting||t.active}}async _waitForServiceWorkerActivation(e){if(!e||e.state==="activated")if(e){console.debug("Service worker already active.");return}else throw new Error("Cannot activate a null service worker!");return new Promise((r,t)=>{e.addEventListener("statechange",()=>{e.state==="activated"&&(console.debug("Activated new service worker."),r())})})}};var g=class{constructor(e,r="flutter-js"){let t=e||[/\.js$/,/\.mjs$/];window.trustedTypes&&(this.policy=trustedTypes.createPolicy(r,{createScriptURL:function(n){if(n.startsWith("blob:"))return n;let s=new URL(n,window.location),a=s.pathname.split("/").pop();if(t.some(u=>u.test(a)))return s.toString();console.error("URL rejected by TrustedTypes policy",r,":",n,"(download prevented)")}}))}};var k=i=>{let e=WebAssembly.compileStreaming(fetch(i));return(r,t)=>((async()=>{let n=await e,s=await WebAssembly.instantiate(n,r);t(s,n)})(),{})};var W=(i,e,r,t)=>(window.flutterCanvasKitLoaded=(async()=>{if(window.flutterCanvasKit)return window.flutterCanvasKit;let n=r.hasChromiumBreakIterators&&r.hasImageCodecs;if(!n&&e.canvasKitVariant=="chromium")throw"Chromium CanvasKit variant specifically requested, but unsupported in this browser";let s=n&&e.canvasKitVariant!=="full",a=t;e.canvasKitVariant=="experimentalWebParagraph"?a=c(a,"experimental_webparagraph"):s&&(a=c(a,"chromium"));let o=c(a,"canvaskit.js");i.flutterTT.policy&&(o=i.flutterTT.policy.createScriptURL(o));let u=k(c(a,"canvaskit.wasm")),m=await import(o);return window.flutterCanvasKit=await m.default({instantiateWasm:u}),window.flutterCanvasKit})(),window.flutterCanvasKitLoaded);var P=async(i,e,r,t)=>{let s=!r.hasImageCodecs||!r.hasChromiumBreakIterators?"skwasm_heavy":"skwasm",a=c(t,`${s}.js`),o=a;i.flutterTT.policy&&(o=i.flutterTT.policy.createScriptURL(o));let u=k(c(t,`${s}.wasm`));return await(await import(o)).default({skwasmSingleThreaded:!r.crossOriginIsolated||e.forceSingleThreadedSkwasm,instantiateWasm:u,locateFile:(p,l)=>{if(p.endsWith(".ww.js")){let y=c(t,p);return URL.createObjectURL(new Blob([`
+"use strict";
+
+let eventListener;
+eventListener = (message) => {
+    const pendingMessages = [];
+    const data = message.data;
+    data["instantiateWasm"] = (info,receiveInstance) => {
+        const instance = new WebAssembly.Instance(data["wasm"], info);
+        return receiveInstance(instance, data["wasm"])
+    };
+    import(data.js).then(async (skwasm) => {
+        await skwasm.default(data);
+
+        removeEventListener("message", eventListener);
+        for (const message of pendingMessages) {
+            dispatchEvent(message);
+        }
+    });
+    removeEventListener("message", eventListener);
+    eventListener = (message) => {
+
+        pendingMessages.push(message);
+    };
+
+    addEventListener("message", eventListener);
+};
+addEventListener("message", eventListener);
+`],{type:"application/javascript"}))}return url},mainScriptUrlOrBlob:a})};var b=class{async loadEntrypoint(e){let{serviceWorker:r,...t}=e||{},n=new g,s=new h;s.setTrustedTypesPolicy(n.policy),await s.loadServiceWorker(r).catch(o=>{console.warn("Exception while loading service worker:",o)});let a=new v;return a.setTrustedTypesPolicy(n.policy),this.didCreateEngineInitializer=a.didCreateEngineInitializer.bind(a),a.loadEntrypoint(t)}async load({serviceWorkerSettings:e,onEntrypointLoaded:r,nonce:t,config:n}={}){n??={};let s=_flutter.buildConfig;if(!s)throw"FlutterLoader.load requires _flutter.buildConfig to be set";let a=n.wasmAllowList?.[w.browserEngine]??C[w.browserEngine],o=d=>{switch(d){case"skwasm":return w.supportsWasmGC&&a;default:return!0}},u=(d,S)=>d.renderer==S,m=d=>d.compileTarget==="dart2wasm"&&!w.supportsWasmGC||n.renderer&&!u(d,n.renderer)?!1:o(d.renderer),p=s.builds.find(m);if(!p)throw"FlutterLoader could not find a build compatible with configuration and environment.";let l={};l.flutterTT=new g,e&&(l.serviceWorkerLoader=new h,l.serviceWorkerLoader.setTrustedTypesPolicy(l.flutterTT.policy),await l.serviceWorkerLoader.loadServiceWorker(e).catch(d=>{console.warn("Exception while loading service worker:",d)}));let y=U(n,s);p.renderer==="canvaskit"?l.canvasKit=W(l,n,w,y):p.renderer==="skwasm"&&(l.skwasm=P(l,n,w,y));let f=new v;return f.setTrustedTypesPolicy(l.flutterTT.policy),this.didCreateEngineInitializer=f.didCreateEngineInitializer.bind(f),f.load(p,l,n,t,r)}};window._flutter||(window._flutter={});window._flutter.loader||(window._flutter.loader=new b);})();
+//# sourceMappingURL=flutter.js.map
+
+if (!window._flutter) {
+  window._flutter = {};
+}
+// Usar configuración estándar - el renderer se establece en index.html
+console.log('🚀 Usando configuración Flutter estándar');
+_flutter.buildConfig = {"engineRevision":"a8bfdfc394deaed5c57bd45a64ac4294dc976a72","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}]};
+
+// Cargador Flutter SIMPLIFICADO - Basado en tu app que funciona
+console.log('🚀 Iniciando Flutter loader simplificado');
+
+// Detectar iOS
+const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+if (isIOSDevice) {
+  console.log('📱 iOS detectado - usando configuración simplificada');
+  if (window.iOSDebug) window.iOSDebug.addLog('info', 'iOS detectado - iniciando Flutter loader');
+  
+  // Cargar Flutter SIN service worker para iOS (como tu app que funciona)
+  _flutter.loader.load({
+    serviceWorkerSettings: null, // Deshabilitar Service Worker para iOS
+    onEntrypointLoaded: function(engineInitializer) {
+      console.log('📱 Flutter engine inicializado en iOS');
+      if (window.iOSDebug) window.iOSDebug.addLog('info', 'Flutter engine inicializado - esperando Firebase');
+      
+      // Dar tiempo para que Firebase se inicialice
+      const waitForFirebase = () => {
+        if (window.firebaseInitialized) {
+          console.log('✅ Firebase listo, inicializando Flutter');
+          if (window.iOSDebug) window.iOSDebug.addLog('info', 'Firebase listo, inicializando Flutter engine');
+          
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            console.log('✅ Flutter app ejecutándose en iOS');
+            if (window.iOSDebug) window.iOSDebug.addLog('success', 'Flutter app ejecutándose correctamente');
+            try {
+              window.flutterInitialized = true; // Marcar como inicializado
+            } catch (e) {
+              console.log('No se pudo establecer flutterInitialized:', e.message);
+            }
+            
+            // SOLUCIÓN RADICAL: Bypass completo del splash screen para iOS
+            setTimeout(() => {
+              const loading = document.getElementById('loading');
+              if (loading && loading.style.display !== 'none') {
+                console.log('⚠️ Loading screen aún visible después de 5 segundos');
+                if (window.iOSDebug) window.iOSDebug.addLog('warn', 'Loading screen aún visible - Flutter puede haber fallado');
+                
+                // SOLUCIÓN AGRESIVA: Forzar renderizado de Flutter
+                console.log('🚀 Forzando renderizado de Flutter...');
+                if (window.iOSDebug) window.iOSDebug.addLog('info', 'Forzando renderizado de Flutter');
+                
+                // Intentar forzar el primer frame de Flutter
+                try {
+                  if (window._flutter && window._flutter.loader) {
+                    console.log('🔧 Intentando forzar primer frame...');
+                    
+                    // Simular evento flutter-first-frame
+                    const event = new CustomEvent('flutter-first-frame');
+                    window.dispatchEvent(event);
+                    
+                    // Forzar re-render
+                    setTimeout(() => {
+                      const app = document.querySelector('flt-glass-pane, flt-scene-host');
+                      if (app) {
+                        console.log('✅ Elemento Flutter encontrado, forzando visibilidad');
+                        app.style.display = 'block';
+                        app.style.visibility = 'visible';
+                        app.style.opacity = '1';
+                      }
+                    }, 100);
+                  }
+                } catch (e) {
+                  console.log('⚠️ Error forzando renderizado:', e);
+                }
+                
+                // Intentar ocultar manualmente el loading
+                loading.style.display = 'none';
+                console.log('🔧 Loading screen ocultado manualmente');
+                if (window.iOSDebug) window.iOSDebug.addLog('info', 'Loading screen ocultado manualmente');
+                
+                // SOLUCIÓN RADICAL: Forzar navegación al calendario
+                console.log('🚀 Forzando navegación al calendario...');
+                if (window.iOSDebug) window.iOSDebug.addLog('info', 'Forzando navegación al calendario');
+                
+                // Simular navegación Flutter
+                window.location.hash = '#/calendar';
+                
+                // Intentar usar Flutter router si está disponible
+                if (window.flutter_internal && window.flutter_internal.go_router) {
+                  try {
+                    window.flutter_internal.go_router.go('/calendar');
+                    console.log('✅ Navegación forzada exitosa');
+                  } catch (e) {
+                    console.log('⚠️ No se pudo usar Flutter router:', e);
+                  }
+                }
+                
+                // SOLUCIÓN FINAL: Crear UI manual si Flutter falla
+                setTimeout(() => {
+                  const app = document.querySelector('flt-glass-pane, flt-scene-host');
+                  if (!app || app.style.display === 'none') {
+                    console.log('🚨 Flutter UI no se renderizó - creando UI manual');
+                    if (window.iOSDebug) window.iOSDebug.addLog('error', 'Flutter UI no se renderizó - creando UI manual');
+                    
+                    // Crear UI de emergencia
+                    const emergencyUI = document.createElement('div');
+                    emergencyUI.style.cssText = `
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      z-index: 10000;
+                    `;
+                    emergencyUI.innerHTML = `
+                      <h1 style="font-size: 2rem; margin-bottom: 1rem;">📅 Calendario Familiar</h1>
+                      <p style="font-size: 1.2rem; margin-bottom: 2rem; text-align: center;">
+                        La aplicación se está cargando...<br>
+                        Si este mensaje persiste, recarga la página.
+                      </p>
+                      <button onclick="window.location.reload()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: 2px solid white;
+                        color: white;
+                        padding: 15px 30px;
+                        border-radius: 25px;
+                        font-size: 1rem;
+                        cursor: pointer;
+                        backdrop-filter: blur(10px);
+                      ">
+                        🔄 Recargar
+                      </button>
+                    `;
+                    document.body.appendChild(emergencyUI);
+                  }
+                }, 2000);
+              }
+            }, 5000);
+            
+            // Ejecutar Flutter app
+            console.log('🚀 Ejecutando appRunner.runApp()...');
+            if (window.iOSDebug) window.iOSDebug.addLog('info', 'Ejecutando appRunner.runApp()');
+            
+            appRunner.runApp();
+            
+            console.log('✅ appRunner.runApp() ejecutado');
+            if (window.iOSDebug) window.iOSDebug.addLog('success', 'appRunner.runApp() ejecutado');
+            
+          }).catch(function(error) {
+            console.error('❌ Error ejecutando Flutter app:', error);
+            if (window.iOSDebug) window.iOSDebug.addLog('error', 'Error ejecutando Flutter app', error.message);
+          });
+        } else if (window.firebaseError) {
+          console.error('❌ Firebase falló, ejecutando sin Firebase');
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            console.log('✅ Flutter app ejecutándose sin Firebase');
+            appRunner.runApp();
+          }).catch(function(error) {
+            console.error('❌ Error ejecutando Flutter app:', error);
+          });
+        } else {
+          console.log('⏳ Esperando Firebase...');
+          setTimeout(waitForFirebase, 100);
+        }
+      };
+      
+      setTimeout(waitForFirebase, 500);
+    }
+  });
+  
+} else {
+  console.log('💻 No es iOS - usando configuración estándar');
+  
+  // Para otros navegadores, deshabilitar service worker para evitar errores de caché
+  _flutter.loader.load({
+    serviceWorkerSettings: null, // Deshabilitar Service Worker para evitar errores de caché
+    onEntrypointLoaded: function(engineInitializer) {
+      console.log('💻 Flutter engine inicializado');
+      
+      const waitForFirebase = () => {
+        if (window.firebaseInitialized) {
+          console.log('✅ Firebase listo, inicializando Flutter');
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            console.log('✅ Flutter app ejecutándose');
+            appRunner.runApp();
+          }).catch(function(error) {
+            console.error('❌ Error ejecutando Flutter app:', error);
+          });
+        } else if (window.firebaseError) {
+          console.error('❌ Firebase falló, ejecutando sin Firebase');
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            console.log('✅ Flutter app ejecutándose sin Firebase');
+            appRunner.runApp();
+          }).catch(function(error) {
+            console.error('❌ Error ejecutando Flutter app:', error);
+          });
+        } else {
+          console.log('⏳ Esperando Firebase...');
+          setTimeout(waitForFirebase, 100);
+        }
+      };
+      
+      setTimeout(waitForFirebase, 500);
+    }
+  });
+}
