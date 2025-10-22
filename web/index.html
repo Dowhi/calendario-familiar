@@ -65,15 +65,14 @@
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { getMessaging } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
+  <!-- Firebase SDKs - Versión compatible para Safari iOS -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 
-    // Your web app's Firebase configuration
+  <script>
+    // Configuración de Firebase (compat)
     const firebaseConfig = {
       apiKey: "AIzaSyB5vvp7IQOZLO7LlsUY_Wq-H8M_5PH3ZQE",
       authDomain: "apptaxi-f2190.firebaseapp.com",
@@ -84,11 +83,13 @@
       measurementId: "G-3D8R30TYTM"
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const messaging = getMessaging(app);
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log('✅ Firebase (compat) inicializado');
+    } catch (e) {
+      console.error('❌ Error inicializando Firebase (compat):', e);
+      window.firebaseError = e;
+    }
 
     // Solicitar permisos de notificación
     if ('Notification' in window) {
@@ -100,7 +101,8 @@
     }
 
     // Detectar iOS y mostrar información
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
       console.log('iOS device detected');
       document.body.classList.add('ios-device');
     }
@@ -138,7 +140,7 @@
             <p style="font-size: 12px; margin-top: 10px;">
               Si tarda mucho, puedes usar la versión HTML:
             </p>
-            <button onclick="window.location.href='ios-calendar.html'" style="
+            <button onclick=\"window.location.href='ios-calendar.html'\" style=\"
               margin-top: 10px; 
               padding: 8px 16px; 
               background: #4CAF50; 
@@ -147,7 +149,7 @@
               border-radius: 5px; 
               font-size: 12px;
               cursor: pointer;
-            ">
+            \">
               Versión HTML
             </button>
           </div>
@@ -167,6 +169,15 @@
     }
   </script>
   
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Cargar bootstrap simple en iOS para máxima compatibilidad
+    (function() {
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var script = document.createElement('script');
+      script.src = isIOS ? 'flutter_bootstrap_simple.js' : 'flutter_bootstrap.js';
+      script.async = true;
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
